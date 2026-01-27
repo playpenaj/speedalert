@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Speed Guard Analytics</title>
+    <title>Speed Guard Pro</title>
     <style>
         * { box-sizing: border-box; touch-action: manipulation; }
         body { 
@@ -14,15 +14,12 @@
         }
         .danger { background: #aa0000 !important; }
         
-        #signal-bar { width: 100%; display: flex; justify-content: space-between; font-size: 0.7rem; padding: 5px; color: #888; border-bottom: 1px solid #222; }
-        .main-display { flex: 1.5; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #speed { font-size: 28vw; line-height: 1; margin: 0; font-weight: 900; }
+        #top-bar { width: 100%; display: flex; justify-content: space-between; font-size: 0.7rem; padding: 5px; color: #888; border-bottom: 1px solid #222; }
+        .main-display { flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #speed { font-size: 25vw; line-height: 1; margin: 0; font-weight: 900; }
         
-        .limit-display {
-            width: 70px; height: 70px; border: 5px solid #ff0000; border-radius: 50%;
-            background: white; color: black; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; font-weight: bold;
-        }
+        #timer-display { font-size: 1.5rem; color: #00ff00; font-family: monospace; margin: 5px 0; }
+        .limit-display { width: 60px; height: 60px; border: 5px solid #ff0000; border-radius: 50%; background: white; color: black; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
         .controls { flex: 0.8; display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center; }
         button { padding: 12px 20px; font-size: 0.8rem; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; text-transform: uppercase; }
@@ -30,27 +27,24 @@
         #stopBtn { background: #ff4444; color: #fff; display: none; width: 80%; }
         .export-btn { background: #333; color: #fff; border: 1px solid #444; width: 80%; }
 
-        .table-container { 
-            flex: 1.5; width: 100%; background: #0a0a0a; border-radius: 15px; 
-            padding: 10px; overflow-y: auto; border: 1px solid #333; margin-top: 10px;
-        }
-        table { width: 100%; border-collapse: collapse; font-size: 0.65rem; text-align: left; }
+        .table-container { flex: 1.5; width: 100%; background: #0a0a0a; border-radius: 15px; padding: 10px; overflow-y: auto; border: 1px solid #333; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.6rem; text-align: left; }
         th { color: #00ff00; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        td { padding: 8px 0; border-bottom: 1px solid #222; }
+        td { padding: 6px 0; border-bottom: 1px solid #222; vertical-align: top; }
+        .timestamp { color: #888; font-size: 0.55rem; }
     </style>
 </head>
 <body>
 
-    <div id="signal-bar">
+    <div id="top-bar">
         <span>GPS: <span id="sig-text" style="color:#ff4444">OFF</span></span>
-        <span>ACCURACY: <span id="acc-val">--</span>m</span>
+        <span id="date-display">--/--/--</span>
+        <span>Acc: <span id="acc-val">--</span>m</span>
     </div>
 
     <div class="main-display">
-        <div class="limit-display">
-            <span style="font-size:0.4rem">LIMIT</span>
-            <span id="roadLimit">50</span>
-        </div>
+        <div id="timer-display">00:00:00</div>
+        <div class="limit-display"><span id="roadLimit">50</span></div>
         <h1 id="speed">0</h1>
         <div style="color:#888; font-size: 0.8rem;">KM/H</div>
     </div>
@@ -65,10 +59,10 @@
         <table>
             <thead>
                 <tr>
-                    <th>S/E LOC</th>
+                    <th>TIME/LOC</th>
+                    <th>DUR/PAUSE</th>
                     <th>DIST</th>
-                    <th>MAX</th>
-                    <th>AVG</th>
+                    <th>MAX/AVG</th>
                 </tr>
             </thead>
             <tbody id="tripLogs"></tbody>
@@ -76,101 +70,86 @@
     </div>
 
     <script>
-        const speedDisplay = document.getElementById('speed');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const tripLogs = document.getElementById('tripLogs');
-        const exportBtn = document.getElementById('exportBtn');
-        
-        let audioCtx, watchID, wakeLock;
-        let startLoc = null, endLoc = null;
+        let audioCtx, watchID, wakeLock, timerInterval;
         let speeds = [], totalDist = 0, lastPos = null;
-        let tripHistory = [];
+        let rideStart, rideDate, tripHistory = [];
+        let stationaryStart = null, totalPauseMs = 0;
+
+        const startBtn = document.getElementById('startBtn'), stopBtn = document.getElementById('stopBtn');
+        const timerDisplay = document.getElementById('timer-display');
 
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function formatMs(ms) {
+            const h = Math.floor(ms/3600000).toString().padStart(2,'0');
+            const m = Math.floor((ms%3600000)/60000).toString().padStart(2,'0');
+            const s = Math.floor((ms%60000)/1000).toString().padStart(2,'0');
+            return `${h}:${m}:${s}`;
         }
 
         startBtn.onclick = async () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen');
             
-            speeds = []; totalDist = 0; lastPos = null; startLoc = null;
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'block';
+            speeds = []; totalDist = 0; lastPos = null; totalPauseMs = 0; stationaryStart = Date.now();
+            rideStart = Date.now(); rideDate = new Date().toLocaleDateString('en-GB');
+
+            startBtn.style.display = 'none'; stopBtn.style.display = 'block';
+            timerInterval = setInterval(() => { timerDisplay.innerText = formatMs(Date.now() - rideStart); }, 1000);
 
             watchID = navigator.geolocation.watchPosition((p) => {
-                const lat = p.coords.latitude;
-                const lon = p.coords.longitude;
-                const kmh = Math.round((p.coords.speed || 0) * 3.6);
-                
-                if (!startLoc) startLoc = `${lat.toFixed(4)},${lon.toFixed(4)}`;
-                endLoc = `${lat.toFixed(4)},${lon.toFixed(4)}`;
-
-                speedDisplay.innerText = kmh;
-                document.getElementById('sig-text').innerText = "LIVE";
-                document.getElementById('sig-text').style.color = "#00ff00";
+                const lat = p.coords.latitude, lon = p.coords.longitude, kmh = Math.round((p.coords.speed || 0) * 3.6);
+                document.getElementById('speed').innerText = kmh;
+                document.getElementById('sig-text').innerText = "LIVE"; document.getElementById('sig-text').style.color = "#00ff00";
                 document.getElementById('acc-val').innerText = Math.round(p.coords.accuracy);
 
-                if (kmh > 2) speeds.push(kmh);
+                if (kmh > 2) {
+                    speeds.push(kmh);
+                    if (stationaryStart) {
+                        totalPauseMs += (Date.now() - stationaryStart);
+                        stationaryStart = null;
+                    }
+                } else if (!stationaryStart) {
+                    stationaryStart = Date.now();
+                }
+
+                // AUTO-STOP CHECK: 5 minutes (300,000 ms) stationary
+                if (stationaryStart && (Date.now() - stationaryStart > 300000)) {
+                    stopBtn.click();
+                    alert("Ride auto-stopped due to 5 mins inactivity.");
+                }
+
                 if (lastPos) totalDist += getDistance(lastPos.lat, lastPos.lon, lat, lon);
                 lastPos = {lat, lon};
-
-                if (kmh > 50) { 
-                    document.body.classList.add('danger');
-                    playBeep();
-                } else {
-                    document.body.classList.remove('danger');
-                }
+                if (kmh > 50) { document.body.classList.add('danger'); playBeep(); } 
+                else { document.body.classList.remove('danger'); }
             }, null, { enableHighAccuracy: true });
         };
 
         stopBtn.onclick = () => {
             navigator.geolocation.clearWatch(watchID);
-            stopBtn.style.display = 'none';
-            startBtn.style.display = 'block';
-            document.getElementById('sig-text').innerText = "OFF";
-            document.getElementById('sig-text').style.color = "#ff4444";
+            clearInterval(timerInterval);
+            stopBtn.style.display = 'none'; startBtn.style.display = 'block';
+            document.getElementById('sig-text').innerText = "OFF"; document.getElementById('sig-text').style.color = "#ff4444";
 
+            const durationMs = Date.now() - rideStart;
             const maxS = speeds.length ? Math.max(...speeds) : 0;
             const avgS = speeds.length ? Math.round(speeds.reduce((a,b)=>a+b)/speeds.length) : 0;
-            const dist = totalDist.toFixed(2);
-
-            const trip = { start: startLoc, end: endLoc, dist: dist, max: maxS, avg: avgS };
+            
+            const trip = { date: rideDate, duration: formatMs(durationMs), pause: formatMs(totalPauseMs), dist: totalDist.toFixed(2), max: maxS, avg: avgS };
             tripHistory.push(trip);
 
-            const row = `<tr>
-                <td>S:${startLoc}<br>E:${endLoc}</td>
-                <td>${dist}km</td>
-                <td>${maxS}</td>
-                <td>${avgS}</td>
-            </tr>`;
-            tripLogs.insertAdjacentHTML('afterbegin', row);
-        };
-
-        exportBtn.onclick = () => {
-            if (tripHistory.length === 0) return alert("No data to export!");
-            
-            let csvContent = "Start Loc,End Loc,Distance(km),Max Speed,Avg Speed\n";
-            tripHistory.forEach(t => {
-                csvContent += `${t.start},${t.end},${t.dist},${t.max},${t.avg}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "ride_analytics.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            document.getElementById('tripLogs').insertAdjacentHTML('afterbegin', `<tr>
+                <td><span class="timestamp">${rideDate}</span></td>
+                <td>Dur: ${trip.duration}<br>Pau: ${trip.pause}</td>
+                <td>${trip.dist}km</td>
+                <td>M: ${maxS}<br>A: ${avgS}</td>
+            </tr>`);
         };
 
         function playBeep() {
@@ -181,6 +160,16 @@
             o.connect(g); g.connect(audioCtx.destination);
             o.start(); o.stop(audioCtx.currentTime + 0.1);
         }
+
+        document.getElementById('exportBtn').onclick = () => {
+            let csv = "Date,Duration,Pause Time,Distance(km),Max Speed,Avg Speed\n";
+            tripHistory.forEach(t => csv += `${t.date},${t.duration},${t.pause},${t.dist},${t.max},${t.avg}\n`);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `ride_report_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        };
     </script>
 </body>
 </html>
