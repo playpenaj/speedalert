@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Speed Guard SG/IN</title>
+    <title>Speed Guard Analytics</title>
     <style>
         * { box-sizing: border-box; touch-action: manipulation; }
         body { 
@@ -12,162 +12,175 @@
             height: 100vh; width: 100vw; margin: 0; padding: 10px;
             background: #000; color: white; overflow: hidden;
         }
-        .danger { background: #aa0000 !important; animation: pulse 0.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .danger { background: #aa0000 !important; }
         
-        /* Connection Status Bar */
-        #signal-bar { 
-            width: 100%; display: flex; justify-content: space-between; 
-            font-size: 0.7rem; padding: 10px; background: #111; border-radius: 10px;
-            margin-bottom: 10px; border: 1px solid #222;
-        }
-        .status-connected { color: #00ff00; font-weight: bold; }
-        .status-disconnected { color: #ff4444; font-weight: bold; }
-
-        .main-display { flex: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #speed { font-size: 35vw; line-height: 1; margin: 0; font-weight: 900; }
+        #signal-bar { width: 100%; display: flex; justify-content: space-between; font-size: 0.7rem; padding: 5px; color: #888; border-bottom: 1px solid #222; }
+        .main-display { flex: 1.5; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #speed { font-size: 28vw; line-height: 1; margin: 0; font-weight: 900; }
         
         .limit-display {
-            width: 100px; height: 100px; border: 8px solid #ff0000; border-radius: 50%;
+            width: 70px; height: 70px; border: 5px solid #ff0000; border-radius: 50%;
             background: white; color: black; display: flex; flex-direction: column;
             align-items: center; justify-content: center; font-weight: bold;
         }
-        #roadLimit { font-size: 2.2rem; }
 
-        .controls { flex: 1.2; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
-        button { padding: 15px 25px; font-size: 0.9rem; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; text-transform: uppercase; width: 80%; }
-        #startBtn { background: #00ff00; color: #000; }
-        .secondary-btn { background: #222; color: #fff; border: 1px solid #444; width: auto; }
+        .controls { flex: 0.8; display: flex; flex-direction: column; gap: 8px; width: 100%; align-items: center; }
+        button { padding: 12px 20px; font-size: 0.8rem; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; text-transform: uppercase; }
+        #startBtn { background: #00ff00; color: #000; width: 80%; }
+        #stopBtn { background: #ff4444; color: #fff; display: none; width: 80%; }
+        .export-btn { background: #333; color: #fff; border: 1px solid #444; width: 80%; }
 
-        .log-container { 
-            flex: 1; width: 100%; background: #0a0a0a; border-radius: 15px; 
-            padding: 10px; overflow-y: auto; font-family: monospace; font-size: 0.7rem; border: 1px solid #333;
+        .table-container { 
+            flex: 1.5; width: 100%; background: #0a0a0a; border-radius: 15px; 
+            padding: 10px; overflow-y: auto; border: 1px solid #333; margin-top: 10px;
         }
-        .alert-log { color: #ff4444; padding: 4px 0; border-bottom: 1px solid #200; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.65rem; text-align: left; }
+        th { color: #00ff00; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        td { padding: 8px 0; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
 
     <div id="signal-bar">
-        <span>GPS: <span id="sig-text" class="status-disconnected">NO CONNECTION</span></span>
+        <span>GPS: <span id="sig-text" style="color:#ff4444">OFF</span></span>
         <span>ACCURACY: <span id="acc-val">--</span>m</span>
     </div>
 
     <div class="main-display">
-        <div class="limit-display" onclick="manualLimit()">
-            <span style="font-size:0.5rem">LIMIT</span>
+        <div class="limit-display">
+            <span style="font-size:0.4rem">LIMIT</span>
             <span id="roadLimit">50</span>
         </div>
         <h1 id="speed">0</h1>
-        <div style="color:#888; letter-spacing: 2px;">KM/H</div>
+        <div style="color:#888; font-size: 0.8rem;">KM/H</div>
     </div>
 
     <div class="controls">
-        <button id="startBtn">Start Monitor</button>
-        <div style="display:flex; gap:10px;">
-            <button id="dimBtn" class="secondary-btn" style="display:none">Dim</button>
-            <button id="clearBtn" class="secondary-btn">Clear Logs</button>
-        </div>
+        <button id="startBtn">Start Ride</button>
+        <button id="stopBtn">Stop & Record</button>
+        <button id="exportBtn" class="export-btn">Download CSV</button>
     </div>
 
-    <div class="log-container" id="logs"></div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>S/E LOC</th>
+                    <th>DIST</th>
+                    <th>MAX</th>
+                    <th>AVG</th>
+                </tr>
+            </thead>
+            <tbody id="tripLogs"></tbody>
+        </table>
+    </div>
 
     <script>
         const speedDisplay = document.getElementById('speed');
-        const roadLimitDisplay = document.getElementById('roadLimit');
-        const accVal = document.getElementById('acc-val');
-        const sigText = document.getElementById('sig-text');
         const startBtn = document.getElementById('startBtn');
-        const logsDiv = document.getElementById('logs');
+        const stopBtn = document.getElementById('stopBtn');
+        const tripLogs = document.getElementById('tripLogs');
+        const exportBtn = document.getElementById('exportBtn');
         
-        let audioCtx = null, alarmInterval = null, currentLimit = 50, lastApiCall = 0;
-        let connectionTimeout = null;
+        let audioCtx, watchID, wakeLock;
+        let startLoc = null, endLoc = null;
+        let speeds = [], totalDist = 0, lastPos = null;
+        let tripHistory = [];
 
-        function manualLimit() {
-            const n = prompt("Set Limit:", currentLimit);
-            if (n && !isNaN(n)) { currentLimit = parseInt(n); roadLimitDisplay.innerText = currentLimit; }
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        async function fetchLimit(lat, lon) {
-            if (Date.now() - lastApiCall < 15000) return;
-            lastApiCall = Date.now();
-            try {
-                const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(`[out:json];way(around:50,${lat},${lon})[maxspeed];out tags;`)}`);
-                const data = await res.json();
-                if (data.elements?.[0]?.tags?.maxspeed) {
-                    currentLimit = parseInt(data.elements[0].tags.maxspeed);
-                    roadLimitDisplay.innerText = currentLimit;
-                }
-            } catch (e) {}
-        }
-
-        function playBeep() {
-            if (audioCtx) {
-                let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-                o.type = "square"; o.frequency.value = 1400;
-                g.gain.setTargetAtTime(0.2, audioCtx.currentTime, 0.01);
-                o.connect(g); g.connect(audioCtx.destination);
-                o.start(); o.stop(audioCtx.currentTime + 0.12);
-            }
-            if (navigator.vibrate) navigator.vibrate(200);
-        }
-
-        function setStatus(connected) {
-            if (connected) {
-                sigText.innerText = "CONNECTED";
-                sigText.className = "status-connected";
-            } else {
-                sigText.innerText = "NO CONNECTION";
-                sigText.className = "status-disconnected";
-                speedDisplay.innerText = "0";
-            }
-        }
-
-        startBtn.onclick = () => {
+        startBtn.onclick = async () => {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (navigator.wakeLock) navigator.wakeLock.request('screen');
+            if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen');
             
-            navigator.geolocation.watchPosition((p) => {
-                // Clear the timeout - we are getting data
-                clearTimeout(connectionTimeout);
-                setStatus(true);
+            speeds = []; totalDist = 0; lastPos = null; startLoc = null;
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
 
-                const acc = Math.round(p.coords.accuracy);
-                accVal.innerText = acc;
-                
+            watchID = navigator.geolocation.watchPosition((p) => {
+                const lat = p.coords.latitude;
+                const lon = p.coords.longitude;
                 const kmh = Math.round((p.coords.speed || 0) * 3.6);
-                speedDisplay.innerText = kmh;
-                fetchLimit(p.coords.latitude, p.coords.longitude);
+                
+                if (!startLoc) startLoc = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+                endLoc = `${lat.toFixed(4)},${lon.toFixed(4)}`;
 
-                if (kmh > currentLimit) {
+                speedDisplay.innerText = kmh;
+                document.getElementById('sig-text').innerText = "LIVE";
+                document.getElementById('sig-text').style.color = "#00ff00";
+                document.getElementById('acc-val').innerText = Math.round(p.coords.accuracy);
+
+                if (kmh > 2) speeds.push(kmh);
+                if (lastPos) totalDist += getDistance(lastPos.lat, lastPos.lon, lat, lon);
+                lastPos = {lat, lon};
+
+                if (kmh > 50) { 
                     document.body.classList.add('danger');
-                    if (!alarmInterval) {
-                        alarmInterval = setInterval(playBeep, 500);
-                        const div = document.createElement('div');
-                        div.className = 'alert-log';
-                        div.innerHTML = `[${new Date().toLocaleTimeString()}] ALERT: ${kmh}km/h (${currentLimit})`;
-                        logsDiv.prepend(div);
-                    }
+                    playBeep();
                 } else {
                     document.body.classList.remove('danger');
-                    clearInterval(alarmInterval); alarmInterval = null;
                 }
-
-                // If no update for 5 seconds, consider disconnected
-                connectionTimeout = setTimeout(() => setStatus(false), 5000);
-
-            }, (err) => {
-                setStatus(false);
-            }, { enableHighAccuracy: true });
-
-            startBtn.style.display = 'none';
-            document.getElementById('dimBtn').style.display = 'block';
+            }, null, { enableHighAccuracy: true });
         };
 
-        document.getElementById('clearBtn').onclick = () => logsDiv.innerHTML = '';
-        document.getElementById('dimBtn').onclick = () => {
-            document.body.style.filter = document.body.style.filter === "brightness(0.2)" ? "brightness(1)" : "brightness(0.2)";
+        stopBtn.onclick = () => {
+            navigator.geolocation.clearWatch(watchID);
+            stopBtn.style.display = 'none';
+            startBtn.style.display = 'block';
+            document.getElementById('sig-text').innerText = "OFF";
+            document.getElementById('sig-text').style.color = "#ff4444";
+
+            const maxS = speeds.length ? Math.max(...speeds) : 0;
+            const avgS = speeds.length ? Math.round(speeds.reduce((a,b)=>a+b)/speeds.length) : 0;
+            const dist = totalDist.toFixed(2);
+
+            const trip = { start: startLoc, end: endLoc, dist: dist, max: maxS, avg: avgS };
+            tripHistory.push(trip);
+
+            const row = `<tr>
+                <td>S:${startLoc}<br>E:${endLoc}</td>
+                <td>${dist}km</td>
+                <td>${maxS}</td>
+                <td>${avgS}</td>
+            </tr>`;
+            tripLogs.insertAdjacentHTML('afterbegin', row);
         };
+
+        exportBtn.onclick = () => {
+            if (tripHistory.length === 0) return alert("No data to export!");
+            
+            let csvContent = "Start Loc,End Loc,Distance(km),Max Speed,Avg Speed\n";
+            tripHistory.forEach(t => {
+                csvContent += `${t.start},${t.end},${t.dist},${t.max},${t.avg}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "ride_analytics.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        function playBeep() {
+            if (!audioCtx) return;
+            let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = "square"; o.frequency.value = 1200;
+            g.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.01);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + 0.1);
+        }
     </script>
 </body>
 </html>
