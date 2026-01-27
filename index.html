@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Speed Guard SG/IN Pro</title>
+    <style>
+        * { box-sizing: border-box; touch-action: manipulation; }
+        body { 
+            font-family: -apple-system, system-ui, sans-serif;
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100vh; width: 100vw; margin: 0; padding: 10px;
+            background: #000; color: white; overflow: hidden;
+        }
+        .danger { background: #aa0000 !important; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        
+        /* GPS Signal Indicator */
+        #signal-bar { width: 100%; display: flex; justify-content: space-between; font-size: 0.7rem; padding: 5px 15px; color: #888; }
+        .accuracy-good { color: #00ff00 !important; }
+        .accuracy-bad { color: #ffaa00 !important; }
+
+        .main-display { flex: 2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #speed { font-size: 35vw; line-height: 1; margin: 0; font-weight: 900; }
+        
+        .limit-display {
+            width: 100px; height: 100px; border: 8px solid #ff0000; border-radius: 50%;
+            background: white; color: black; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; font-weight: bold; margin-bottom: 5px;
+        }
+        #roadLimit { font-size: 2.2rem; }
+
+        .controls { flex: 1.2; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+        button { padding: 15px 25px; font-size: 0.9rem; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; text-transform: uppercase; width: 80%; }
+        #startBtn { background: #00ff00; color: #000; }
+        .secondary-btn { background: #222; color: #fff; border: 1px solid #444; width: auto; }
+
+        .log-container { 
+            flex: 1; width: 100%; background: #111; border-radius: 15px; 
+            padding: 10px; overflow-y: auto; font-family: monospace; font-size: 0.7rem; border: 1px solid #333;
+        }
+        .alert-log { color: #ff4444; border-bottom: 1px solid #300; padding: 4px 0; }
+    </style>
+</head>
+<body>
+
+    <div id="signal-bar">
+        <span>GPS Accuracy: <span id="acc-val">--</span>m</span>
+        <span id="signal-status">Waiting...</span>
+    </div>
+
+    <div class="main-display">
+        <div class="limit-display" onclick="manualLimit()">
+            <span style="font-size:0.5rem">LIMIT</span>
+            <span id="roadLimit">50</span>
+        </div>
+        <h1 id="speed">0</h1>
+        <div style="color:#888; letter-spacing: 2px;">KM/H</div>
+    </div>
+
+    <div class="controls">
+        <button id="startBtn">Start Monitoring</button>
+        <div style="display:flex; gap:10px;">
+            <button id="dimBtn" class="secondary-btn" style="display:none">Dim</button>
+            <button id="clearBtn" class="secondary-btn">Clear Logs</button>
+        </div>
+    </div>
+
+    <div class="log-container" id="logs"></div>
+
+    <script>
+        const speedDisplay = document.getElementById('speed');
+        const roadLimitDisplay = document.getElementById('roadLimit');
+        const accVal = document.getElementById('acc-val');
+        const sigStatus = document.getElementById('signal-status');
+        const startBtn = document.getElementById('startBtn');
+        const logsDiv = document.getElementById('logs');
+        
+        let audioCtx = null, alarmInterval = null, currentLimit = 50, lastApiCall = 0;
+
+        function manualLimit() {
+            const n = prompt("Set Limit (km/h):", currentLimit);
+            if (n && !isNaN(n)) { currentLimit = parseInt(n); roadLimitDisplay.innerText = currentLimit; }
+        }
+
+        async function fetchLimit(lat, lon) {
+            if (Date.now() - lastApiCall < 15000) return;
+            lastApiCall = Date.now();
+            const query = `[out:json];way(around:50,${lat},${lon})[maxspeed];out tags;`;
+            try {
+                const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                if (data.elements?.[0]?.tags?.maxspeed) {
+                    currentLimit = parseInt(data.elements[0].tags.maxspeed);
+                    roadLimitDisplay.innerText = currentLimit;
+                }
+            } catch (e) {}
+        }
+
+        function playBeep() {
+            if (audioCtx) {
+                let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.type = "square"; o.frequency.value = 1400;
+                g.gain.setTargetAtTime(0.2, audioCtx.currentTime, 0.01);
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start(); o.stop(audioCtx.currentTime + 0.12);
+            }
+            if (navigator.vibrate) navigator.vibrate(200);
+        }
+
+        startBtn.onclick = () => {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (navigator.wakeLock) navigator.wakeLock.request('screen');
+            
+            navigator.geolocation.watchPosition((p) => {
+                const acc = Math.round(p.coords.accuracy);
+                accVal.innerText = acc;
+                
+                // Signal Feedback
+                if (acc <= 10) { sigStatus.innerText = "EXCELLENT"; sigStatus.className = "accuracy-good"; }
+                else if (acc <= 25) { sigStatus.innerText = "FAIR"; sigStatus.className = "accuracy-bad"; }
+                else { sigStatus.innerText = "POOR (Drifting)"; sigStatus.className = "accuracy-bad"; }
+
+                const kmh = Math.round((p.coords.speed || 0) * 3.6);
+                speedDisplay.innerText = kmh;
+                fetchLimit(p.coords.latitude, p.coords.longitude);
+
+                if (kmh > currentLimit) {
+                    document.body.classList.add('danger');
+                    if (!alarmInterval) {
+                        alarmInterval = setInterval(playBeep, 500);
+                        const div = document.createElement('div');
+                        div.className = 'alert-log';
+                        div.innerHTML = `[${new Date().toLocaleTimeString()}] ALERT: ${kmh}km/h in ${currentLimit} zone`;
+                        logsDiv.prepend(div);
+                    }
+                } else {
+                    document.body.classList.remove('danger');
+                    clearInterval(alarmInterval); alarmInterval = null;
+                }
+            }, null, { enableHighAccuracy: true });
+
+            startBtn.style.display = 'none';
+            document.getElementById('dimBtn').style.display = 'block';
+        };
+
+        document.getElementById('clearBtn').onclick = () => logsDiv.innerHTML = '';
+        document.getElementById('dimBtn').onclick = () => {
+            document.body.style.filter = document.body.style.filter === "brightness(0.2)" ? "brightness(1)" : "brightness(0.2)";
+        };
+    </script>
+</body>
+</html>
