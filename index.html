@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Speed Guard Analytics</title>
+    <title>Speed Guard Ultra</title>
     <style>
         * { box-sizing: border-box; touch-action: manipulation; }
         body { 
@@ -12,37 +12,44 @@
             display: flex; flex-direction: column;
         }
 
-        /* Overspeeding Animation */
-        .danger { animation: blink-red 0.6s infinite; }
-        @keyframes blink-red { 0%, 100% { background: #000; } 50% { background: #600; } }
+        .danger { animation: blink-red 0.4s infinite; }
+        @keyframes blink-red { 0%, 100% { background: #000; } 50% { background: #a00; } }
 
-        /* Navigation Tabs */
+        #slow-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,0,0,0.8); z-index: 1000; 
+            justify-content: center; align-items: center; font-size: 3rem; font-weight: 900;
+            color: white; pointer-events: none; text-align: center;
+        }
+
         .nav-tabs { display: flex; background: #111; border-bottom: 1px solid #333; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #888; font-weight: bold; font-size: 0.8rem; }
         .tab-btn.active { color: #00ff00; border-bottom: 3px solid #00ff00; }
 
         .tab-content { flex: 1; display: none; padding: 15px; overflow-y: auto; }
         .tab-content.active { display: flex; flex-direction: column; align-items: center; }
 
-        /* Monitor Tab Styles */
-        #top-bar { width: 100%; display: flex; justify-content: space-between; font-size: 0.7rem; color: #888; margin-bottom: 20px; }
         #speed { font-size: 30vw; line-height: 1; margin: 10px 0; font-weight: 900; }
-        .limit-display { width: 80px; height: 80px; border: 6px solid #f00; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.8rem; }
-        #timer-display { font-family: monospace; font-size: 1.2rem; color: #0f0; }
-
-        /* Log Tab Styles */
-        table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
-        th { text-align: left; color: #0f0; border-bottom: 1px solid #333; padding: 8px 4px; }
-        td { padding: 10px 4px; border-bottom: 1px solid #222; vertical-align: top; }
-        .map-link { color: #0088ff; text-decoration: none; font-size: 0.6rem; display: block; margin-top: 4px; }
+        .limit-display { width: 90px; height: 90px; border: 8px solid #f00; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2rem; }
         
         .btn-main { padding: 15px 40px; border-radius: 50px; border: none; font-weight: bold; font-size: 1rem; width: 80%; margin: 10px 0; }
         #startBtn { background: #0f0; color: #000; }
         #stopBtn { background: #f44; color: #fff; display: none; }
-        .export-btn { background: #333; color: #fff; width: 100%; margin-bottom: 20px; }
+        
+        /* README Styles */
+        .readme { background: #111; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: left; width: 100%; border: 1px solid #333; }
+        .readme h3 { color: #0f0; margin-top: 0; font-size: 1rem; }
+        .readme ul { padding-left: 20px; margin: 0; }
+        .readme li { font-size: 0.75rem; color: #ccc; margin-bottom: 8px; line-height: 1.4; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.7rem; margin-top: 15px; }
+        th { text-align: left; color: #0f0; border-bottom: 1px solid #333; padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
+
+    <div id="slow-overlay">🚨 SLOW DOWN 🚨</div>
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="openTab('monitor')">Monitor</button>
@@ -50,11 +57,7 @@
     </div>
 
     <div id="monitor" class="tab-content active">
-        <div id="top-bar">
-            <span>GPS: <span id="sig-text" style="color:#f44">OFF</span></span>
-            <span>Acc: <span id="acc-val">--</span>m</span>
-        </div>
-        <div id="timer-display">00:00:00</div>
+        <div id="timer-display" style="color:#0f0; font-family: monospace;">00:00:00</div>
         <div class="limit-display" id="roadLimit">50</div>
         <h1 id="speed">0</h1>
         <div style="color:#888;">KM/H</div>
@@ -63,15 +66,21 @@
     </div>
 
     <div id="logs" class="tab-content">
-        <button id="exportBtn" class="btn-main export-btn">DOWNLOAD CSV REPORT</button>
+        <button id="exportBtn" class="btn-main" style="background:#333; color:white; width:100%">DOWNLOAD CSV</button>
+        
+        <div class="readme">
+            <h3>📖 Read Me: How it Works</h3>
+            <ul>
+                <li><strong>GPS Tracking:</strong> The app uses your phone's built-in GPS chip to calculate your speed and distance. No internet is needed for speed, but internet is used to check road speed limits.</li>
+                <li><strong>Privacy First:</strong> Your location data is <strong>never</strong> sent to a server for storage. All calculations happen locally on your phone.</li>
+                <li><strong>Data Protection:</strong> The "Ride Logs" you see are stored only in your phone's temporary memory. If you refresh this page, the logs will disappear—so download your CSV before closing!</li>
+                <li><strong>Pincodes:</strong> We use an open-source map service to convert your start/end coordinates into a Pincode for easier record-keeping.</li>
+                <li><strong>Battery:</strong> High-precision GPS uses significant battery power. We recommend keeping your phone plugged in during long trips.</li>
+            </ul>
+        </div>
+
         <table>
-            <thead>
-                <tr>
-                    <th>DATE / TIME</th>
-                    <th>PINCODES</th>
-                    <th>STATS</th>
-                </tr>
-            </thead>
+            <thead><tr><th>TIME</th><th>PINCODES</th><th>STATS</th></tr></thead>
             <tbody id="tripLogs"></tbody>
         </table>
     </div>
@@ -79,7 +88,7 @@
     <script>
         let audioCtx, watchID, timerInterval, rideStart, currentLimit = 50, tripHistory = [];
         let speeds = [], totalDist = 0, lastPos = null, overspeedMs = 0, overspeedStart = null;
-        let startPin = "--", endPin = "--", startCoords = "", endCoords = "";
+        let startPin = "--", startCoords = "";
 
         function openTab(name) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -88,17 +97,30 @@
             event.currentTarget.classList.add('active');
         }
 
+        function playBeep() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
         async function getPincode(lat, lon) {
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                 const data = await res.json();
-                return data.address.postcode || "Unknown";
+                return data.address.postcode || "N/A";
             } catch { return "N/A"; }
         }
 
         async function updateSpeedLimit(lat, lon) {
             try {
-                const query = `[out:json];way(around:50,${lat},${lon})[maxspeed];out tags;`;
+                const query = `[out:json];way(around:60,${lat},${lon})[maxspeed];out tags;`;
                 const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
                 const data = await res.json();
                 if (data.elements?.[0]?.tags?.maxspeed) {
@@ -109,11 +131,11 @@
         }
 
         document.getElementById('startBtn').onclick = async () => {
-            audioCtx = new (AudioContext || webkitAudioContext)();
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (navigator.wakeLock) await navigator.wakeLock.request('screen');
             
             rideStart = Date.now();
-            speeds = []; totalDist = 0; lastPos = null; overspeedMs = 0;
+            speeds = []; totalDist = 0; lastPos = null; overspeedMs = 0; startCoords = "";
             
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'block';
@@ -123,6 +145,11 @@
                 document.getElementById('timer-display').innerText = new Date(diff).toISOString().substr(11, 8);
             }, 1000);
 
+            // Re-check speed limit every 5 seconds
+            setInterval(() => {
+                if(lastPos) updateSpeedLimit(lastPos.lat, lastPos.lon);
+            }, 5000);
+
             watchID = navigator.geolocation.watchPosition(async (p) => {
                 const lat = p.coords.latitude, lon = p.coords.longitude;
                 const kmh = Math.round((p.coords.speed || 0) * 3.6);
@@ -131,19 +158,16 @@
                     startCoords = `${lat},${lon}`;
                     startPin = await getPincode(lat, lon);
                 }
-                endCoords = `${lat},${lon}`;
+                
                 document.getElementById('speed').innerText = kmh;
-                document.getElementById('acc-val').innerText = Math.round(p.coords.accuracy) + "m";
-                document.getElementById('sig-text').innerText = "LIVE"; document.getElementById('sig-text').style.color = "#0f0";
-
-                updateSpeedLimit(lat, lon);
 
                 if (kmh > currentLimit) {
                     document.body.classList.add('danger');
-                    if (!overspeedStart) overspeedStart = Date.now();
+                    document.getElementById('slow-overlay').style.display = 'flex';
+                    playBeep();
                 } else {
                     document.body.classList.remove('danger');
-                    if (overspeedStart) { overspeedMs += (Date.now() - overspeedStart); overspeedStart = null; }
+                    document.getElementById('slow-overlay').style.display = 'none';
                 }
 
                 if (lastPos) {
@@ -159,38 +183,42 @@
         document.getElementById('stopBtn').onclick = async () => {
             navigator.geolocation.clearWatch(watchID);
             clearInterval(timerInterval);
-            endPin = await getPincode(lastPos.lat, lastPos.lon);
+            const endPin = await getPincode(lastPos.lat, lastPos.lon);
             
-            const duration = document.getElementById('timer-display').innerText;
-            const maxS = speeds.length ? Math.max(...speeds) : 0;
-            const tripDate = new Date().toLocaleString('en-GB');
-
-            const trip = { date: tripDate, duration, sPin: startPin, ePin: endPin, dist: totalDist.toFixed(2), max: maxS, sMap: startCoords, eMap: endCoords };
+            const trip = { 
+                date: new Date().toLocaleString('en-GB'), 
+                duration: document.getElementById('timer-display').innerText, 
+                sPin: startPin, ePin: endPin, 
+                dist: totalDist.toFixed(2), 
+                max: speeds.length ? Math.max(...speeds) : 0 
+            };
             tripHistory.push(trip);
 
-            const row = `<tr>
-                <td>${tripDate.replace(', ', '<br>')}</td>
-                <td>S: ${startPin}<br>E: ${endPin}
-                    <a class="map-link" href="https://www.google.com/maps/dir/${trip.sMap}/${trip.eMap}" target="_blank">↗ VIEW MAP</a>
-                </td>
-                <td>${trip.dist}km<br>Max: ${maxS}</td>
-            </tr>`;
-            document.getElementById('tripLogs').insertAdjacentHTML('afterbegin', row);
+            document.getElementById('tripLogs').insertAdjacentHTML('afterbegin', `<tr>
+                <td>${trip.date}</td>
+                <td>S:${trip.sPin}<br>E:${trip.ePin}</td>
+                <td>${trip.dist}km<br>Max:${trip.max}</td>
+            </tr>`);
 
             document.getElementById('stopBtn').style.display = 'none';
             document.getElementById('startBtn').style.display = 'block';
             document.body.classList.remove('danger');
-            startCoords = "";
+            document.getElementById('slow-overlay').style.display = 'none';
         };
 
         document.getElementById('exportBtn').onclick = () => {
+            if (tripHistory.length === 0) return alert("No rides recorded.");
             let csv = "Date,Duration,Start Pin,End Pin,Distance(km),Max Speed\n";
             tripHistory.forEach(t => csv += `"${t.date}",${t.duration},${t.sPin},${t.ePin},${t.dist},${t.max}\n`);
-            const blob = new Blob([csv], { type: 'text/csv' });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `trips_${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute("href", url);
+            link.setAttribute("download", "ride_report.csv");
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         };
     </script>
 </body>
