@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Speed Guard Pro</title>
+    <title>Speed Guard Live</title>
     <style>
         :root {
             --safe-top: env(safe-area-inset-top, 20px);
@@ -19,12 +19,10 @@
             padding-top: var(--safe-top);
         }
 
-        /* GPS Status Light */
         #gps-status { font-size: 0.7rem; font-weight: bold; padding: 4px 10px; border-radius: 10px; margin-bottom: 5px; text-transform: uppercase; }
         .gps-searching { color: #ff9800; background: rgba(255, 152, 0, 0.2); }
         .gps-active { color: var(--neon-green); background: rgba(0, 255, 0, 0.2); }
 
-        /* Custom In-App Popup */
         #custom-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
@@ -36,7 +34,6 @@
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
         .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
 
-        /* Alert Overlay */
         .danger { animation: blink-red 0.3s infinite; }
         @keyframes blink-red { 0%, 100% { background: #000; } 50% { background: #600; } }
         #slow-overlay {
@@ -60,12 +57,12 @@
         #startBtn { background: var(--neon-green); color: #000; }
         #stopBtn { background: var(--danger-red); color: #fff; display: none; }
 
-        /* Read Me Styling */
-        .readme { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; width: 100%; text-align: left; }
-        .readme h4 { margin: 0 0 10px 0; color: var(--neon-green); font-size: 0.9rem; text-transform: uppercase; }
-        .readme ul { padding-left: 15px; margin: 0; }
-        .readme li { font-size: 0.75rem; color: #ccc; margin-bottom: 5px; line-height: 1.3; }
-
+        /* Settings Area */
+        .settings-card { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; width: 100%; text-align: left; }
+        .settings-card h4 { margin: 0 0 12px 0; color: var(--neon-green); font-size: 0.9rem; text-transform: uppercase; }
+        .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        select { background: #222; color: white; border: 1px solid #444; padding: 8px; border-radius: 5px; font-size: 0.8rem; }
+        
         .log-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .btn-small { padding: 10px; border-radius: 8px; border: none; font-weight: bold; font-size: 0.7rem; color: white; background: #222; }
         table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
@@ -107,16 +104,27 @@
     </div>
 
     <div id="logs" class="tab-content">
-        <div class="readme">
-            <h4>📖 Read Me: How it works</h4>
-            <ul>
-                <li><strong>Purpose:</strong> A private, offline tool to track your speed and distance.</li>
-                <li><strong>GPS Status:</strong> Checks if your phone has a clear view of the sky for accuracy.</li>
-                <li><strong>Data Protection:</strong> All records stay in your browser. Clearing browser data will delete logs.</li>
-                <li><strong>Calibration:</strong> Speed matches your car dashboard (+5km/h offset).</li>
-                <li><strong>Import/Export:</strong> Save your data as a CSV file or reload old files back into the list.</li>
+        <div class="settings-card">
+            <h4>⚙️ Alarm Settings</h4>
+            <div class="setting-row">
+                <label style="font-size: 0.8rem; color:#ccc;">Alarm Tone:</label>
+                <select id="soundSelect">
+                    <option value="industrial">Sharp Industrial</option>
+                    <option value="pulse">Pulse Warning</option>
+                </select>
+            </div>
+            <button onclick="testAlarm()" class="btn-small" style="width:100%; background:#444;">🔊 TEST SELECTED ALARM</button>
+        </div>
+
+        <div class="settings-card" style="margin-top:0">
+            <h4>📖 Read Me</h4>
+            <ul style="padding-left:15px; margin:0; font-size:0.75rem; color:#aaa; line-height:1.4;">
+                <li><strong>Live Limits:</strong> Fetched from OpenStreetMap as you drive.</li>
+                <li><strong>Sound:</strong> You must click START to unlock audio in your browser.</li>
+                <li><strong>Privacy:</strong> Data is 100% offline on your device.</li>
             </ul>
         </div>
+
         <div class="log-actions">
             <button onclick="askExport()" class="btn-small" style="background:#0055ff;">EXPORT</button>
             <button onclick="document.getElementById('fileInput').click()" class="btn-small" style="background:#00aa00;">IMPORT</button>
@@ -130,9 +138,9 @@
     </div>
 
     <script>
-        let audioCtx, watchID, timerInterval, rideStart, overspeedSec = 0, idleTime = 0, currentLimit = 50;
-        let speeds = [], totalDist = 0, lastPos = null;
-        let tripHistory = JSON.parse(localStorage.getItem('speedGuardStable') || '[]');
+        let audioCtx, watchID, timerInterval, limitInterval, rideStart, overspeedSec = 0, idleTime = 0;
+        let currentLimit = 50, speeds = [], totalDist = 0, lastPos = null;
+        let tripHistory = JSON.parse(localStorage.getItem('speedGuardV6') || '[]');
 
         function openTab(name) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -151,13 +159,53 @@
 
         function closeModal() { document.getElementById('custom-modal').style.display = 'none'; }
 
-        function askStart() { showModal("Start Journey?", "Tracking will begin. Ensure phone is mounted.", startRide); }
-        function askStop() { showModal("End Journey?", "Save your current ride data to history?", () => stopRide(false)); }
-        function askClear() { showModal("Wipe All?", "Permanent deletion of all local history.", () => { tripHistory = []; localStorage.removeItem('speedGuardStable'); renderLogs(); }); }
-        function askExport() { showModal("Export CSV?", "Save logs to your device.", downloadCSV); }
+        function playAlarm() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const type = document.getElementById('soundSelect').value;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            if (type === 'industrial') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            } else {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            }
+            
+            osc.connect(gain); gain.connect(audioCtx.destination);
+        }
+
+        function testAlarm() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            playAlarm();
+        }
+
+        async function fetchSpeedLimit(lat, lon) {
+            const query = `[out:json];way(around:35, ${lat}, ${lon})[maxspeed];out tags;`;
+            try {
+                const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                if (data.elements && data.elements.length > 0) {
+                    let limit = parseInt(data.elements[0].tags.maxspeed);
+                    if (!isNaN(limit)) {
+                        currentLimit = limit;
+                        document.getElementById('roadLimit').innerText = currentLimit;
+                    }
+                }
+            } catch (e) { console.error("Limit Fetch Error", e); }
+        }
+
+        function askStart() { showModal("Start Journey?", "Alarm and GPS tracking will activate.", startRide); }
+        function askStop() { showModal("End Journey?", "Save data and reset screen?", () => stopRide(false)); }
 
         function startRide() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             rideStart = Date.now(); speeds = []; totalDist = 0; lastPos = null; overspeedSec = 0; idleTime = 0;
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'block';
@@ -166,65 +214,53 @@
                 const diff = Date.now() - rideStart;
                 document.getElementById('timer-display').innerText = new Date(diff).toISOString().substr(11, 8);
                 if (idleTime >= 300) stopRide(true);
-                const idl = document.getElementById('auto-stop-timer');
-                if (idleTime > 0) {
-                    idl.style.visibility = "visible";
-                    let r = 300 - idleTime;
-                    idl.innerText = `Idle Auto-Stop: ${Math.floor(r/60)}:${(r%60).toString().padStart(2,'0')}`;
-                } else idl.style.visibility = "hidden";
             }, 1000);
 
             watchID = navigator.geolocation.watchPosition((p) => {
-                // GPS Status update
                 const gpsEl = document.getElementById('gps-status');
-                gpsEl.innerText = "GPS: Active";
-                gpsEl.className = "gps-active";
+                gpsEl.innerText = "GPS: Active"; gpsEl.className = "gps-active";
 
                 const rawKmh = Math.round((p.coords.speed || 0) * 3.6);
                 const kmh = rawKmh > 0 ? rawKmh + 5 : 0;
                 document.getElementById('speed').innerText = kmh;
                 
                 if (kmh > currentLimit) {
-                    document.body.classList.add('danger'); overspeedSec++; idleTime = 0;
+                    document.body.classList.add('danger'); overspeedSec++;
                     document.getElementById('slow-overlay').style.display = 'flex';
+                    playAlarm();
                 } else {
-                    if (kmh < 2) idleTime++; else idleTime = 0;
                     document.body.classList.remove('danger'); document.getElementById('slow-overlay').style.display = 'none';
                 }
+                
+                if (kmh < 2) idleTime++; else {
+                    idleTime = 0;
+                    if (!limitInterval || Date.now() - limitInterval > 20000) {
+                        fetchSpeedLimit(p.coords.latitude, p.coords.longitude);
+                        limitInterval = Date.now();
+                    }
+                }
                 lastPos = {lat: p.coords.latitude, lon: p.coords.longitude}; if (kmh > 5) speeds.push(kmh);
-            }, () => {
-                const gpsEl = document.getElementById('gps-status');
-                gpsEl.innerText = "GPS: No Signal";
-                gpsEl.className = "gps-searching";
-            }, { enableHighAccuracy: true });
+            }, null, { enableHighAccuracy: true });
         }
 
         function stopRide(auto) {
-            navigator.geolocation.clearWatch(watchID);
-            clearInterval(timerInterval);
-            
+            navigator.geolocation.clearWatch(watchID); clearInterval(timerInterval);
             const trip = { 
                 dt: new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
-                dur: document.getElementById('timer-display').innerText, 
-                dst: totalDist.toFixed(2), mx: speeds.length ? Math.max(...speeds) : 0, 
-                ov: (overspeedSec / 60).toFixed(1)
+                dur: document.getElementById('timer-display').innerText, dst: totalDist.toFixed(2), 
+                mx: speeds.length ? Math.max(...speeds) : 0, ov: (overspeedSec / 60).toFixed(1)
             };
             tripHistory.push(trip);
-            localStorage.setItem('speedGuardStable', JSON.stringify(tripHistory));
+            localStorage.setItem('speedGuardV6', JSON.stringify(tripHistory));
             renderLogs();
-
-            // RESET UI
+            
             document.getElementById('timer-display').innerText = "00:00:00";
             document.getElementById('speed').innerText = "0";
-            document.getElementById('auto-stop-timer').style.visibility = "hidden";
+            document.getElementById('roadLimit').innerText = "--";
             document.getElementById('stopBtn').style.display = 'none';
             document.getElementById('startBtn').style.display = 'block';
-            document.body.classList.remove('danger');
-            document.getElementById('slow-overlay').style.display = 'none';
             document.getElementById('gps-status').innerText = "GPS: Searching...";
             document.getElementById('gps-status').className = "gps-searching";
-
-            if (auto) showModal("Auto-Stopped", "Idle for 5m. Trip saved and reset.", () => {});
         }
 
         function renderLogs() {
@@ -233,12 +269,14 @@
             `).join('');
         }
 
-        function downloadCSV() {
+        function askExport() { showModal("Export CSV?", "Save logs to your device.", () => {
             let csv = "DateTime,Duration,Dist,Max,Overspeed\n";
             tripHistory.forEach(t => csv += `${t.dt},${t.dur},${t.dst},${t.mx},${t.ov}\n`);
             const b = new Blob([csv], { type: 'text/csv' });
             const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `logs.csv`; a.click();
-        }
+        }); }
+
+        function askClear() { showModal("Wipe All?", "Delete history permanently?", () => { tripHistory = []; localStorage.removeItem('speedGuardV6'); renderLogs(); }); }
 
         function importCSV(e) {
             const reader = new FileReader();
@@ -247,11 +285,10 @@
                     const c = r.split(',');
                     if (c.length >= 5) tripHistory.push({ dt: c[0], dur: c[1], dst: c[2], mx: c[3], ov: c[4] });
                 });
-                localStorage.setItem('speedGuardStable', JSON.stringify(tripHistory)); renderLogs();
+                localStorage.setItem('speedGuardV6', JSON.stringify(tripHistory)); renderLogs();
             };
             reader.readAsText(e.target.files[0]);
         }
-
         window.onload = renderLogs;
     </script>
 </body>
