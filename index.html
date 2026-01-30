@@ -23,16 +23,20 @@
 
         /* CUSTOM MODAL STYLE */
         #modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
             z-index: 5000; justify-content: center; align-items: center; padding: 20px;
         }
         .modal-box {
-            background: #222; border: 1px solid #444; border-radius: 20px;
-            width: 100%; max-width: 320px; padding: 25px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #1a1a1a; border: 1px solid #333; border-radius: 20px;
+            width: 100%; max-width: 340px; padding: 25px; text-align: left;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            max-height: 80vh; overflow-y: auto;
         }
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .modal-btn { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; }
+        
+        .readme-list { padding-left: 20px; color: #ccc; font-size: 0.85rem; line-height: 1.5; }
+        .readme-list li { margin-bottom: 8px; }
 
         #camera-alert {
             display: none; width: 100%; background: var(--camera-yellow); color: #000;
@@ -47,7 +51,6 @@
         .tab-content { flex: 1; display: none; padding: 15px; overflow-y: auto; }
         .tab-content.active { display: flex; flex-direction: column; align-items: center; }
 
-        /* DASHBOARD GRID */
         .dash-grid {
             display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 10px; margin-bottom: 10px;
         }
@@ -65,6 +68,7 @@
         td { padding: 12px 5px; border-bottom: 1px solid #1a1a1a; }
 
         .btn-main { padding: 20px; border-radius: 50px; border: none; font-weight: 800; font-size: 1.2rem; width: 92%; margin-top: 10px; cursor: pointer; }
+        #info-trigger { background: #222; border: none; color: #888; border-radius: 50%; width: 24px; height: 24px; font-size: 0.8rem; cursor: pointer; margin-left: 10px; }
         
         #slow-overlay { display: none; position: fixed; inset: 0; background: rgba(255,0,0,0.9); z-index: 2500; justify-content: center; align-items: center; font-size: 3.5rem; font-weight: 900; pointer-events: none; }
         .danger { animation: blink-red 0.4s infinite; }
@@ -75,10 +79,10 @@
 
     <div id="modal-overlay">
         <div class="modal-box">
-            <h3 id="modal-title" style="margin-top:0;">Confirm</h3>
-            <p id="modal-msg" style="color:#aaa; font-size:0.9rem;"></p>
+            <h3 id="modal-title" style="margin-top:0; color:var(--neon-green);"></h3>
+            <div id="modal-body"></div>
             <div class="modal-btns">
-                <button class="modal-btn" style="background:#444; color:white;" onclick="closeModal(false)">CANCEL</button>
+                <button id="modal-cancel-btn" class="modal-btn" style="background:#333; color:white;" onclick="closeModal()">CLOSE</button>
                 <button id="modal-confirm-btn" class="modal-btn" style="background:var(--neon-green); color:black;">OK</button>
             </div>
         </div>
@@ -93,6 +97,11 @@
     </div>
 
     <div id="monitor" class="tab-content active">
+        <div style="display:flex; align-items:center; margin-bottom:10px;">
+            <span style="font-size:0.7rem; color:#666; text-transform:uppercase; letter-spacing:2px;">Live Guard</span>
+            <button id="info-trigger" onclick="showReadme()">ⓘ</button>
+        </div>
+        
         <div class="dash-grid">
             <div class="dash-item">
                 <span class="dash-label">Duration</span>
@@ -145,23 +154,46 @@
         let currentLimit = 60, cameraDetected = false;
         let tripHistory = JSON.parse(localStorage.getItem('SpeedGuardFinalV13') || '[]');
 
-        // --- CUSTOM MODAL SYSTEM ---
-        function showModal(title, msg, onConfirm) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-msg').innerText = msg;
-            document.getElementById('modal-overlay').style.display = 'flex';
-            document.getElementById('modal-confirm-btn').onclick = () => {
-                onConfirm();
-                closeModal();
-            };
-        }
         function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+        
+        function showModal(title, content, onConfirm = null) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerHTML = typeof content === 'string' ? `<p style="color:#aaa; font-size:0.9rem;">${content}</p>` : '';
+            if (typeof content === 'object') document.getElementById('modal-body').appendChild(content);
+            
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+            
+            if (onConfirm) {
+                confirmBtn.style.display = 'block';
+                confirmBtn.onclick = () => { onConfirm(); closeModal(); };
+                cancelBtn.innerText = "CANCEL";
+            } else {
+                confirmBtn.style.display = 'none';
+                cancelBtn.innerText = "CLOSE";
+            }
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
 
-        // --- BUTTON HANDLERS ---
-        function handleStart() { showModal("Start Journey", "Ensure phone is mounted securely. Screen will stay ON.", startRide); }
-        function handleStop() { showModal("End Journey", "Save this trip to your history?", stopRide); }
-        function handleWipe() { showModal("Wipe History", "This will permanently delete all logs.", () => { tripHistory = []; localStorage.removeItem('SpeedGuardFinalV13'); renderLogs(); }); }
-        function handleExport() { showModal("Export CSV", "Download ride data to your device?", exportCSV); }
+        function showReadme() {
+            const list = document.createElement('ul');
+            list.className = 'readme-list';
+            list.innerHTML = `
+                <li><b>Dashboard:</b> Real-time speed, duration, and distance tracking.</li>
+                <li><b>Speed Limits:</b> Automatically fetches road limits via GPS.</li>
+                <li><b>Camera Alerts:</b> Visual and audio warnings for speed and red-light cameras within 750m.</li>
+                <li><b>Screen Wake-Lock:</b> Keeps screen ON automatically during active journeys.</li>
+                <li><b>Audio Heartbeat:</b> Prevents mobile browsers from silencing alerts in the background.</li>
+                <li><b>Route History:</b> Saves your traveled path, accessible via the "Route" link in History.</li>
+                <li><b>Data Management:</b> Export your logs to CSV or upload previous backups.</li>
+            `;
+            showModal("Application Features", list);
+        }
+
+        function handleStart() { showModal("Start Journey", "Ensure GPS is enabled. The screen will stay awake until you end the ride.", startRide); }
+        function handleStop() { showModal("End Journey", "Stop tracking and save this ride to history?", stopRide); }
+        function handleWipe() { showModal("Wipe History", "Permanently delete all ride logs? This cannot be undone.", () => { tripHistory = []; localStorage.removeItem('SpeedGuardFinalV13'); renderLogs(); }); }
+        function handleExport() { showModal("Export Data", "Download your history as a CSV file?", exportCSV); }
 
         async function requestWakeLock() {
             try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
