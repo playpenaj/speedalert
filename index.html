@@ -10,290 +10,320 @@
             --neon-green: #00ff00;
             --danger-red: #ff4444;
             --camera-yellow: #ffcc00;
-            --link-blue: #44aaff;
+            --bg-dark: #0a0a0a;
+            --card-bg: #161616;
         }
 
         * { box-sizing: border-box; touch-action: manipulation; }
         body { 
-            font-family: -apple-system, system-ui, sans-serif;
-            background: #000; color: white; margin: 0; height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
-            padding-top: var(--safe-top);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-dark); color: white; margin: 0; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; padding-top: var(--safe-top);
         }
+
+        /* CUSTOM MODAL STYLE */
+        #modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 5000; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-box {
+            background: #222; border: 1px solid #444; border-radius: 20px;
+            width: 100%; max-width: 320px; padding: 25px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
 
         #camera-alert {
             display: none; width: 100%; background: var(--camera-yellow); color: #000;
-            padding: 12px; text-align: center; font-weight: 900; font-size: 1.1rem;
+            padding: 15px; text-align: center; font-weight: 900; font-size: 1.2rem;
             position: fixed; top: 0; left: 0; z-index: 3000;
         }
 
-        .nav-tabs { display: flex; background: #111; border-bottom: 1px solid #333; z-index: 2000; }
-        .tab-btn { flex: 1; padding: 18px; border: none; background: none; color: #888; font-weight: bold; font-size: 0.9rem; outline: none; }
+        .nav-tabs { display: flex; background: #1a1a1a; border-bottom: 1px solid #333; z-index: 2000; }
+        .tab-btn { flex: 1; padding: 20px; border: none; background: none; color: #666; font-weight: bold; font-size: 0.9rem; }
         .tab-btn.active { color: var(--neon-green); border-bottom: 3px solid var(--neon-green); }
 
-        .tab-content { flex: 1; display: none; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .tab-content { flex: 1; display: none; padding: 15px; overflow-y: auto; }
         .tab-content.active { display: flex; flex-direction: column; align-items: center; }
 
-        #speed { font-size: 35vw; line-height: 0.8; margin: 15px 0 5px 0; font-weight: 900; font-variant-numeric: tabular-nums; }
-        .limit-display { width: 90px; height: 90px; border: 8px solid #f00; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2.2rem; }
-        
-        .card { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; width: 100%; }
-        .card h4 { margin: 0 0 10px 0; color: var(--neon-green); font-size: 0.8rem; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
-        
-        .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center; }
-        .stat-val { font-size: 1.1rem; font-weight: bold; display: block; color: #fff; }
-        .stat-lab { font-size: 0.6rem; color: #888; text-transform: uppercase; }
+        /* DASHBOARD GRID */
+        .dash-grid {
+            display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 10px; margin-bottom: 10px;
+        }
+        .dash-item { background: var(--card-bg); padding: 12px; border-radius: 15px; text-align: center; border: 1px solid #222; }
+        .dash-label { font-size: 0.6rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .dash-val { font-size: 1.2rem; font-weight: bold; display: block; margin-top: 4px; }
 
-        .readme-text { font-size: 0.75rem; color: #bbb; line-height: 1.4; padding-top: 10px; border-top: 1px solid #222; }
-        .readme-text ul { padding-left: 18px; margin: 8px 0; }
-
+        #speed { font-size: 38vw; line-height: 0.8; margin: 5px 0; font-weight: 900; font-variant-numeric: tabular-nums; }
+        .limit-display { width: 90px; height: 90px; border: 7px solid #f00; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 2.2rem; }
+        
+        .card { background: var(--card-bg); padding: 18px; border-radius: 15px; border: 1px solid #222; margin-bottom: 15px; width: 100%; }
+        
         table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
-        th { text-align: left; color: var(--neon-green); border-bottom: 1px solid #333; padding: 8px 4px; }
-        td { padding: 12px 4px; border-bottom: 1px solid #222; }
+        th { text-align: left; color: var(--neon-green); border-bottom: 1px solid #333; padding: 10px 5px; }
+        td { padding: 12px 5px; border-bottom: 1px solid #1a1a1a; }
 
-        .btn-main { padding: 20px; border-radius: 50px; border: none; font-weight: bold; font-size: 1.1rem; width: 90%; margin: 20px 0; cursor: pointer; }
-        #slow-overlay { display: none; position: fixed; inset: 0; background: rgba(255,0,0,0.85); z-index: 2500; justify-content: center; align-items: center; font-size: 3rem; font-weight: 900; pointer-events: none; }
+        .btn-main { padding: 20px; border-radius: 50px; border: none; font-weight: 800; font-size: 1.2rem; width: 92%; margin-top: 10px; cursor: pointer; }
         
-        .danger { animation: blink-red 0.5s infinite; }
+        #slow-overlay { display: none; position: fixed; inset: 0; background: rgba(255,0,0,0.9); z-index: 2500; justify-content: center; align-items: center; font-size: 3.5rem; font-weight: 900; pointer-events: none; }
+        .danger { animation: blink-red 0.4s infinite; }
         @keyframes blink-red { 0%, 100% { background: #000; } 50% { background: #300; } }
     </style>
 </head>
 <body>
 
-    <div id="camera-alert">📸 SPEED CAMERA AHEAD</div>
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title" style="margin-top:0;">Confirm</h3>
+            <p id="modal-msg" style="color:#aaa; font-size:0.9rem;"></p>
+            <div class="modal-btns">
+                <button class="modal-btn" style="background:#444; color:white;" onclick="closeModal(false)">CANCEL</button>
+                <button id="modal-confirm-btn" class="modal-btn" style="background:var(--neon-green); color:black;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="camera-alert">⚠️ SPEED CAMERA AHEAD</div>
     <div id="slow-overlay">SLOW DOWN</div>
 
     <div class="nav-tabs">
-        <button id="mon-tab" class="tab-btn active" onclick="openTab('monitor')">Monitor</button>
-        <button id="log-tab" class="tab-btn" onclick="openTab('logs')">Ride Logs</button>
+        <button id="mon-tab" class="tab-btn active" onclick="openTab('monitor')">DASHBOARD</button>
+        <button id="log-tab" class="tab-btn" onclick="openTab('logs')">HISTORY</button>
     </div>
 
     <div id="monitor" class="tab-content active">
-        <div id="gps-status" style="font-size:0.65rem; font-weight:bold; margin-top:5px; padding:4px 10px; border-radius:10px; background: #222;">GPS: IDLE</div>
-        <div id="timer-display" style="font-family: monospace; color: var(--neon-green); margin-top: 10px; font-size: 1.2rem;">00:00:00</div>
+        <div class="dash-grid">
+            <div class="dash-item">
+                <span class="dash-label">Duration</span>
+                <span id="dash-duration" class="dash-val" style="color:var(--neon-green)">00:00:00</span>
+            </div>
+            <div class="dash-item">
+                <span class="dash-label">Distance</span>
+                <span id="dash-dist" class="dash-val">0.0 km</span>
+            </div>
+        </div>
+
         <div class="limit-display" id="roadLimit">60</div>
         <h1 id="speed">0</h1>
-        <div style="color:#888; font-size: 0.8rem; letter-spacing: 2px;">KM/H</div>
+        <div style="color:#444; font-size: 0.8rem; letter-spacing: 4px; font-weight: bold; margin-bottom: 10px;">KM/H</div>
         
-        <button id="startBtn" class="btn-main" style="background:var(--neon-green); color:#000;">START JOURNEY</button>
-        <button id="stopBtn" class="btn-main" style="background:var(--danger-red); color:#fff; display:none;">END JOURNEY</button>
+        <button id="startBtn" class="btn-main" style="background:var(--neon-green); color:#000;" onclick="handleStart()">START JOURNEY</button>
+        <button id="stopBtn" class="btn-main" style="background:var(--danger-red); color:#fff; display:none;" onclick="handleStop()">END JOURNEY</button>
+        
+        <div id="gps-status" style="font-size:0.55rem; color:#555; margin-top:15px; letter-spacing:1px;">GPS: IDLE | SCREEN: AUTO</div>
     </div>
 
     <div id="logs" class="tab-content">
         <div class="card">
-            <h4>📊 Lifetime Summary</h4>
-            <div class="summary-grid">
-                <div><span class="stat-val" id="sum-dist">0</span><span class="stat-lab">Total KM</span></div>
-                <div><span class="stat-val" id="sum-max">0</span><span class="stat-lab">Top Speed</span></div>
-                <div><span class="stat-val" id="sum-rides">0</span><span class="stat-lab">Rides</span></div>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); text-align:center;">
+                <div><span class="dash-val" id="sum-dist">0</span><span class="dash-label">KM</span></div>
+                <div><span class="dash-val" id="sum-max">0</span><span class="dash-label">MAX</span></div>
+                <div><span class="dash-val" id="sum-rides">0</span><span class="dash-label">RIDES</span></div>
+                <div><span class="dash-val" id="sum-time">0</span><span class="dash-label">MINS</span></div>
             </div>
         </div>
 
-        <div class="card">
-            <h4>📖 Read Me</h4>
-            <div class="readme-text">
-                <ul>
-                    <li><strong>Audio:</strong> Keep phone unmuted. Tap "Test" if silent.</li>
-                    <li><strong>Detection:</strong> Updates speed limits via OpenStreetMap.</li>
-                    <li><strong>Privacy:</strong> All logs stay on your device local storage.</li>
-                </ul>
-                <button onclick="playAlarm()" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:8px; border-radius:6px; font-size:0.7rem; margin-top:5px;">🔊 TEST ALARM TONE</button>
-            </div>
+        <div style="display: flex; gap: 8px; width: 100%; margin-bottom: 10px;">
+            <button onclick="handleExport()" style="flex:1; background:#0055ff; padding:12px; border:none; border-radius:10px; color:white; font-weight:bold; font-size:0.7rem;">EXPORT</button>
+            <button onclick="document.getElementById('csvUpload').click()" style="flex:1; background:#222; border:1px solid #444; padding:12px; border-radius:10px; color:white; font-weight:bold; font-size:0.7rem;">UPLOAD</button>
+            <input type="file" id="csvUpload" style="display:none" accept=".csv" onchange="handleFileUpload(event)">
         </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 15px;">
-            <button onclick="exportCSV()" style="background:#0055ff; padding:12px; border:none; border-radius:8px; color:white; font-weight:bold; font-size:0.7rem;">EXPORT CSV</button>
-            <button id="wipeBtn" onclick="confirmWipe()" style="background:#440000; padding:12px; border:none; border-radius:8px; color:white; font-weight:bold; font-size:0.7rem;">WIPE DATA</button>
-        </div>
+        
+        <button onclick="handleWipe()" style="background:none; border:none; color:#555; font-size:0.6rem; text-decoration:underline;">WIPE ALL HISTORY</button>
 
         <table>
-            <thead><tr><th>DATE</th><th>MAP</th><th>KM</th><th>MAX</th><th>AVG</th><th>OVER</th></tr></thead>
+            <thead><tr><th>DATE</th><th>DUR</th><th>KM</th><th>MAX</th><th>OVER</th><th>MAP</th></tr></thead>
             <tbody id="tripLogs"></tbody>
         </table>
     </div>
 
     <script>
-        let audioCtx, watchID, timerInterval;
+        let audioCtx, watchID, timerInterval, heartbeat, wakeLock = null;
         let rideStart, speeds = [], totalDist = 0, overspeedSec = 0;
-        let startLoc = null, endLoc = null, lastLat, lastLon, lastTime;
+        let route = [], lastLat, lastLon, lastTime;
         let currentLimit = 60, cameraDetected = false;
-        let wipeStep = 0;
-
         let tripHistory = JSON.parse(localStorage.getItem('SpeedGuardFinalV13') || '[]');
 
-        // BUTTON LISTENERS (More reliable than inline onclick for some mobile browsers)
-        document.getElementById('startBtn').addEventListener('click', startRide);
-        document.getElementById('stopBtn').addEventListener('click', stopRide);
+        // --- CUSTOM MODAL SYSTEM ---
+        function showModal(title, msg, onConfirm) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = msg;
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('modal-confirm-btn').onclick = () => {
+                onConfirm();
+                closeModal();
+            };
+        }
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
-        function openTab(name) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(name).classList.add('active');
-            if (name === 'monitor') document.getElementById('mon-tab').classList.add('active');
-            else {
-                document.getElementById('log-tab').classList.add('active');
-                renderLogs();
-            }
+        // --- BUTTON HANDLERS ---
+        function handleStart() { showModal("Start Journey", "Ensure phone is mounted securely. Screen will stay ON.", startRide); }
+        function handleStop() { showModal("End Journey", "Save this trip to your history?", stopRide); }
+        function handleWipe() { showModal("Wipe History", "This will permanently delete all logs.", () => { tripHistory = []; localStorage.removeItem('SpeedGuardFinalV13'); renderLogs(); }); }
+        function handleExport() { showModal("Export CSV", "Download ride data to your device?", exportCSV); }
+
+        async function requestWakeLock() {
+            try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (err) {}
         }
 
-        function playAlarm() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                heartbeat = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                heartbeat.frequency.setValueAtTime(20, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                heartbeat.connect(gain); gain.connect(audioCtx.destination);
+                heartbeat.start();
+            }
             if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playAlarm(freq = 1000) {
+            initAudio();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setTargetAtTime(0.15, audioCtx.currentTime, 0.01);
             osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
         }
 
         async function updateRoadData(lat, lon) {
-            const query = `[out:json];(node["highway"="speed_camera"](around:500,${lat},${lon});way["maxspeed"](around:50,${lat},${lon}););out tags;`;
+            const query = `[out:json];(node["highway"~"speed_camera|red_light"](around:750,${lat},${lon});way["maxspeed"](around:50,${lat},${lon}););out tags;`;
             try {
                 const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
                 const data = await res.json();
-                
-                const hasCam = data.elements.some(e => e.tags && e.tags.highway === 'speed_camera');
-                document.getElementById('camera-alert').style.display = hasCam ? 'block' : 'none';
-                if(hasCam && !cameraDetected) playAlarm();
-                cameraDetected = hasCam;
-
+                const cam = data.elements.find(e => e.tags && (e.tags.highway === 'speed_camera' || e.tags.highway === 'red_light'));
+                if (cam) { if (!cameraDetected) playAlarm(1500); document.getElementById('camera-alert').style.display = 'block'; cameraDetected = true; }
+                else { document.getElementById('camera-alert').style.display = 'none'; cameraDetected = false; }
                 const way = data.elements.find(e => e.tags && e.tags.maxspeed);
-                if (way) {
-                    currentLimit = parseInt(way.tags.maxspeed);
-                    document.getElementById('roadLimit').innerText = currentLimit;
-                }
-            } catch (e) { console.error("API Error"); }
+                if (way) { currentLimit = parseInt(way.tags.maxspeed) || 60; document.getElementById('roadLimit').innerText = currentLimit; }
+            } catch (e) {}
         }
 
         function startRide() {
-            // Wake up Audio
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            audioCtx.resume();
-
+            initAudio(); requestWakeLock();
             rideStart = Date.now(); lastTime = Date.now();
-            speeds = []; totalDist = 0; overspeedSec = 0; startLoc = null;
-
+            speeds = []; totalDist = 0; overspeedSec = 0; route = [];
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'block';
-            document.getElementById('gps-status').innerText = "GPS: REQUESTING...";
+            document.getElementById('gps-status').innerText = "GPS: ACTIVE | SCREEN: ON";
 
             watchID = navigator.geolocation.watchPosition((p) => {
-                document.getElementById('gps-status').innerText = "GPS: ACTIVE";
-                let s = p.coords.speed || 0;
-                if (s < 0.5) s = 0; 
+                let s = p.coords.speed || 0; if (s < 0.5) s = 0;
                 const kmh = Math.round(s * 3.6);
                 document.getElementById('speed').innerText = kmh;
-
                 let now = Date.now();
                 let delta = (now - lastTime) / 1000;
-                if (s > 0) {
+                if (s > 0.5) {
                     totalDist += (s * delta) / 1000;
+                    document.getElementById('dash-dist').innerText = totalDist.toFixed(1) + " km";
                     speeds.push(kmh);
+                    route.push(`${p.coords.latitude},${p.coords.longitude}`);
                     if (!lastLat || Math.abs(p.coords.latitude - lastLat) > 0.0005) {
                         updateRoadData(p.coords.latitude, p.coords.longitude);
                         lastLat = p.coords.latitude;
                     }
                 }
                 lastTime = now;
-
                 if (kmh > currentLimit) {
-                    document.body.classList.add('danger');
                     document.getElementById('slow-overlay').style.display = 'flex';
-                    playAlarm();
+                    document.body.classList.add('danger'); playAlarm(800);
                     overspeedSec += delta;
                 } else {
-                    document.body.classList.remove('danger');
                     document.getElementById('slow-overlay').style.display = 'none';
+                    document.body.classList.remove('danger');
                 }
-
-                if(!startLoc) startLoc = `${p.coords.latitude},${p.coords.longitude}`;
-                endLoc = `${p.coords.latitude},${p.coords.longitude}`;
-            }, (e) => {
-                document.getElementById('gps-status').innerText = "GPS: ERROR";
-                alert("Please enable Location Services");
-            }, { enableHighAccuracy: true });
+            }, null, { enableHighAccuracy: true });
 
             timerInterval = setInterval(() => {
                 let d = new Date(Date.now() - rideStart);
-                document.getElementById('timer-display').innerText = d.toISOString().substr(11, 8);
+                document.getElementById('dash-duration').innerText = d.toISOString().substr(11, 8);
             }, 1000);
         }
 
         function stopRide() {
             navigator.geolocation.clearWatch(watchID);
             clearInterval(timerInterval);
-
-            if (speeds.length > 0 || totalDist > 0.1) {
+            if (wakeLock) { wakeLock.release(); wakeLock = null; }
+            
+            const duration = Math.round((Date.now() - rideStart) / 1000);
+            if (speeds.length > 5) {
+                const pathStr = route.filter((_,i) => i % 15 === 0).join('/');
                 const trip = {
                     dt: new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short'}),
-                    map: `https://www.google.com/maps/dir/${startLoc}/${endLoc}`,
+                    dur: Math.floor(duration / 60) + "m",
+                    map: `https://www.google.com/maps/dir/${pathStr}`,
                     dst: totalDist.toFixed(1),
                     mx: Math.max(...speeds, 0),
-                    av: Math.round(speeds.reduce((a,b)=>a+b,0)/(speeds.length||1)),
                     ov: Math.round(overspeedSec / 60)
                 };
                 tripHistory.push(trip);
                 localStorage.setItem('SpeedGuardFinalV13', JSON.stringify(tripHistory));
             }
-
             document.getElementById('stopBtn').style.display = 'none';
             document.getElementById('startBtn').style.display = 'block';
             document.getElementById('speed').innerText = "0";
-            document.getElementById('gps-status').innerText = "GPS: IDLE";
+            document.getElementById('dash-duration').innerText = "00:00:00";
+            document.getElementById('dash-dist').innerText = "0.0 km";
             document.body.classList.remove('danger');
             document.getElementById('slow-overlay').style.display = 'none';
+            document.getElementById('gps-status').innerText = "GPS: IDLE | SCREEN: AUTO";
             renderLogs();
         }
 
         function renderLogs() {
-            // Update Summary Card
-            const totalKm = tripHistory.reduce((a, b) => a + parseFloat(b.dst), 0).toFixed(1);
-            const maxSpd = Math.max(...tripHistory.map(t => t.mx), 0);
-            document.getElementById('sum-dist').innerText = totalKm;
-            document.getElementById('sum-max').innerText = maxSpd;
+            document.getElementById('sum-dist').innerText = tripHistory.reduce((a, b) => a + parseFloat(b.dst), 0).toFixed(1);
+            document.getElementById('sum-max').innerText = Math.max(...tripHistory.map(t => t.mx), 0);
             document.getElementById('sum-rides').innerText = tripHistory.length;
+            document.getElementById('sum-time').innerText = tripHistory.reduce((a, b) => a + parseInt(b.dur), 0);
 
-            // Update Table
             document.getElementById('tripLogs').innerHTML = [...tripHistory].reverse().map(t => `
                 <tr>
                     <td>${t.dt}</td>
-                    <td><a href="${t.map}" target="_blank" style="color:var(--link-blue);">MAP</a></td>
-                    <td>${t.dst}</td>
+                    <td>${t.dur}</td>
+                    <td>${t.dst}k</td>
                     <td>${t.mx}</td>
-                    <td>${t.av}</td>
-                    <td style="color:${t.ov > 0 ? 'red' : 'inherit'}">${t.ov}m</td>
+                    <td style="color:${parseInt(t.ov)>0?'red':'inherit'}">${t.ov}m</td>
+                    <td><a href="${t.map}" target="_blank" style="color:var(--link-blue); font-weight:bold;">ROUTE</a></td>
                 </tr>
             `).join('');
         }
 
-        function confirmWipe() {
-            const btn = document.getElementById('wipeBtn');
-            if (wipeStep === 0) {
-                btn.innerText = "SURE? TAP AGAIN";
-                btn.style.background = "red";
-                wipeStep = 1;
-                setTimeout(() => { 
-                    wipeStep = 0; 
-                    btn.innerText = "WIPE DATA"; 
-                    btn.style.background = "#440000";
-                }, 3000);
-            } else {
-                tripHistory = [];
-                localStorage.removeItem('SpeedGuardFinalV13');
-                renderLogs();
-                btn.innerText = "DELETED";
-                setTimeout(() => { btn.innerText = "WIPE DATA"; btn.style.background = "#440000"; }, 2000);
-                wipeStep = 0;
-            }
+        function exportCSV() {
+            let csv = "Date,Duration,KM,MaxSpeed,OverspeedMin,MapURL\n";
+            tripHistory.forEach(t => csv += `${t.dt},${t.dur},${t.dst},${t.mx},${t.ov},"${t.map}"\n`);
+            const b = new Blob([csv], {type:'text/csv'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='SpeedGuard_Logs.csv'; a.click();
         }
 
-        function exportCSV() {
-            let csv = "Date,Map,KM,Max,Avg,OverMin\n";
-            tripHistory.forEach(t => csv += `${t.dt},"${t.map}",${t.dst},${t.mx},${t.av},${t.ov}\n`);
-            const b = new Blob([csv], {type:'text/csv'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='trips.csv'; a.click();
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n').slice(1);
+                lines.forEach(line => {
+                    const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if(cols.length >= 5) {
+                        tripHistory.push({ dt: cols[0], dur: cols[1], dst: cols[2], mx: cols[3], ov: cols[4], map: cols[5]?.replace(/"/g, '') });
+                    }
+                });
+                localStorage.setItem('SpeedGuardFinalV13', JSON.stringify(tripHistory));
+                renderLogs();
+            };
+            reader.readAsText(file);
+        }
+
+        function openTab(name) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            if (name === 'monitor') document.getElementById('mon-tab').classList.add('active');
+            else { document.getElementById('log-tab').classList.add('active'); renderLogs(); }
         }
 
         window.onload = renderLogs;
