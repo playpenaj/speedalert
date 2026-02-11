@@ -1,345 +1,1772 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Speed Guard Pro</title>
-
-<style>
-:root{--green:#00ff00;--red:#ff4444;--bg:#000;--card:#111}
-*{box-sizing:border-box}
-body{
- margin:0;background:var(--bg);color:#fff;
- font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto;
- height:100vh;display:flex;flex-direction:column
-}
-
-/* MODAL */
-#modal{
- position:fixed;inset:0;background:rgba(0,0,0,.9);
- display:none;z-index:9999;
- align-items:center;justify-content:center;padding:20px
-}
-#modalBox{
- background:#111;border-radius:20px;
- padding:22px;max-width:340px;width:100%;
- border:1px solid #333
-}
-#modalBox h3{margin-top:0;color:var(--green)}
-#modalBox p{font-size:.85rem;color:#ccc;line-height:1.5}
-#modalBox button{
- margin-top:15px;width:100%;
- padding:12px;border:none;
- border-radius:12px;font-weight:900;
- background:var(--green);color:#000
-}
-
-/* NAV */
-.nav-tabs{display:flex;background:#111;border-bottom:1px solid #222}
-.tab-btn{
- flex:1;padding:18px;border:none;background:none;
- color:#666;font-weight:900
-}
-.tab-btn.active{color:var(--green);border-bottom:3px solid var(--green)}
-.tab-content{flex:1;display:none;flex-direction:column;align-items:center;padding:10px}
-.tab-content.active{display:flex}
-
-/* DASH */
-.dash-grid{
- display:grid;grid-template-columns:repeat(3,1fr);
- gap:6px;width:100%
-}
-.dash-item{
- background:var(--card);border-radius:12px;
- padding:10px;text-align:center;border:1px solid #222
-}
-.dash-label{font-size:.55rem;color:#777}
-#speed{
- font-size:42vw;font-weight:900;
- line-height:.8;color:var(--green)
-}
-.limit-display{
- width:90px;height:90px;
- border:8px solid red;border-radius:50%;
- background:#fff;color:#000;
- display:flex;align-items:center;justify-content:center;
- font-weight:900;font-size:2.3rem;margin-top:5px
-}
-
-/* BUTTONS */
-.btn{
- width:92%;padding:18px;margin-top:10px;
- font-weight:900;border:none;border-radius:40px
-}
-.green{background:var(--green);color:#000}
-.red{background:var(--red);color:#fff}
-.gray{background:#333;color:#fff}
-
-/* ALERTS */
-#camera-alert{
- position:fixed;top:0;width:100%;
- background:#ffcc00;color:#000;
- font-weight:900;text-align:center;padding:14px;
- display:none;z-index:3000
-}
-#slow-overlay{
- position:fixed;inset:0;
- background:rgba(255,0,0,.85);
- display:none;z-index:2500;
- align-items:center;justify-content:center;
- font-size:3.5rem;font-weight:900;
- pointer-events:none;text-align:center
-}
-
-/* INFO */
-.info-btn{
- position:absolute;top:8px;right:8px;
- width:26px;height:26px;
- border-radius:50%;
- border:none;background:#222;
- color:#aaa;font-weight:900
-}
-
-/* TABLE */
-table{width:100%;border-collapse:collapse;font-size:.75rem}
-th{color:var(--green);padding:8px;border-bottom:2px solid #222}
-td{padding:12px 4px;border-bottom:1px solid #222;text-align:center}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0066cc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>MotoDash - Motorcycle Speedometer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --danger-color: #ff3300;
+            --warning-color: #ffaa00;
+            --success-color: #009933;
+            --text-dark: #000000;
+            --text-light: #ffffff;
+            --bg-light: #ffffff;
+            --bg-dark: #000000;
+            --shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        /* Device-friendly container */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* Top section - 70% for speedometer */
+        .speedometer-section {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            position: relative;
+            padding: 20px;
+            border-bottom: 1px solid #d0d0d0;
+        }
+        
+        /* Status indicators */
+        .status-indicators {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .gps-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        .gps-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .screen-lock-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        /* Speed limit display */
+        .speed-limit-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            border: 3px solid var(--danger-color);
+            text-align: center;
+            min-width: 100px;
+        }
+        
+        .speed-limit-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .speed-limit-value {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--danger-color);
+            line-height: 1;
+            margin-top: 4px;
+        }
+        
+        /* Main speed display */
+        .speed-display-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .current-speed {
+            font-size: 140px;
+            font-weight: 900;
+            color: var(--primary-color);
+            line-height: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            transition: color 0.3s;
+        }
+        
+        .speed-unit {
+            font-size: 28px;
+            font-weight: 600;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        /* Bottom section - 30% for trip info */
+        .trip-section {
+            height: 30vh;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1px;
+            background-color: #e0e0e0;
+        }
+        
+        .trip-item {
+            background-color: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .trip-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .trip-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .trip-value.overspeed {
+            color: var(--danger-color);
+        }
+        
+        /* Control buttons */
+        .control-buttons {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 0 15px;
+            z-index: 20;
+        }
+        
+        .control-btn {
+            flex: 1;
+            max-width: 150px;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+            -webkit-appearance: none;
+        }
+        
+        .control-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .control-btn.stop {
+            background-color: var(--danger-color);
+        }
+        
+        .control-btn.history {
+            background-color: #666;
+        }
+        
+        .control-btn i {
+            font-size: 24px;
+        }
+        
+        .control-btn span {
+            font-size: 14px;
+        }
+        
+        /* Settings button */
+        .settings-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 30;
+            transition: all 0.2s;
+        }
+        
+        .settings-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Modal overlays */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            display: none;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        /* Start/Stop modal */
+        .start-stop-modal .modal-body {
+            text-align: center;
+        }
+        
+        .modal-icon {
+            font-size: 70px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .modal-message {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .modal-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 140px;
+        }
+        
+        .modal-btn.confirm {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .modal-btn.cancel {
+            background-color: #ddd;
+            color: #333;
+        }
+        
+        /* Settings modal */
+        .settings-section {
+            margin-bottom: 30px;
+        }
+        
+        .settings-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .sound-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .sound-option:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .sound-option.selected {
+            border-color: var(--primary-color);
+            background-color: #e6f2ff;
+        }
+        
+        .sound-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-right: 15px;
+            width: 40px;
+        }
+        
+        .sound-info {
+            flex: 1;
+        }
+        
+        .sound-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .sound-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .sound-test {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Alert overlays */
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            display: none;
+        }
+        
+        .alert-box {
+            background-color: var(--bg-light);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: alertPulse 0.5s ease-in-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        @keyframes alertPulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .camera-alert .alert-box {
+            border-top: 10px solid var(--warning-color);
+        }
+        
+        .speed-alert .alert-box {
+            border-top: 10px solid var(--danger-color);
+        }
+        
+        .alert-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .camera-alert .alert-icon {
+            color: var(--warning-color);
+        }
+        
+        .speed-alert .alert-icon {
+            color: var(--danger-color);
+        }
+        
+        .alert-title {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 15px;
+        }
+        
+        .camera-alert .alert-title {
+            color: var(--warning-color);
+        }
+        
+        .speed-alert .alert-title {
+            color: var(--danger-color);
+        }
+        
+        .alert-message {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .alert-distance {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+        }
+        
+        .alert-close {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        /* History modal */
+        .history-table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .history-table th {
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .history-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .history-btn {
+            flex: 1;
+            min-width: 120px;
+            background-color: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .history-btn.download {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .history-btn.upload {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .history-btn.clear {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        /* Empty state */
+        .empty-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+        
+        .empty-history i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .empty-history h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .current-speed {
+                font-size: 100px;
+            }
+            
+            .speed-limit-value {
+                font-size: 36px;
+            }
+            
+            .trip-value {
+                font-size: 24px;
+            }
+            
+            .control-btn {
+                padding: 14px 8px;
+                font-size: 14px;
+            }
+            
+            .control-btn i {
+                font-size: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .current-speed {
+                font-size: 80px;
+            }
+            
+            .speed-unit {
+                font-size: 22px;
+            }
+            
+            .trip-label {
+                font-size: 12px;
+            }
+            
+            .trip-value {
+                font-size: 20px;
+            }
+            
+            .modal-btn {
+                padding: 12px 20px;
+                min-width: 120px;
+                font-size: 16px;
+            }
+            
+            .alert-title {
+                font-size: 24px;
+            }
+        }
+        
+        /* Landscape mode optimization */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .speedometer-section {
+                height: 60vh;
+            }
+            
+            .trip-section {
+                height: 40vh;
+            }
+            
+            .current-speed {
+                font-size: 80px;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-light: #121212;
+                --text-dark: #ffffff;
+            }
+            
+            body {
+                background-color: #121212;
+                color: #ffffff;
+            }
+            
+            .speedometer-section {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            }
+            
+            .trip-item {
+                background-color: #1e1e1e;
+            }
+            
+            .modal-content, .alert-box {
+                background-color: #1e1e1e;
+                color: #ffffff;
+            }
+            
+            .modal-message, .alert-message {
+                color: #aaa;
+            }
+            
+            .sound-option {
+                background-color: #2a2a2a;
+            }
+            
+            .sound-option:hover {
+                background-color: #333;
+            }
+            
+            .sound-option.selected {
+                background-color: #2a3a4a;
+            }
+            
+            .history-table th {
+                background-color: #2a2a2a;
+                color: #ffffff;
+            }
+            
+            .history-table tr:nth-child(even) {
+                background-color: #252525;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <div class="app-container">
+        <!-- Speedometer Section (70% of screen) -->
+        <div class="speedometer-section">
+            <!-- Status Indicators -->
+            <div class="status-indicators">
+                <div class="gps-status">
+                    <div class="gps-dot"></div>
+                    <span>GPS ACTIVE</span>
+                </div>
+                <div class="screen-lock-status">
+                    <i class="fas fa-sun"></i>
+                    <span>SCREEN ON</span>
+                </div>
+            </div>
+            
+            <!-- Speed Limit Display -->
+            <div class="speed-limit-container">
+                <div class="speed-limit-label">SPEED LIMIT</div>
+                <div class="speed-limit-value" id="speedLimitValue">50</div>
+            </div>
+            
+            <!-- Main Speed Display -->
+            <div class="speed-display-container">
+                <div class="current-speed" id="currentSpeed">0</div>
+                <div class="speed-unit">km/h</div>
+            </div>
+        </div>
+        
+        <!-- Trip Info Section (30% of screen) -->
+        <div class="trip-section">
+            <div class="trip-item">
+                <div class="trip-label">DISTANCE</div>
+                <div class="trip-value" id="distanceValue">0.0 km</div>
+            </div>
+            <div class="trip-item">
+                <div class="trip-label">TIME</div>
+                <div class="trip-value" id="timeValue">00:00:00</div>
+            </div>
+            <div class="trip-item">
+                <div class="trip-label">OVERSPEED</div>
+                <div class="trip-value overspeed" id="overspeedValue">0:00</div>
+            </div>
+            <div class="trip-item">
+                <div class="trip-label">AVG SPEED</div>
+                <div class="trip-value" id="avgSpeedValue">0 km/h</div>
+            </div>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div class="control-buttons">
+            <button class="control-btn" id="startBtn">
+                <i class="fas fa-play"></i>
+                <span>START</span>
+            </button>
+            <button class="control-btn stop" id="stopBtn" disabled>
+                <i class="fas fa-stop"></i>
+                <span>STOP</span>
+            </button>
+            <button class="control-btn history" id="historyBtn">
+                <i class="fas fa-history"></i>
+                <span>HISTORY</span>
+            </button>
+        </div>
+        
+        <!-- Settings Button -->
+        <div class="settings-btn" id="settingsBtn">
+            <i class="fas fa-cog"></i>
+        </div>
+        
+        <!-- Start Trip Modal -->
+        <div class="modal-overlay" id="startModal">
+            <div class="modal-content start-stop-modal">
+                <div class="modal-header">
+                    <div class="modal-title">START TRIP</div>
+                    <button class="modal-close" id="closeStartModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-icon">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <div class="modal-message">
+                        Ready to start your trip? The app will track your distance, time, speed, and alert you about speed cameras and limits.
+                    </div>
+                    <div class="modal-actions">
+                        <button class="modal-btn confirm" id="confirmStart">START TRIP</button>
+                        <button class="modal-btn cancel" id="cancelStart">CANCEL</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stop Trip Modal -->
+        <div class="modal-overlay" id="stopModal">
+            <div class="modal-content start-stop-modal">
+                <div class="modal-header">
+                    <div class="modal-title">END TRIP</div>
+                    <button class="modal-close" id="closeStopModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-icon">
+                        <i class="fas fa-flag-checkered"></i>
+                    </div>
+                    <div class="modal-message">
+                        Are you sure you want to end this trip? Your trip data will be saved to history.
+                    </div>
+                    <div class="modal-actions">
+                        <button class="modal-btn confirm" id="confirmStop">END TRIP</button>
+                        <button class="modal-btn cancel" id="cancelStop">CONTINUE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Modal -->
+        <div class="modal-overlay" id="settingsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">SETTINGS</div>
+                    <button class="modal-close" id="closeSettingsModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Sound Settings -->
+                    <div class="settings-section">
+                        <div class="settings-title">CAMERA ALERT SOUND</div>
+                        <div class="sound-option selected" data-sound="camera1">
+                            <div class="sound-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="sound-info">
+                                <div class="sound-name">Standard Beep</div>
+                                <div class="sound-desc">Clear, short beep for camera alerts</div>
+                            </div>
+                            <button class="sound-test">TEST</button>
+                        </div>
+                        <div class="sound-option" data-sound="camera2">
+                            <div class="sound-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="sound-info">
+                                <div class="sound-name">Warning Tone</div>
+                                <div class="sound-desc">Urgent tone for immediate attention</div>
+                            </div>
+                            <button class="sound-test">TEST</button>
+                        </div>
+                        <div class="sound-option" data-sound="camera3">
+                            <div class="sound-icon">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <div class="sound-info">
+                                <div class="sound-name">Double Beep</div>
+                                <div class="sound-desc">Two quick beeps for camera detection</div>
+                            </div>
+                            <button class="sound-test">TEST</button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-title">SPEED ALERT SOUND</div>
+                        <div class="sound-option selected" data-sound="speed1">
+                            <div class="sound-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="sound-info">
+                                <div class="sound-name">Standard Alert</div>
+                                <div class="sound-desc">Continuous tone for speed warnings</div>
+                            </div>
+                            <button class="sound-test">TEST</button>
+                        </div>
+                        <div class="sound-option" data-sound="speed2">
+                            <div class="sound-icon">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="sound-info">
+                                <div class="sound-name">Urgent Warning</div>
+                                <div class="sound-desc">Repeating beep for speed violations</div>
+                            </div>
+                            <button class="sound-test">TEST</button>
+                        </div>
+                        <div class="sound-option" data-sound="speed3">
+                            <div class="sound-icon">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <div class="sound-info">
+                                <div class="sound-name">Siren Pulse</div>
+                                <div class="sound-desc">Pulsing siren-like sound for attention</div>
+                            </div>
+                            <button class="sound-test">TEST</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Camera Settings -->
+                    <div class="settings-section">
+                        <div class="settings-title">CAMERA ALERT SETTINGS</div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Alert Distance</label>
+                            <input type="range" id="cameraDistance" min="100" max="1000" step="50" style="width: 100%;">
+                            <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                                <span style="font-size: 14px; color: #666;">100m</span>
+                                <span id="cameraDistanceValue" style="font-weight: 600;">500m</span>
+                                <span style="font-size: 14px; color: #666;">1000m</span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="cameraAlertsToggle" checked>
+                                <span>Enable camera alerts</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="speedAlertsToggle" checked>
+                                <span>Enable speed alerts</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- App Info -->
+                    <div class="settings-section">
+                        <div class="settings-title">APP INFORMATION</div>
+                        <div style="color: #666; line-height: 1.6;">
+                            <p><strong>MotoDash v2.0</strong></p>
+                            <p>Progressive Web App - Works offline</p>
+                            <p>Data stored locally in your browser</p>
+                            <p>Screen lock enabled for motorcycle use</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Modal -->
+        <div class="modal-overlay" id="historyModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">TRIP HISTORY</div>
+                    <button class="modal-close" id="closeHistoryModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="history-actions">
+                        <button class="history-btn download" id="downloadHistoryBtn">
+                            <i class="fas fa-download"></i>
+                            <span>DOWNLOAD</span>
+                        </button>
+                        <button class="history-btn upload" id="uploadHistoryBtn">
+                            <i class="fas fa-upload"></i>
+                            <span>UPLOAD</span>
+                        </button>
+                        <button class="history-btn clear" id="clearHistoryBtn">
+                            <i class="fas fa-trash"></i>
+                            <span>CLEAR</span>
+                        </button>
+                    </div>
+                    
+                    <div class="history-table-container">
+                        <table class="history-table" id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>DATE</th>
+                                    <th>DISTANCE</th>
+                                    <th>TIME</th>
+                                    <th>OVERSPEED</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- History will be populated here -->
+                            </tbody>
+                        </table>
+                        <div id="emptyHistory" class="empty-history" style="display: none;">
+                            <i class="fas fa-history"></i>
+                            <h3>No Trip History</h3>
+                            <p>Start your first trip to see history here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Camera Alert -->
+        <div class="alert-overlay camera-alert" id="cameraAlert">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div class="alert-title">SPEED CAMERA AHEAD</div>
+                <div class="alert-distance" id="cameraDistanceAlert">500m</div>
+                <div class="alert-message">Reduce speed and stay alert. Camera detected ahead.</div>
+                <button class="alert-close" id="closeCameraAlert">ACKNOWLEDGE</button>
+            </div>
+        </div>
+        
+        <!-- Speed Alert -->
+        <div class="alert-overlay speed-alert" id="speedAlert">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-title">OVER SPEED LIMIT</div>
+                <div class="alert-message">You are exceeding the speed limit. Please slow down.</div>
+                <button class="alert-close" id="closeSpeedAlert">ACKNOWLEDGE</button>
+            </div>
+        </div>
+        
+        <!-- Hidden file input -->
+        <input type="file" id="historyFileInput" accept=".json" style="display: none;">
+    </div>
 
-<!-- README MODAL -->
-<div id="modal">
- <div id="modalBox">
-  <h3>Speed Guard Pro – Read Me</h3>
-  <p>
-   • Start Journey enables GPS & keeps screen awake.<br><br>
-   • Speed is GPS-based with smoothing (stable = 0).<br><br>
-   • Speed limit auto-detected from road data.<br><br>
-   • Overspeed triggers sound + SLOW DOWN overlay.<br><br>
-   • Speed camera alert shows for 5 seconds.<br><br>
-   • Pause freezes tracking without saving.<br><br>
-   • History supports delete, import & export.
-  </p>
-  <button onclick="closeReadme()">GOT IT</button>
- </div>
-</div>
+    <!-- Sound effects -->
+    <audio id="cameraSound1" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="cameraSound2" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-warning-alarm-buzzer-1051.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="cameraSound3" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-retro-game-emergency-alarm-1000.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="speedSound1" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-classic-alarm-995.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="speedSound2" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-car-urgent-horn-558.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="speedSound3" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-siren-ambulance-1008.mp3" type="audio/mpeg">
+    </audio>
 
-<div id="camera-alert">⚠️ SPEED CAMERA AHEAD</div>
-<div id="slow-overlay">SLOW<br>DOWN</div>
+    <script>
+        // App state
+        const appState = {
+            isTripActive: false,
+            tripStartTime: null,
+            tripTimer: null,
+            overspeedTimer: null,
+            distance: 0,
+            overspeedSeconds: 0,
+            speedLimit: 50,
+            currentSpeed: 0,
+            wakeLock: null,
+            tripHistory: [],
+            cameraAlertActive: false,
+            speedAlertActive: false,
+            cameraLocations: [],
+            currentCameraSound: 'camera1',
+            currentSpeedSound: 'speed1',
+            cameraAlertDistance: 500,
+            cameraAlertsEnabled: true,
+            speedAlertsEnabled: true
+        };
 
-<div class="nav-tabs">
- <button class="tab-btn active" onclick="openTab('dash')">DASHBOARD</button>
- <button class="tab-btn" onclick="openTab('logs')">HISTORY</button>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dash" class="tab-content active">
- <button class="info-btn" onclick="openReadme()">ⓘ</button>
-
- <div class="dash-grid">
-  <div class="dash-item"><div class="dash-label">TIME</div><div id="time">00:00:00</div></div>
-  <div class="dash-item"><div class="dash-label">KM</div><div id="km">0.00</div></div>
-  <div class="dash-item"><div class="dash-label">VIO</div><div id="vio" style="color:var(--red)">0</div></div>
- </div>
-
- <div class="limit-display" id="limit">--</div>
- <div id="speed">0</div>
-
- <button class="btn green" onclick="confirmStart()">START JOURNEY</button>
- <button class="btn gray" onclick="togglePause()">PAUSE / RESUME</button>
- <button class="btn red" onclick="confirmStop()">END & SAVE</button>
-</div>
-
-<!-- HISTORY -->
-<div id="logs" class="tab-content">
- <button class="btn gray" onclick="exportTXT()">EXPORT TXT</button>
- <button class="btn gray" onclick="triggerImport()">IMPORT TXT</button>
- <input type="file" id="fileIn" hidden accept=".txt" onchange="importTXT(event)">
- <button class="btn red" onclick="clearAll()">CLEAR ALL</button>
-
- <table>
-  <thead>
-   <tr><th>Date</th><th>KM</th><th>Max</th><th>Vio</th><th>Del</th></tr>
-  </thead>
-  <tbody id="logBody"></tbody>
- </table>
-</div>
-
-<script>
-/* README */
-function openReadme(){document.getElementById("modal").style.display="flex"}
-function closeReadme(){document.getElementById("modal").style.display="none"}
-</script>
-
-<script>
-/* ===== SOUND (FIXED) ===== */
-let audioCtx=null;
-function unlockAudio(){
- if(!audioCtx){
-  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
- }
- if(audioCtx.state==="suspended") audioCtx.resume();
-}
-function beep(freq){
- if(!audioCtx) return;
- const o=audioCtx.createOscillator();
- const g=audioCtx.createGain();
- o.frequency.value=freq;
- g.gain.value=0.15;
- o.connect(g);g.connect(audioCtx.destination);
- o.start();o.stop(audioCtx.currentTime+.25);
-}
-
-/* ===== CORE LOGIC (UNCHANGED) ===== */
-const STORE="SGP_DEPLOY";
-let watchID,timerID,wakeLock=null;
-let paused=false,wasSpeeding=false;
-let lastTime=null,lastFetch=0;
-let dist=0,vio=0,maxSpeed=0;
-let speedBuf=[],speedLimit=null,cameraCooldown=0;
-
-function openTab(id){
- document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
- document.getElementById(id).classList.add('active');
- if(id==='logs')renderLogs();
-}
-async function keepAwake(){
- if('wakeLock'in navigator)wakeLock=await navigator.wakeLock.request('screen');
-}
-async function fetchRoad(lat,lon){
- if(Date.now()-lastFetch<20000)return;
- lastFetch=Date.now();
- const q=`[out:json];way(around:50,${lat},${lon})["maxspeed"];out tags 1;`;
- try{
-  const r=await fetch("https://overpass-api.de/api/interpreter?data="+encodeURIComponent(q));
-  const j=await r.json();
-  if(j.elements.length){
-   const v=parseInt(j.elements[0].tags.maxspeed);
-   if(!isNaN(v)){
-    speedLimit=v;
-    document.getElementById("limit").innerText=v;
-   }
-  }
- }catch{}
-}
-
-function confirmStart(){
- if(confirm("Start journey?")){
-  unlockAudio();
-  startRide();
- }
-}
-function confirmStop(){
- if(confirm("End journey and save this ride?"))stopRide();
-}
-
-function startRide(){
- keepAwake();
- dist=vio=maxSpeed=0;
- speedBuf=[];lastTime=null;
- speedLimit=null;
- document.getElementById("km").innerText="0.00";
- document.getElementById("vio").innerText="0";
- document.getElementById("limit").innerText="--";
- const start=Date.now();
-
- watchID=navigator.geolocation.watchPosition(p=>{
-  if(paused)return;
-  let kmh=Math.max(0,(p.coords.speed||0)*3.6);
-  speedBuf.push(kmh);if(speedBuf.length>5)speedBuf.shift();
-  kmh=speedBuf.reduce((a,b)=>a+b,0)/speedBuf.length;
-  if(kmh<2)kmh=0;
-  kmh=Math.round(kmh);
-  document.getElementById("speed").innerText=kmh;
-  maxSpeed=Math.max(maxSpeed,kmh);
-
-  if(lastTime&&kmh>2){
-   dist+=(kmh/3600)*((Date.now()-lastTime)/1000);
-   document.getElementById("km").innerText=dist.toFixed(2);
-  }
-  lastTime=Date.now();
-
-  fetchRoad(p.coords.latitude,p.coords.longitude);
-
-  if(speedLimit&&kmh>speedLimit){
-   if(!wasSpeeding){vio++;beep(800)}
-   wasSpeeding=true;
-   document.getElementById("vio").innerText=vio;
-   document.getElementById("slow-overlay").style.display="flex";
-  }else{
-   wasSpeeding=false;
-   document.getElementById("slow-overlay").style.display="none";
-  }
-
-  if(kmh>40&&Date.now()>cameraCooldown){
-   cameraCooldown=Date.now()+60000;
-   document.getElementById("camera-alert").style.display="block";
-   beep(1600);
-   setTimeout(()=>document.getElementById("camera-alert").style.display="none",5000);
-  }
- },null,{enableHighAccuracy:true});
-
- timerID=setInterval(()=>{
-  document.getElementById("time").innerText=
-   new Date(Date.now()-start).toISOString().substr(11,8);
- },1000);
-}
-
-function stopRide(){
- navigator.geolocation.clearWatch(watchID);
- clearInterval(timerID);
- if(wakeLock)wakeLock.release();
- const h=JSON.parse(localStorage.getItem(STORE)||"[]");
- h.push({dt:new Date().toLocaleDateString(),km:dist.toFixed(2),mx:maxSpeed,vio});
- localStorage.setItem(STORE,JSON.stringify(h));
- openTab("logs");
-}
-function togglePause(){paused=!paused}
-
-/* HISTORY */
-function renderLogs(){
- const h=JSON.parse(localStorage.getItem(STORE)||"[]");
- document.getElementById("logBody").innerHTML=
- h.map((r,i)=>`
- <tr>
-  <td>${r.dt}</td><td>${r.km}</td><td>${r.mx}</td><td>${r.vio}</td>
-  <td onclick="deleteRide(${i})" style="color:#0f0;cursor:pointer">✖</td>
- </tr>`).join("");
-}
-function deleteRide(i){
- const h=JSON.parse(localStorage.getItem(STORE)||"[]");
- h.splice(i,1);
- localStorage.setItem(STORE,JSON.stringify(h));
- renderLogs();
-}
-function clearAll(){
- localStorage.removeItem(STORE);
- renderLogs();
-}
-function exportTXT(){
- const h=JSON.parse(localStorage.getItem(STORE)||"[]");
- const b=new Blob([h.map(r=>JSON.stringify(r)).join("\n")],{type:"text/plain"});
- const a=document.createElement("a");
- a.href=URL.createObjectURL(b);
- a.download="speedguard_rides.txt";
- a.click();
-}
-function triggerImport(){document.getElementById("fileIn").click()}
-function importTXT(e){
- const r=new FileReader();
- r.onload=()=>{
-  const h=JSON.parse(localStorage.getItem(STORE)||"[]");
-  r.result.split("\n").forEach(l=>{try{h.push(JSON.parse(l))}catch{}});
-  localStorage.setItem(STORE,JSON.stringify(h));
-  renderLogs();
- };
- r.readAsText(e.target.files[0]);
-}
-</script>
-
+        // DOM Elements
+        const currentSpeedEl = document.getElementById('currentSpeed');
+        const speedLimitValueEl = document.getElementById('speedLimitValue');
+        const distanceEl = document.getElementById('distanceValue');
+        const timeEl = document.getElementById('timeValue');
+        const overspeedEl = document.getElementById('overspeedValue');
+        const avgSpeedEl = document.getElementById('avgSpeedValue');
+        
+        // Buttons
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const historyBtn = document.getElementById('historyBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        
+        // Modals
+        const startModal = document.getElementById('startModal');
+        const stopModal = document.getElementById('stopModal');
+        const settingsModal = document.getElementById('settingsModal');
+        const historyModal = document.getElementById('historyModal');
+        const cameraAlert = document.getElementById('cameraAlert');
+        const speedAlert = document.getElementById('speedAlert');
+        
+        // Modal buttons
+        const confirmStartBtn = document.getElementById('confirmStart');
+        const cancelStartBtn = document.getElementById('cancelStart');
+        const confirmStopBtn = document.getElementById('confirmStop');
+        const cancelStopBtn = document.getElementById('cancelStop');
+        const closeStartModalBtn = document.getElementById('closeStartModal');
+        const closeStopModalBtn = document.getElementById('closeStopModal');
+        const closeSettingsModalBtn = document.getElementById('closeSettingsModal');
+        const closeHistoryModalBtn = document.getElementById('closeHistoryModal');
+        const closeCameraAlertBtn = document.getElementById('closeCameraAlert');
+        const closeSpeedAlertBtn = document.getElementById('closeSpeedAlert');
+        
+        // History elements
+        const historyTableBody = document.getElementById('historyTableBody');
+        const emptyHistoryEl = document.getElementById('emptyHistory');
+        const downloadHistoryBtn = document.getElementById('downloadHistoryBtn');
+        const uploadHistoryBtn = document.getElementById('uploadHistoryBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const historyFileInput = document.getElementById('historyFileInput');
+        
+        // Settings elements
+        const cameraDistanceSlider = document.getElementById('cameraDistance');
+        const cameraDistanceValue = document.getElementById('cameraDistanceValue');
+        const cameraAlertsToggle = document.getElementById('cameraAlertsToggle');
+        const speedAlertsToggle = document.getElementById('speedAlertsToggle');
+        const cameraDistanceAlert = document.getElementById('cameraDistanceAlert');
+        
+        // Audio elements
+        const cameraSounds = {
+            'camera1': document.getElementById('cameraSound1'),
+            'camera2': document.getElementById('cameraSound2'),
+            'camera3': document.getElementById('cameraSound3')
+        };
+        
+        const speedSounds = {
+            'speed1': document.getElementById('speedSound1'),
+            'speed2': document.getElementById('speedSound2'),
+            'speed3': document.getElementById('speedSound3')
+        };
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved data
+            loadTripHistory();
+            loadSettings();
+            
+            // Request wake lock to keep screen on
+            requestWakeLock();
+            
+            // Initialize event listeners
+            initEventListeners();
+            
+            // Start GPS simulation
+            simulateGPSData();
+            
+            // Generate simulated camera locations
+            generateCameraLocations();
+            
+            // Update UI
+            updateCameraDistanceDisplay();
+        });
+        
+        // Event Listeners
+        function initEventListeners() {
+            // Control buttons
+            startBtn.addEventListener('click', () => showModal(startModal));
+            stopBtn.addEventListener('click', () => showModal(stopModal));
+            historyBtn.addEventListener('click', () => {
+                loadHistoryTable();
+                showModal(historyModal);
+            });
+            settingsBtn.addEventListener('click', () => showModal(settingsModal));
+            
+            // Modal actions
+            confirmStartBtn.addEventListener('click', startTrip);
+            cancelStartBtn.addEventListener('click', () => hideModal(startModal));
+            confirmStopBtn.addEventListener('click', stopTrip);
+            cancelStopBtn.addEventListener('click', () => hideModal(stopModal));
+            closeStartModalBtn.addEventListener('click', () => hideModal(startModal));
+            closeStopModalBtn.addEventListener('click', () => hideModal(stopModal));
+            closeSettingsModalBtn.addEventListener('click', () => hideModal(settingsModal));
+            closeHistoryModalBtn.addEventListener('click', () => hideModal(historyModal));
+            
+            // Alert close buttons
+            closeCameraAlertBtn.addEventListener('click', () => {
+                hideModal(cameraAlert);
+                appState.cameraAlertActive = false;
+            });
+            
+            closeSpeedAlertBtn.addEventListener('click', () => {
+                hideModal(speedAlert);
+                appState.speedAlertActive = false;
+            });
+            
+            // History actions
+            downloadHistoryBtn.addEventListener('click', downloadHistory);
+            uploadHistoryBtn.addEventListener('click', () => historyFileInput.click());
+            clearHistoryBtn.addEventListener('click', clearHistory);
+            historyFileInput.addEventListener('change', uploadHistory);
+            
+            // Settings
+            cameraDistanceSlider.addEventListener('input', updateCameraDistance);
+            cameraAlertsToggle.addEventListener('change', () => {
+                appState.cameraAlertsEnabled = cameraAlertsToggle.checked;
+                saveSettings();
+            });
+            speedAlertsToggle.addEventListener('change', () => {
+                appState.speedAlertsEnabled = speedAlertsToggle.checked;
+                saveSettings();
+            });
+            
+            // Sound selection
+            document.querySelectorAll('.sound-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const soundType = this.getAttribute('data-sound');
+                    selectSoundOption(this, soundType);
+                });
+            });
+            
+            // Test sound buttons
+            document.querySelectorAll('.sound-test').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const soundOption = this.closest('.sound-option');
+                    const soundType = soundOption.getAttribute('data-sound');
+                    testSound(soundType);
+                });
+            });
+            
+            // Prevent context menu on long press
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        }
+        
+        // Modal functions
+        function showModal(modal) {
+            modal.style.display = 'flex';
+        }
+        
+        function hideModal(modal) {
+            modal.style.display = 'none';
+        }
+        
+        // Trip management
+        function startTrip() {
+            appState.isTripActive = true;
+            appState.tripStartTime = new Date();
+            appState.distance = 0;
+            appState.overspeedSeconds = 0;
+            
+            // Update UI
+            hideModal(startModal);
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            // Start timers
+            startTripTimer();
+            startOverspeedMonitor();
+            
+            // Reset camera triggers for new trip
+            resetCameraTriggers();
+            
+            // Show notification
+            showNotification('Trip started! Ride safe!');
+        }
+        
+        function stopTrip() {
+            appState.isTripActive = false;
+            
+            // Stop timers
+            clearInterval(appState.tripTimer);
+            clearInterval(appState.overspeedTimer);
+            
+            // Save trip to history
+            saveTripToHistory();
+            
+            // Reset UI
+            hideModal(stopModal);
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            // Reset display values
+            currentSpeedEl.textContent = '0';
+            distanceEl.textContent = '0.0 km';
+            timeEl.textContent = '00:00:00';
+            overspeedEl.textContent = '0:00';
+            avgSpeedEl.textContent = '0 km/h';
+            
+            // Show notification
+            showNotification('Trip saved to history!');
+        }
+        
+        function startTripTimer() {
+            appState.tripTimer = setInterval(() => {
+                if (!appState.isTripActive) return;
+                
+                const now = new Date();
+                const diff = Math.floor((now - appState.tripStartTime) / 1000);
+                
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
+                
+                timeEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Calculate average speed
+                if (appState.distance > 0 && diff > 0) {
+                    const hoursTraveled = diff / 3600;
+                    const avgSpeed = appState.distance / hoursTraveled;
+                    avgSpeedEl.textContent = Math.round(avgSpeed) + ' km/h';
+                }
+            }, 1000);
+        }
+        
+        function startOverspeedMonitor() {
+            appState.overspeedTimer = setInterval(() => {
+                if (!appState.isTripActive) return;
+                
+                // Check if current speed exceeds speed limit
+                if (appState.currentSpeed > appState.speedLimit) {
+                    appState.overspeedSeconds++;
+                    
+                    const minutes = Math.floor(appState.overspeedSeconds / 60);
+                    const seconds = appState.overspeedSeconds % 60;
+                    overspeedEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Show speed alert if enabled
+                    if (appState.speedAlertsEnabled && !appState.speedAlertActive) {
+                        showSpeedAlert();
+                    }
+                }
+            }, 1000);
+        }
+        
+        // GPS simulation
+        function simulateGPSData() {
+            // Simulated GPS updates every 3 seconds
+            setInterval(() => {
+                if (!appState.isTripActive) return;
+                
+                // Simulate speed changes
+                const speedChange = (Math.random() - 0.5) * 10;
+                appState.currentSpeed = Math.max(0, appState.currentSpeed + speedChange);
+                
+                // Keep speed in realistic range
+                if (appState.currentSpeed > 120) appState.currentSpeed = 80;
+                if (appState.currentSpeed < 20) appState.currentSpeed = 40;
+                
+                // Update speed display
+                currentSpeedEl.textContent = Math.round(appState.currentSpeed);
+                
+                // Change speed limit occasionally
+                if (Math.random() < 0.05) {
+                    const limits = [30, 40, 50, 60, 70, 80, 90, 100];
+                    appState.speedLimit = limits[Math.floor(Math.random() * limits.length)];
+                    speedLimitValueEl.textContent = appState.speedLimit;
+                    
+                    // Update speed display color based on limit
+                    if (appState.currentSpeed > appState.speedLimit) {
+                        currentSpeedEl.style.color = 'var(--danger-color)';
+                    } else {
+                        currentSpeedEl.style.color = 'var(--primary-color)';
+                    }
+                }
+                
+                // Calculate distance traveled
+                const hoursPassed = 3 / 3600; // 3 seconds in hours
+                const newDistance = appState.distance + (appState.currentSpeed * hoursPassed);
+                appState.distance = newDistance;
+                
+                // Update distance display
+                distanceEl.textContent = newDistance.toFixed(1) + ' km';
+                
+                // Check for nearby cameras
+                checkForCameras();
+                
+            }, 3000);
+        }
+        
+        // Camera system
+        function generateCameraLocations() {
+            // Generate 10 random camera locations along a simulated route
+            appState.cameraLocations = [];
+            for (let i = 0; i < 10; i++) {
+                appState.cameraLocations.push({
+                    id: i,
+                    lat: 51.5 + (Math.random() * 0.1),
+                    lng: -0.1 + (Math.random() * 0.1),
+                    triggered: false,
+                    distance: Math.floor(Math.random() * 1000) + 100
+                });
+            }
+        }
+        
+        function checkForCameras() {
+            if (!appState.isTripActive || !appState.cameraAlertsEnabled) return;
+            
+            // Find the closest untriggered camera
+            const closestCamera = appState.cameraLocations
+                .filter(camera => !camera.triggered)
+                .reduce((closest, camera) => {
+                    // Simulate distance calculation
+                    const distance = camera.distance - (Math.random() * 50);
+                    return (distance < closest.distance) ? {camera, distance} : closest;
+                }, {camera: null, distance: Infinity});
+            
+            // If a camera is within alert distance, trigger alert
+            if (closestCamera.camera && closestCamera.distance <= appState.cameraAlertDistance && closestCamera.distance > 0) {
+                triggerCameraAlert(closestCamera.camera, Math.round(closestCamera.distance));
+            }
+        }
+        
+        function triggerCameraAlert(camera, distance) {
+            if (appState.cameraAlertActive) return;
+            
+            appState.cameraAlertActive = true;
+            camera.triggered = true;
+            
+            // Update alert distance display
+            cameraDistanceAlert.textContent = distance + 'm';
+            
+            // Play camera sound
+            playSound(appState.currentCameraSound, 'camera');
+            
+            // Show alert
+            showModal(cameraAlert);
+            
+            // Auto-close after 8 seconds
+            setTimeout(() => {
+                if (appState.cameraAlertActive) {
+                    hideModal(cameraAlert);
+                    appState.cameraAlertActive = false;
+                }
+            }, 8000);
+        }
+        
+        function resetCameraTriggers() {
+            appState.cameraLocations.forEach(camera => {
+                camera.triggered = false;
+            });
+        }
+        
+        // Alert functions
+        function showSpeedAlert() {
+            appState.speedAlertActive = true;
+            
+            // Play speed sound
+            playSound(appState.currentSpeedSound, 'speed');
+            
+            // Show alert
+            showModal(speedAlert);
+            
+            // Auto-close after 6 seconds
+            setTimeout(() => {
+                if (appState.speedAlertActive) {
+                    hideModal(speedAlert);
+                    appState.speedAlertActive = false;
+                }
+            }, 6000);
+        }
+        
+        // Sound functions
+        function selectSoundOption(element, soundType) {
+            // Remove selected class from all options in the same group
+            const container = element.closest('.settings-section');
+            container.querySelectorAll('.sound-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Update app state based on sound type
+            if (soundType.startsWith('camera')) {
+                appState.currentCameraSound = soundType;
+            } else if (soundType.startsWith('speed')) {
+                appState.currentSpeedSound = soundType;
+            }
+            
+            // Save settings
+            saveSettings();
+        }
+        
+        function testSound(soundType) {
+            playSound(soundType, soundType.startsWith('camera') ? 'camera' : 'speed');
+        }
+        
+        function playSound(soundId, soundGroup) {
+            let audio;
+            
+            if (soundGroup === 'camera') {
+                audio = cameraSounds[soundId];
+            } else {
+                audio = speedSounds[soundId];
+            }
+            
+            if (audio) {
+                audio.currentTime = 0;
+                audio.volume = 0.7;
+                audio.play().catch(e => console.log("Audio play failed:", e));
+            }
+        }
+        
+        // Settings functions
+        function updateCameraDistance() {
+            appState.cameraAlertDistance = parseInt(cameraDistanceSlider.value);
+            cameraDistanceValue.textContent = appState.cameraAlertDistance + 'm';
+            saveSettings();
+        }
+        
+        function updateCameraDistanceDisplay() {
+            cameraDistanceSlider.value = appState.cameraAlertDistance;
+            cameraDistanceValue.textContent = appState.cameraAlertDistance + 'm';
+            cameraAlertsToggle.checked = appState.cameraAlertsEnabled;
+            speedAlertsToggle.checked = appState.speedAlertsEnabled;
+        }
+        
+        function saveSettings() {
+            const settings = {
+                cameraSound: appState.currentCameraSound,
+                speedSound: appState.currentSpeedSound,
+                cameraAlertDistance: appState.cameraAlertDistance,
+                cameraAlertsEnabled: appState.cameraAlertsEnabled,
+                speedAlertsEnabled: appState.speedAlertsEnabled
+            };
+            localStorage.setItem('motoDashSettings', JSON.stringify(settings));
+        }
+        
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('motoDashSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                appState.currentCameraSound = settings.cameraSound || 'camera1';
+                appState.currentSpeedSound = settings.speedSound || 'speed1';
+                appState.cameraAlertDistance = settings.cameraAlertDistance || 500;
+                appState.cameraAlertsEnabled = settings.cameraAlertsEnabled !== false;
+                appState.speedAlertsEnabled = settings.speedAlertsEnabled !== false;
+                
+                // Update UI
+                updateCameraDistanceDisplay();
+                
+                // Select correct sound options
+                document.querySelector(`.sound-option[data-sound="${appState.currentCameraSound}"]`)?.classList.add('selected');
+                document.querySelector(`.sound-option[data-sound="${appState.currentSpeedSound}"]`)?.classList.add('selected');
+            }
+        }
+        
+        // History management
+        function saveTripToHistory() {
+            const tripDuration = Math.floor((new Date() - appState.tripStartTime) / 1000);
+            const hoursTraveled = tripDuration / 3600;
+            const avgSpeed = hoursTraveled > 0 ? (appState.distance / hoursTraveled) : 0;
+            
+            const trip = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                distance: appState.distance.toFixed(1) + ' km',
+                duration: timeEl.textContent,
+                overspeed: overspeedEl.textContent,
+                avgSpeed: Math.round(avgSpeed) + ' km/h'
+            };
+            
+            appState.tripHistory.unshift(trip);
+            
+            // Keep only last 50 trips
+            if (appState.tripHistory.length > 50) {
+                appState.tripHistory = appState.tripHistory.slice(0, 50);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('motoDashHistory', JSON.stringify(appState.tripHistory));
+        }
+        
+        function loadTripHistory() {
+            const savedHistory = localStorage.getItem('motoDashHistory');
+            if (savedHistory) {
+                appState.tripHistory = JSON.parse(savedHistory);
+            }
+        }
+        
+        function loadHistoryTable() {
+            historyTableBody.innerHTML = '';
+            
+            if (appState.tripHistory.length === 0) {
+                emptyHistoryEl.style.display = 'block';
+                return;
+            }
+            
+            emptyHistoryEl.style.display = 'none';
+            
+            appState.tripHistory.forEach(trip => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${trip.date}</td>
+                    <td>${trip.distance}</td>
+                    <td>${trip.duration}</td>
+                    <td>${trip.overspeed}</td>
+                `;
+                historyTableBody.appendChild(row);
+            });
+        }
+        
+        function downloadHistory() {
+            const dataStr = JSON.stringify(appState.tripHistory, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `motodash-history-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showNotification('History downloaded!');
+        }
+        
+        function uploadHistory(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const uploadedHistory = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(uploadedHistory)) {
+                        appState.tripHistory = uploadedHistory.concat(appState.tripHistory);
+                        
+                        // Keep only last 50 trips
+                        if (appState.tripHistory.length > 50) {
+                            appState.tripHistory = appState.tripHistory.slice(0, 50);
+                        }
+                        
+                        localStorage.setItem('motoDashHistory', JSON.stringify(appState.tripHistory));
+                        loadHistoryTable();
+                        showNotification('History uploaded successfully!');
+                    } else {
+                        showNotification('Invalid history file format');
+                    }
+                } catch (error) {
+                    showNotification('Error reading history file');
+                }
+            };
+            
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+        
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all trip history? This cannot be undone.')) {
+                appState.tripHistory = [];
+                localStorage.removeItem('motoDashHistory');
+                loadHistoryTable();
+                showNotification('History cleared!');
+            }
+        }
+        
+        // Wake Lock API
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    appState.wakeLock = await navigator.wakeLock.request('screen');
+                    
+                    appState.wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock was released');
+                        // Try to reacquire wake lock
+                        setTimeout(requestWakeLock, 1000);
+                    });
+                }
+            } catch (err) {
+                console.error(`${err.name}, ${err.message}`);
+            }
+        }
+        
+        // Notification system
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 90px;
+                right: 20px;
+                background-color: var(--primary-color);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 10000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+                max-width: 300px;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        // Add CSS animations for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
