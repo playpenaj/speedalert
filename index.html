@@ -11,6 +11,7 @@
     <title>MotoDash Pro - GPS Speedometer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* === PROFESSIONAL DARK THEME === */
         * {
             margin: 0;
             padding: 0;
@@ -347,7 +348,7 @@
             z-index: 30;
         }
 
-        /* ========== MODALS (same as before, but with professional colors) ========== */
+        /* ========== MODALS ========== */
         .modal {
             position: fixed;
             top: 0;
@@ -731,7 +732,7 @@
             </div>
         </div>
 
-        <!-- Control Bar (Fixed Bottom) -->
+        <!-- Control Bar -->
         <div class="control-bar">
             <button class="btn btn-start" id="startBtn">
                 <i class="fas fa-play"></i>
@@ -923,9 +924,9 @@
                     <!-- App Info -->
                     <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px;">
                         <h3 style="margin-bottom: 10px; color: var(--accent-blue);">ℹ️ App Info</h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 5px;">MotoDash Pro v6.0</p>
+                        <p style="color: var(--text-secondary); margin-bottom: 5px;">MotoDash Pro v7.0</p>
                         <p style="color: var(--text-secondary); margin-bottom: 5px;">Works in Singapore & India</p>
-                        <p style="color: var(--text-secondary);">Real GPS – no simulation</p>
+                        <p style="color: var(--text-secondary);">Real GPS – Speed limit simulated (demo)</p>
                     </div>
                 </div>
             </div>
@@ -1018,595 +1019,617 @@
     </div>
 
     <script>
-        // ==================== STATE ====================
-        const appState = {
-            isTripActive: false,
-            tripStartTime: null,
-            tripTimer: null,
-            distance: 0,
-            overspeedSeconds: 0,
-            speedLimit: 50,
-            currentSpeed: 0,
-            wakeLock: null,
-            tripHistory: [],
-            cameraAlertActive: false,
-            speedAlertActive: false,
-            cameraLocations: [],
-            currentCameraSound: 'camera2',
-            currentSpeedSound: 'speed2',
-            cameraAlertDistance: 500,
-            cameraAlertsEnabled: true,
-            speedAlertsEnabled: true,
-            region: 'sg',
-            speedLimitCaptured: false,
-            lastPosition: null,
-            lastTimestamp: null,
-            watchId: null,
-            gpsError: false
-        };
-
-        const speedLimitDB = {
-            sg: { default: 50, limits: [30,40,50,60,70,80,90] },
-            in: { default: 50, limits: [30,40,50,60,70,80] }
-        };
-
-        // ==================== DOM ELEMENTS ====================
-        const currentSpeedEl = document.getElementById('currentSpeed');
-        const speedLimitValueEl = document.getElementById('speedLimitValue');
-        const distanceEl = document.getElementById('distanceValue');
-        const timeEl = document.getElementById('timeValue');
-        const overspeedEl = document.getElementById('overspeedValue');
-        const avgSpeedEl = document.getElementById('avgSpeedValue');
-        const regionDisplay = document.getElementById('regionDisplay');
-        const speedLimitCapturedBadge = document.getElementById('speedLimitCapturedBadge');
-        const gpsStatusText = document.getElementById('gpsStatusText');
-        const gpsDot = document.getElementById('gpsDot');
-
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const historyBtn = document.getElementById('historyBtn');
-        const settingsBtn = document.getElementById('settingsBtn');
-
-        const startModal = document.getElementById('startModal');
-        const stopModal = document.getElementById('stopModal');
-        const settingsModal = document.getElementById('settingsModal');
-        const historyModal = document.getElementById('historyModal');
-        const cameraAlertModal = document.getElementById('cameraAlertModal');
-        const speedAlertModal = document.getElementById('speedAlertModal');
-
-        const closeStartModal = document.getElementById('closeStartModal');
-        const closeStopModal = document.getElementById('closeStopModal');
-        const closeSettingsModal = document.getElementById('closeSettingsModal');
-        const closeHistoryModal = document.getElementById('closeHistoryModal');
-        const closeCameraAlert = document.getElementById('closeCameraAlert');
-        const closeSpeedAlert = document.getElementById('closeSpeedAlert');
-
-        const confirmStart = document.getElementById('confirmStart');
-        const cancelStart = document.getElementById('cancelStart');
-        const confirmStop = document.getElementById('confirmStop');
-        const cancelStop = document.getElementById('cancelStop');
-
-        const historyTableBody = document.getElementById('historyTableBody');
-        const emptyHistory = document.getElementById('emptyHistory');
-        const downloadHistoryBtn = document.getElementById('downloadHistoryBtn');
-        const uploadHistoryBtn = document.getElementById('uploadHistoryBtn');
-        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-        const historyFileInput = document.getElementById('historyFileInput');
-
-        const cameraDistanceSlider = document.getElementById('cameraDistance');
-        const cameraDistanceValue = document.getElementById('cameraDistanceValue');
-        const cameraAlertsToggle = document.getElementById('cameraAlertsToggle');
-        const speedAlertsToggle = document.getElementById('speedAlertsToggle');
-        const cameraDistanceDisplay = document.getElementById('cameraDistanceDisplay');
-        const speedAlertCurrent = document.getElementById('speedAlertCurrent');
-        const speedAlertLimit = document.getElementById('speedAlertLimit');
-        const regionSG = document.getElementById('regionSG');
-        const regionIN = document.getElementById('regionIN');
-
-        const stopDistance = document.getElementById('stopDistance');
-        const stopDuration = document.getElementById('stopDuration');
-        const stopOverspeed = document.getElementById('stopOverspeed');
-
-        const cameraSounds = {
-            camera1: document.getElementById('cameraSound1'),
-            camera2: document.getElementById('cameraSound2'),
-            camera3: document.getElementById('cameraSound3')
-        };
-        const speedSounds = {
-            speed1: document.getElementById('speedSound1'),
-            speed2: document.getElementById('speedSound2'),
-            speed3: document.getElementById('speedSound3')
-        };
-
-        // ==================== AUDIO SETUP ====================
-        let audioContext;
-        function initAudio() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                document.addEventListener('touchstart', resumeAudio);
-                document.addEventListener('click', resumeAudio);
-                preloadSounds();
-            } catch (e) { console.log('Web Audio not supported'); }
-        }
-        function resumeAudio() {
-            if (audioContext && audioContext.state === 'suspended') audioContext.resume();
-        }
-        function preloadSounds() {
-            const urls = {
-                camera1: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm.ogg',
-                camera2: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-                camera3: 'https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg',
-                speed1: 'https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg',
-                speed2: 'https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg',
-                speed3: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg'
+        (function() {
+            // ==================== STATE ====================
+            const appState = {
+                isTripActive: false,
+                tripStartTime: null,
+                tripTimer: null,
+                distance: 0,
+                overspeedSeconds: 0,
+                speedLimit: 50,
+                currentSpeed: 0,
+                wakeLock: null,
+                tripHistory: [],
+                cameraAlertActive: false,
+                speedAlertActive: false,
+                cameraLocations: [],
+                currentCameraSound: 'camera2',
+                currentSpeedSound: 'speed2',
+                cameraAlertDistance: 500,
+                cameraAlertsEnabled: true,
+                speedAlertsEnabled: true,
+                region: 'sg',
+                speedLimitCaptured: false,
+                lastPosition: null,
+                lastTimestamp: null,
+                watchId: null,
+                gpsError: false,
+                distanceSinceLastLimitCheck: 0
             };
-            for (let [key, url] of Object.entries(urls)) {
-                const audio = cameraSounds[key] || speedSounds[key];
-                if (audio) { audio.src = url; audio.load(); }
-            }
-        }
 
-        // ==================== GPS ====================
-        function startGPS() {
-            if (!navigator.geolocation) {
-                gpsStatusText.innerText = 'GPS NOT SUPPORTED';
-                gpsDot.style.background = 'gray';
-                return;
-            }
-            appState.watchId = navigator.geolocation.watchPosition(
-                pos => {
-                    gpsStatusText.innerText = 'GPS ACTIVE';
-                    gpsDot.style.background = 'var(--accent-green)';
-                    appState.gpsError = false;
-                    const coords = pos.coords;
-                    let speed = coords.speed ? coords.speed * 3.6 : 0;
-                    if (speed === 0 && appState.lastPosition) {
-                        const d = calculateDistance(appState.lastPosition.lat, appState.lastPosition.lon, coords.latitude, coords.longitude);
-                        const dt = (pos.timestamp - appState.lastTimestamp) / 1000;
-                        if (dt > 0) speed = (d / dt) * 3600;
-                    }
-                    appState.currentSpeed = Math.max(0, Math.round(speed * 10) / 10);
-                    currentSpeedEl.textContent = Math.round(appState.currentSpeed);
-                    if (appState.currentSpeed > appState.speedLimit) {
-                        currentSpeedEl.classList.add('speed-over-limit');
-                    } else {
-                        currentSpeedEl.classList.remove('speed-over-limit');
-                    }
-                    if (appState.isTripActive && appState.lastPosition) {
-                        const delta = calculateDistance(appState.lastPosition.lat, appState.lastPosition.lon, coords.latitude, coords.longitude);
-                        appState.distance += delta;
-                        distanceEl.textContent = appState.distance.toFixed(2) + ' km';
-                    }
-                    appState.lastPosition = { lat: coords.latitude, lon: coords.longitude };
-                    appState.lastTimestamp = pos.timestamp;
-                    if (appState.isTripActive && !appState.speedLimitCaptured && appState.distance > 0.1) captureSpeedLimit();
-                },
-                err => {
-                    gpsStatusText.innerText = 'GPS ERROR';
-                    gpsDot.style.background = 'var(--accent-red)';
-                    appState.gpsError = true;
-                    appState.currentSpeed = 0;
-                    currentSpeedEl.textContent = '0';
-                    currentSpeedEl.classList.remove('speed-over-limit');
-                },
-                { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
-            );
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        function captureSpeedLimit() {
-            let newLimit = 50;
-            if (appState.currentSpeed < 35) newLimit = 40;
-            else if (appState.currentSpeed < 55) newLimit = 50;
-            else if (appState.currentSpeed < 75) newLimit = 70;
-            else newLimit = 90;
-            const limits = speedLimitDB[appState.region].limits;
-            newLimit = Math.min(Math.max(...limits), Math.max(Math.min(...limits), newLimit));
-            appState.speedLimit = newLimit;
-            speedLimitValueEl.textContent = appState.speedLimit;
-            appState.speedLimitCaptured = true;
-            speedLimitCapturedBadge.innerHTML = `<i class="fas fa-traffic-light"></i><span>Speed Limit: ${appState.speedLimit} km/h</span>`;
-            speedLimitCapturedBadge.classList.add('active');
-            showNotification(`Speed limit: ${appState.speedLimit} km/h`);
-        }
-
-        // ==================== MONITORING ====================
-        function startMonitoring() {
-            setInterval(() => {
-                if (!appState.isTripActive) return;
-                if (appState.currentSpeed > appState.speedLimit) {
-                    appState.overspeedSeconds++;
-                    const m = Math.floor(appState.overspeedSeconds / 60);
-                    const s = appState.overspeedSeconds % 60;
-                    overspeedEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
-                    if (appState.speedAlertsEnabled && !appState.speedAlertActive) showSpeedAlert();
-                }
-                if (appState.cameraAlertsEnabled) checkForCameras();
-            }, 1000);
-        }
-
-        // ==================== CAMERAS ====================
-        function generateCameraLocations() {
-            appState.cameraLocations = [];
-            for (let i = 0; i < 15; i++) {
-                appState.cameraLocations.push({ id: i, distance: Math.floor(Math.random()*10000)+1000, triggered: false });
-            }
-        }
-        function checkForCameras() {
-            if (!appState.isTripActive || !appState.cameraAlertsEnabled) return;
-            const curM = appState.distance * 1000;
-            appState.cameraLocations.forEach(cam => {
-                if (!cam.triggered && Math.abs(cam.distance - curM) <= appState.cameraAlertDistance) {
-                    triggerCameraAlert(cam, Math.round(Math.abs(cam.distance - curM)));
-                }
-            });
-        }
-        function triggerCameraAlert(cam, dist) {
-            if (appState.cameraAlertActive) return;
-            appState.cameraAlertActive = true;
-            cam.triggered = true;
-            cameraDistanceDisplay.textContent = dist + 'm';
-            playSound(appState.currentCameraSound);
-            showModal(cameraAlertModal);
-            setTimeout(() => { if (appState.cameraAlertActive) { hideModal(cameraAlertModal); appState.cameraAlertActive = false; } }, 7000);
-        }
-        function resetCameraTriggers() { appState.cameraLocations.forEach(c => c.triggered = false); }
-
-        // ==================== TRIP CONTROL ====================
-        function startTrip() {
-            appState.isTripActive = true;
-            appState.tripStartTime = new Date();
-            appState.distance = 0;
-            appState.overspeedSeconds = 0;
-            appState.speedLimitCaptured = false;
-            appState.lastPosition = null;
-            distanceEl.textContent = '0.00 km';
-            timeEl.textContent = '00:00:00';
-            overspeedEl.textContent = '0:00';
-            avgSpeedEl.textContent = '0 km/h';
-            speedLimitCapturedBadge.innerHTML = '<i class="fas fa-traffic-light"></i><span>Speed Limit: Capturing...</span>';
-            speedLimitCapturedBadge.classList.remove('active');
-            hideModal(startModal);
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-            startTripTimer();
-            resetCameraTriggers();
-            showNotification('Trip started – ride safe!');
-        }
-
-        function stopTrip() {
-            appState.isTripActive = false;
-            clearInterval(appState.tripTimer);
-            saveTripToHistory();
-            hideModal(stopModal);
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            distanceEl.textContent = '0.00 km';
-            timeEl.textContent = '00:00:00';
-            overspeedEl.textContent = '0:00';
-            avgSpeedEl.textContent = '0 km/h';
-            speedLimitCapturedBadge.innerHTML = '<i class="fas fa-traffic-light"></i><span>Speed Limit: Waiting...</span>';
-            speedLimitCapturedBadge.classList.remove('active');
-            showNotification('Trip saved to history');
-        }
-
-        function showStopConfirmation() {
-            stopDistance.textContent = distanceEl.textContent;
-            stopDuration.textContent = timeEl.textContent;
-            stopOverspeed.textContent = overspeedEl.textContent;
-            showModal(stopModal);
-        }
-
-        function startTripTimer() {
-            appState.tripTimer = setInterval(() => {
-                if (!appState.isTripActive) return;
-                const now = new Date();
-                const diff = Math.floor((now - appState.tripStartTime) / 1000);
-                const h = Math.floor(diff / 3600);
-                const m = Math.floor((diff % 3600) / 60);
-                const s = diff % 60;
-                timeEl.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                if (diff > 0) {
-                    const avg = appState.distance / (diff / 3600);
-                    avgSpeedEl.textContent = Math.round(avg) + ' km/h';
-                }
-            }, 1000);
-        }
-
-        // ==================== SOUND ====================
-        function playSound(soundId) {
-            try {
-                if (audioContext && audioContext.state === 'running') {
-                    playWebAudioSound(soundId);
-                } else {
-                    const audio = soundId.startsWith('camera') ? cameraSounds[soundId] : speedSounds[soundId];
-                    if (audio) { audio.currentTime = 0; audio.volume = 0.8; audio.play().catch(e => playWebAudioSound(soundId)); }
-                }
-            } catch (e) { console.log('Sound error'); }
-        }
-
-        function playWebAudioSound(soundId) {
-            if (!audioContext) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.connect(gain); gain.connect(audioContext.destination);
-            switch(soundId) {
-                case 'camera1':
-                    osc.frequency.value = 800;
-                    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                    osc.start(); osc.stop(audioContext.currentTime + 0.2); break;
-                case 'camera2':
-                    osc.frequency.value = 1000;
-                    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                    osc.start(); osc.stop(audioContext.currentTime + 0.1);
-                    setTimeout(() => {
-                        const osc2 = audioContext.createOscillator();
-                        const gain2 = audioContext.createGain();
-                        osc2.connect(gain2); gain2.connect(audioContext.destination);
-                        osc2.frequency.value = 1000;
-                        gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                        osc2.start(); osc2.stop(audioContext.currentTime + 0.1);
-                    }, 150);
-                    break;
-                case 'camera3':
-                    osc.type = 'sawtooth';
-                    osc.frequency.value = 600;
-                    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                    osc.start(); osc.stop(audioContext.currentTime + 0.5); break;
-                case 'speed1':
-                    for (let i=0;i<3;i++) setTimeout(() => { let o=audioContext.createOscillator(),g=audioContext.createGain(); o.connect(g); g.connect(audioContext.destination); o.frequency.value=600; g.gain.setValueAtTime(0.3,audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+0.1); o.start(); o.stop(audioContext.currentTime+0.1); }, i*200);
-                    break;
-                case 'speed2':
-                    for (let i=0;i<5;i++) setTimeout(() => { let o=audioContext.createOscillator(),g=audioContext.createGain(); o.connect(g); g.connect(audioContext.destination); o.frequency.value=800; g.gain.setValueAtTime(0.3,audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+0.08); o.start(); o.stop(audioContext.currentTime+0.08); }, i*120);
-                    break;
-                case 'speed3':
-                    const start = audioContext.currentTime;
-                    osc.type='sawtooth';
-                    for (let i=0;i<6;i++) { let t = start + i*0.15; osc.frequency.setValueAtTime(600,t); osc.frequency.linearRampToValueAtTime(800,t+0.07); osc.frequency.linearRampToValueAtTime(600,t+0.14); }
-                    gain.gain.setValueAtTime(0.2,start);
-                    gain.gain.exponentialRampToValueAtTime(0.01,start+1);
-                    osc.start(); osc.stop(start+1); break;
-            }
-        }
-
-        // ==================== SOUND SELECTION ====================
-        function selectSound(option) {
-            const container = option.closest('.settings-section');
-            container.querySelectorAll('.sound-option').forEach(o => o.classList.remove('selected'));
-            option.classList.add('selected');
-            const type = option.dataset.sound;
-            if (type.startsWith('camera')) appState.currentCameraSound = type;
-            else appState.currentSpeedSound = type;
-            saveSettings();
-        }
-
-        function applySettingsToUI() {
-            document.querySelectorAll('.settings-section:nth-of-type(2) .sound-option').forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.dataset.sound === appState.currentCameraSound) opt.classList.add('selected');
-            });
-            document.querySelectorAll('.settings-section:nth-of-type(3) .sound-option').forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.dataset.sound === appState.currentSpeedSound) opt.classList.add('selected');
-            });
-        }
-
-        // ==================== REGION ====================
-        function selectRegion(reg) {
-            appState.region = reg;
-            regionSG.classList.toggle('selected', reg === 'sg');
-            regionIN.classList.toggle('selected', reg === 'in');
-            regionDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i><span>${reg === 'sg' ? 'Singapore' : 'India'}</span>`;
-            appState.speedLimit = speedLimitDB[reg].default;
-            speedLimitValueEl.textContent = appState.speedLimit;
-            saveSettings();
-            showNotification(`Region: ${reg === 'sg' ? 'Singapore' : 'India'}`);
-        }
-
-        // ==================== SETTINGS ====================
-        function updateCameraDistance() {
-            appState.cameraAlertDistance = parseInt(cameraDistanceSlider.value);
-            cameraDistanceValue.textContent = appState.cameraAlertDistance + 'm';
-            saveSettings();
-        }
-        function toggleCameraAlerts() { appState.cameraAlertsEnabled = cameraAlertsToggle.checked; saveSettings(); }
-        function toggleSpeedAlerts() { appState.speedAlertsEnabled = speedAlertsToggle.checked; saveSettings(); }
-        function updateCameraDistanceDisplay() {
-            cameraDistanceSlider.value = appState.cameraAlertDistance;
-            cameraDistanceValue.textContent = appState.cameraAlertDistance + 'm';
-            cameraAlertsToggle.checked = appState.cameraAlertsEnabled;
-            speedAlertsToggle.checked = appState.speedAlertsEnabled;
-        }
-        function updateRegionUI() {
-            const sg = appState.region === 'sg';
-            regionSG.classList.toggle('selected', sg);
-            regionIN.classList.toggle('selected', !sg);
-            regionDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i><span>${sg ? 'Singapore' : 'India'}</span>`;
-        }
-
-        // ==================== ALERT HANDLERS ====================
-        function closeCameraAlertHandler() { hideModal(cameraAlertModal); appState.cameraAlertActive = false; }
-        function closeSpeedAlertHandler() { hideModal(speedAlertModal); appState.speedAlertActive = false; }
-
-        // ==================== HISTORY ====================
-        function saveTripToHistory() {
-            const trip = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString('en-SG', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }),
-                distance: appState.distance.toFixed(2) + ' km',
-                duration: timeEl.textContent,
-                overspeed: overspeedEl.textContent,
-                region: appState.region
+            const speedLimitDB = {
+                sg: { default: 50, limits: [30,40,50,60,70,80,90] },
+                in: { default: 50, limits: [30,40,50,60,70,80] }
             };
-            appState.tripHistory.unshift(trip);
-            if (appState.tripHistory.length > 50) appState.tripHistory = appState.tripHistory.slice(0,50);
-            localStorage.setItem('motoDashHistory', JSON.stringify(appState.tripHistory));
-        }
-        function loadTripHistory() { const s = localStorage.getItem('motoDashHistory'); if(s) appState.tripHistory = JSON.parse(s); }
-        function showHistory() { loadHistoryTable(); showModal(historyModal); }
-        function loadHistoryTable() {
-            historyTableBody.innerHTML = '';
-            if (appState.tripHistory.length === 0) { emptyHistory.style.display = 'block'; return; }
-            emptyHistory.style.display = 'none';
-            appState.tripHistory.forEach(t => {
-                const r = document.createElement('tr');
-                r.innerHTML = `<td>${t.date}</td><td>${t.distance}</td><td>${t.duration}</td><td>${t.overspeed}</td>`;
-                historyTableBody.appendChild(r);
-            });
-        }
-        function downloadHistory() {
-            const data = JSON.stringify(appState.tripHistory, null, 2);
-            const blob = new Blob([data], {type:'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `motodash-${appState.region}-history-${new Date().toISOString().slice(0,10)}.json`;
-            a.click(); URL.revokeObjectURL(url); showNotification('History downloaded');
-        }
-        function uploadHistory(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(ev) {
+
+            // ==================== DOM ELEMENTS ====================
+            const currentSpeedEl = document.getElementById('currentSpeed');
+            const speedLimitValueEl = document.getElementById('speedLimitValue');
+            const distanceEl = document.getElementById('distanceValue');
+            const timeEl = document.getElementById('timeValue');
+            const overspeedEl = document.getElementById('overspeedValue');
+            const avgSpeedEl = document.getElementById('avgSpeedValue');
+            const regionDisplay = document.getElementById('regionDisplay');
+            const speedLimitCapturedBadge = document.getElementById('speedLimitCapturedBadge');
+            const gpsStatusText = document.getElementById('gpsStatusText');
+            const gpsDot = document.getElementById('gpsDot');
+
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const historyBtn = document.getElementById('historyBtn');
+            const settingsBtn = document.getElementById('settingsBtn');
+
+            const startModal = document.getElementById('startModal');
+            const stopModal = document.getElementById('stopModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const historyModal = document.getElementById('historyModal');
+            const cameraAlertModal = document.getElementById('cameraAlertModal');
+            const speedAlertModal = document.getElementById('speedAlertModal');
+
+            const closeStartModal = document.getElementById('closeStartModal');
+            const closeStopModal = document.getElementById('closeStopModal');
+            const closeSettingsModal = document.getElementById('closeSettingsModal');
+            const closeHistoryModal = document.getElementById('closeHistoryModal');
+            const closeCameraAlert = document.getElementById('closeCameraAlert');
+            const closeSpeedAlert = document.getElementById('closeSpeedAlert');
+
+            const confirmStart = document.getElementById('confirmStart');
+            const cancelStart = document.getElementById('cancelStart');
+            const confirmStop = document.getElementById('confirmStop');
+            const cancelStop = document.getElementById('cancelStop');
+
+            const historyTableBody = document.getElementById('historyTableBody');
+            const emptyHistory = document.getElementById('emptyHistory');
+            const downloadHistoryBtn = document.getElementById('downloadHistoryBtn');
+            const uploadHistoryBtn = document.getElementById('uploadHistoryBtn');
+            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+            const historyFileInput = document.getElementById('historyFileInput');
+
+            const cameraDistanceSlider = document.getElementById('cameraDistance');
+            const cameraDistanceValue = document.getElementById('cameraDistanceValue');
+            const cameraAlertsToggle = document.getElementById('cameraAlertsToggle');
+            const speedAlertsToggle = document.getElementById('speedAlertsToggle');
+            const cameraDistanceDisplay = document.getElementById('cameraDistanceDisplay');
+            const speedAlertCurrent = document.getElementById('speedAlertCurrent');
+            const speedAlertLimit = document.getElementById('speedAlertLimit');
+            const regionSG = document.getElementById('regionSG');
+            const regionIN = document.getElementById('regionIN');
+
+            const stopDistance = document.getElementById('stopDistance');
+            const stopDuration = document.getElementById('stopDuration');
+            const stopOverspeed = document.getElementById('stopOverspeed');
+
+            const cameraSounds = {
+                camera1: document.getElementById('cameraSound1'),
+                camera2: document.getElementById('cameraSound2'),
+                camera3: document.getElementById('cameraSound3')
+            };
+            const speedSounds = {
+                speed1: document.getElementById('speedSound1'),
+                speed2: document.getElementById('speedSound2'),
+                speed3: document.getElementById('speedSound3')
+            };
+
+            // ==================== AUDIO SETUP ====================
+            let audioContext;
+            function initAudio() {
                 try {
-                    const h = JSON.parse(ev.target.result);
-                    if (Array.isArray(h)) { appState.tripHistory = h.concat(appState.tripHistory).slice(0,50); localStorage.setItem('motoDashHistory', JSON.stringify(appState.tripHistory)); loadHistoryTable(); showNotification('History uploaded'); }
-                } catch { showNotification('Invalid file'); }
-            };
-            reader.readAsText(file); e.target.value = '';
-        }
-        function clearHistory() { if (confirm('Clear all trip history?')) { appState.tripHistory = []; localStorage.removeItem('motoDashHistory'); loadHistoryTable(); showNotification('History cleared'); } }
-
-        // ==================== SETTINGS STORAGE ====================
-        function saveSettings() {
-            localStorage.setItem('motoDashSettings', JSON.stringify({
-                region: appState.region,
-                cameraSound: appState.currentCameraSound,
-                speedSound: appState.currentSpeedSound,
-                cameraDistance: appState.cameraAlertDistance,
-                cameraAlerts: appState.cameraAlertsEnabled,
-                speedAlerts: appState.speedAlertsEnabled
-            }));
-        }
-        function loadSettings() {
-            const s = localStorage.getItem('motoDashSettings');
-            if (s) {
-                const set = JSON.parse(s);
-                appState.region = set.region || 'sg';
-                appState.currentCameraSound = set.cameraSound || 'camera2';
-                appState.currentSpeedSound = set.speedSound || 'speed2';
-                appState.cameraAlertDistance = set.cameraDistance || 500;
-                appState.cameraAlertsEnabled = set.cameraAlerts !== false;
-                appState.speedAlertsEnabled = set.speedAlerts !== false;
-            } else {
-                appState.currentCameraSound = 'camera2';
-                appState.currentSpeedSound = 'speed2';
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    document.addEventListener('touchstart', resumeAudio);
+                    document.addEventListener('click', resumeAudio);
+                    preloadSounds();
+                } catch (e) { console.log('Web Audio not supported'); }
             }
-        }
-
-        // ==================== WAKE LOCK ====================
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    appState.wakeLock = await navigator.wakeLock.request('screen');
-                    document.addEventListener('visibilitychange', async () => {
-                        if (document.visibilityState === 'visible' && appState.wakeLock === null) {
-                            appState.wakeLock = await navigator.wakeLock.request('screen');
-                        }
-                    });
+            function resumeAudio() {
+                if (audioContext && audioContext.state === 'suspended') audioContext.resume();
+            }
+            function preloadSounds() {
+                const urls = {
+                    camera1: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm.ogg',
+                    camera2: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+                    camera3: 'https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg',
+                    speed1: 'https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg',
+                    speed2: 'https://actions.google.com/sounds/v1/alarms/medium_bell_ringing_near.ogg',
+                    speed3: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg'
+                };
+                for (let [key, url] of Object.entries(urls)) {
+                    const audio = cameraSounds[key] || speedSounds[key];
+                    if (audio) { audio.src = url; audio.load(); }
                 }
-            } catch (err) { console.log('Wake Lock error'); }
-        }
+            }
 
-        // ==================== MODAL HELPERS ====================
-        function showModal(m) { m.style.display = 'flex'; }
-        function hideModal(m) { m.style.display = 'none'; }
+            // ==================== GPS ====================
+            function startGPS() {
+                if (!navigator.geolocation) {
+                    gpsStatusText.innerText = 'GPS NOT SUPPORTED';
+                    gpsDot.style.background = 'gray';
+                    return;
+                }
+                appState.watchId = navigator.geolocation.watchPosition(
+                    pos => {
+                        gpsStatusText.innerText = 'GPS ACTIVE';
+                        gpsDot.style.background = 'var(--accent-green)';
+                        appState.gpsError = false;
+                        const coords = pos.coords;
+                        let speed = coords.speed ? coords.speed * 3.6 : 0;
+                        if (speed === 0 && appState.lastPosition) {
+                            const d = calculateDistance(appState.lastPosition.lat, appState.lastPosition.lon, coords.latitude, coords.longitude);
+                            const dt = (pos.timestamp - appState.lastTimestamp) / 1000;
+                            if (dt > 0) speed = (d / dt) * 3600;
+                        }
+                        appState.currentSpeed = Math.max(0, Math.round(speed * 10) / 10);
+                        currentSpeedEl.textContent = Math.round(appState.currentSpeed);
+                        if (appState.currentSpeed > appState.speedLimit) {
+                            currentSpeedEl.classList.add('speed-over-limit');
+                        } else {
+                            currentSpeedEl.classList.remove('speed-over-limit');
+                        }
+                        if (appState.isTripActive && appState.lastPosition) {
+                            const delta = calculateDistance(appState.lastPosition.lat, appState.lastPosition.lon, coords.latitude, coords.longitude);
+                            appState.distance += delta;
+                            appState.distanceSinceLastLimitCheck += delta;
+                            distanceEl.textContent = appState.distance.toFixed(2) + ' km';
+                        }
+                        appState.lastPosition = { lat: coords.latitude, lon: coords.longitude };
+                        appState.lastTimestamp = pos.timestamp;
 
-        // ==================== NOTIFICATION ====================
-        function showNotification(msg) {
-            const n = document.createElement('div');
-            n.style.cssText = `position:fixed; bottom:calc(15vh + 30px); right:20px; background:var(--accent-blue); color:white; padding:12px 24px; border-radius:30px; font-weight:500; z-index:10000; animation:slideIn 0.3s ease; box-shadow:0 0 15px rgba(59,130,246,0.5); max-width:300px;`;
-            n.textContent = msg;
-            document.body.appendChild(n);
-            setTimeout(() => n.remove(), 3000);
-        }
+                        // Speed limit capture after moving 0.2 km (200m)
+                        if (appState.isTripActive && !appState.speedLimitCaptured && appState.distanceSinceLastLimitCheck >= 0.2) {
+                            captureSpeedLimit();
+                        }
+                    },
+                    err => {
+                        gpsStatusText.innerText = 'GPS ERROR';
+                        gpsDot.style.background = 'var(--accent-red)';
+                        appState.gpsError = true;
+                        appState.currentSpeed = 0;
+                        currentSpeedEl.textContent = '0';
+                        currentSpeedEl.classList.remove('speed-over-limit');
+                    },
+                    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+                );
+            }
 
-        // ==================== EVENT LISTENERS ====================
-        function initEventListeners() {
-            startBtn.addEventListener('click', () => showModal(startModal));
-            stopBtn.addEventListener('click', showStopConfirmation);
-            historyBtn.addEventListener('click', showHistory);
-            settingsBtn.addEventListener('click', () => showModal(settingsModal));
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+                return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            }
 
-            closeStartModal.addEventListener('click', () => hideModal(startModal));
-            closeStopModal.addEventListener('click', () => hideModal(stopModal));
-            closeSettingsModal.addEventListener('click', () => hideModal(settingsModal));
-            closeHistoryModal.addEventListener('click', () => hideModal(historyModal));
-            closeCameraAlert.addEventListener('click', closeCameraAlertHandler);
-            closeSpeedAlert.addEventListener('click', closeSpeedAlertHandler);
+            // ==================== SPEED LIMIT CAPTURE ====================
+            function captureSpeedLimit() {
+                // Simulate realistic limit based on current speed and region
+                let newLimit = 50;
+                if (appState.currentSpeed < 35) newLimit = 40;
+                else if (appState.currentSpeed < 55) newLimit = 50;
+                else if (appState.currentSpeed < 75) newLimit = 70;
+                else newLimit = 90;
+                const limits = speedLimitDB[appState.region].limits;
+                newLimit = limits.reduce((prev, curr) => Math.abs(curr - newLimit) < Math.abs(prev - newLimit) ? curr : prev);
+                appState.speedLimit = newLimit;
+                speedLimitValueEl.textContent = appState.speedLimit;
+                appState.speedLimitCaptured = true;
+                speedLimitCapturedBadge.innerHTML = `<i class="fas fa-traffic-light"></i><span>Speed Limit: ${appState.speedLimit} km/h</span>`;
+                speedLimitCapturedBadge.classList.add('active');
+                showNotification(`Speed limit: ${appState.speedLimit} km/h`);
+                appState.distanceSinceLastLimitCheck = 0; // reset for possible future changes (optional)
+            }
 
-            confirmStart.addEventListener('click', startTrip);
-            cancelStart.addEventListener('click', () => hideModal(startModal));
-            confirmStop.addEventListener('click', stopTrip);
-            cancelStop.addEventListener('click', () => hideModal(stopModal));
+            // ==================== MONITORING ====================
+            function startMonitoring() {
+                setInterval(() => {
+                    if (!appState.isTripActive) return;
+                    if (appState.currentSpeed > appState.speedLimit) {
+                        appState.overspeedSeconds++;
+                        const m = Math.floor(appState.overspeedSeconds / 60);
+                        const s = appState.overspeedSeconds % 60;
+                        overspeedEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+                        if (appState.speedAlertsEnabled && !appState.speedAlertActive) showSpeedAlert();
+                    }
+                    if (appState.cameraAlertsEnabled) checkForCameras();
+                }, 1000);
+            }
 
-            downloadHistoryBtn.addEventListener('click', downloadHistory);
-            uploadHistoryBtn.addEventListener('click', () => historyFileInput.click());
-            clearHistoryBtn.addEventListener('click', clearHistory);
-            historyFileInput.addEventListener('change', uploadHistory);
-
-            cameraDistanceSlider.addEventListener('input', updateCameraDistance);
-            cameraAlertsToggle.addEventListener('change', toggleCameraAlerts);
-            speedAlertsToggle.addEventListener('change', toggleSpeedAlerts);
-            
-            regionSG.addEventListener('click', () => selectRegion('sg'));
-            regionIN.addEventListener('click', () => selectRegion('in'));
-
-            document.querySelectorAll('.sound-option').forEach(opt => {
-                opt.addEventListener('click', function(e) {
-                    if (e.target.closest('.test-btn')) return;
-                    selectSound(this);
+            // ==================== CAMERAS ====================
+            function generateCameraLocations() {
+                appState.cameraLocations = [];
+                for (let i = 0; i < 15; i++) {
+                    appState.cameraLocations.push({ id: i, distance: Math.floor(Math.random()*10000)+1000, triggered: false });
+                }
+            }
+            function checkForCameras() {
+                if (!appState.isTripActive || !appState.cameraAlertsEnabled) return;
+                const curM = appState.distance * 1000;
+                appState.cameraLocations.forEach(cam => {
+                    if (!cam.triggered && Math.abs(cam.distance - curM) <= appState.cameraAlertDistance) {
+                        triggerCameraAlert(cam, Math.round(Math.abs(cam.distance - curM)));
+                    }
                 });
-            });
-            document.querySelectorAll('.test-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const s = this.closest('.sound-option').dataset.sound;
-                    playSound(s);
+            }
+            function triggerCameraAlert(cam, dist) {
+                if (appState.cameraAlertActive) return;
+                appState.cameraAlertActive = true;
+                cam.triggered = true;
+                cameraDistanceDisplay.textContent = dist + 'm';
+                playSound(appState.currentCameraSound);
+                showModal(cameraAlertModal);
+                setTimeout(() => { if (appState.cameraAlertActive) { hideModal(cameraAlertModal); appState.cameraAlertActive = false; } }, 7000);
+            }
+            function resetCameraTriggers() { appState.cameraLocations.forEach(c => c.triggered = false); }
+
+            // ==================== TRIP CONTROL ====================
+            function startTrip() {
+                appState.isTripActive = true;
+                appState.tripStartTime = new Date();
+                appState.distance = 0;
+                appState.overspeedSeconds = 0;
+                appState.speedLimitCaptured = false;
+                appState.lastPosition = null;
+                appState.distanceSinceLastLimitCheck = 0;
+                distanceEl.textContent = '0.00 km';
+                timeEl.textContent = '00:00:00';
+                overspeedEl.textContent = '0:00';
+                avgSpeedEl.textContent = '0 km/h';
+                speedLimitCapturedBadge.innerHTML = '<i class="fas fa-traffic-light"></i><span>Speed Limit: Capturing...</span>';
+                speedLimitCapturedBadge.classList.remove('active');
+                hideModal(startModal);
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                startTripTimer();
+                resetCameraTriggers();
+                requestWakeLock(); // ensure wake lock is active during trip
+                showNotification('Trip started – ride safe!');
+            }
+
+            function stopTrip() {
+                appState.isTripActive = false;
+                clearInterval(appState.tripTimer);
+                saveTripToHistory();
+                hideModal(stopModal);
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                distanceEl.textContent = '0.00 km';
+                timeEl.textContent = '00:00:00';
+                overspeedEl.textContent = '0:00';
+                avgSpeedEl.textContent = '0 km/h';
+                speedLimitCapturedBadge.innerHTML = '<i class="fas fa-traffic-light"></i><span>Speed Limit: Waiting...</span>';
+                speedLimitCapturedBadge.classList.remove('active');
+                // Release wake lock? We'll keep it always on, but can release if needed.
+                // Not necessary to release.
+                showNotification('Trip saved to history');
+            }
+
+            function showStopConfirmation() {
+                stopDistance.textContent = distanceEl.textContent;
+                stopDuration.textContent = timeEl.textContent;
+                stopOverspeed.textContent = overspeedEl.textContent;
+                showModal(stopModal);
+            }
+
+            function startTripTimer() {
+                appState.tripTimer = setInterval(() => {
+                    if (!appState.isTripActive) return;
+                    const now = new Date();
+                    const diff = Math.floor((now - appState.tripStartTime) / 1000);
+                    const h = Math.floor(diff / 3600);
+                    const m = Math.floor((diff % 3600) / 60);
+                    const s = diff % 60;
+                    timeEl.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                    if (diff > 0) {
+                        const avg = appState.distance / (diff / 3600);
+                        avgSpeedEl.textContent = Math.round(avg) + ' km/h';
+                    }
+                }, 1000);
+            }
+
+            // ==================== SOUND ====================
+            function playSound(soundId) {
+                try {
+                    if (audioContext && audioContext.state === 'running') {
+                        playWebAudioSound(soundId);
+                    } else {
+                        const audio = soundId.startsWith('camera') ? cameraSounds[soundId] : speedSounds[soundId];
+                        if (audio) {
+                            audio.currentTime = 0;
+                            audio.volume = 1.0; // 100% volume
+                            audio.play().catch(e => playWebAudioSound(soundId));
+                        }
+                    }
+                } catch (e) { console.log('Sound error'); }
+            }
+
+            function playWebAudioSound(soundId) {
+                if (!audioContext) return;
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain); gain.connect(audioContext.destination);
+                gain.gain.value = 1.0; // 100% volume
+                switch(soundId) {
+                    case 'camera1':
+                        osc.frequency.value = 800;
+                        gain.gain.setValueAtTime(1.0, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                        osc.start(); osc.stop(audioContext.currentTime + 0.2); break;
+                    case 'camera2':
+                        osc.frequency.value = 1000;
+                        gain.gain.setValueAtTime(1.0, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                        osc.start(); osc.stop(audioContext.currentTime + 0.1);
+                        setTimeout(() => {
+                            const osc2 = audioContext.createOscillator();
+                            const gain2 = audioContext.createGain();
+                            osc2.connect(gain2); gain2.connect(audioContext.destination);
+                            osc2.frequency.value = 1000;
+                            gain2.gain.setValueAtTime(1.0, audioContext.currentTime);
+                            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                            osc2.start(); osc2.stop(audioContext.currentTime + 0.1);
+                        }, 150);
+                        break;
+                    case 'camera3':
+                        osc.type = 'sawtooth';
+                        osc.frequency.value = 600;
+                        gain.gain.setValueAtTime(0.8, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                        osc.start(); osc.stop(audioContext.currentTime + 0.5); break;
+                    case 'speed1':
+                        for (let i=0;i<3;i++) setTimeout(() => { let o=audioContext.createOscillator(),g=audioContext.createGain(); o.connect(g); g.connect(audioContext.destination); o.frequency.value=600; g.gain.setValueAtTime(1.0,audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+0.1); o.start(); o.stop(audioContext.currentTime+0.1); }, i*200);
+                        break;
+                    case 'speed2':
+                        for (let i=0;i<5;i++) setTimeout(() => { let o=audioContext.createOscillator(),g=audioContext.createGain(); o.connect(g); g.connect(audioContext.destination); o.frequency.value=800; g.gain.setValueAtTime(1.0,audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+0.08); o.start(); o.stop(audioContext.currentTime+0.08); }, i*120);
+                        break;
+                    case 'speed3':
+                        const start = audioContext.currentTime;
+                        osc.type='sawtooth';
+                        for (let i=0;i<6;i++) { let t = start + i*0.15; osc.frequency.setValueAtTime(600,t); osc.frequency.linearRampToValueAtTime(800,t+0.07); osc.frequency.linearRampToValueAtTime(600,t+0.14); }
+                        gain.gain.setValueAtTime(0.8,start);
+                        gain.gain.exponentialRampToValueAtTime(0.01,start+1);
+                        osc.start(); osc.stop(start+1); break;
+                }
+            }
+
+            // ==================== SOUND SELECTION ====================
+            function selectSound(option) {
+                const container = option.closest('.settings-section');
+                container.querySelectorAll('.sound-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                const type = option.dataset.sound;
+                if (type.startsWith('camera')) appState.currentCameraSound = type;
+                else appState.currentSpeedSound = type;
+                saveSettings();
+            }
+
+            function applySettingsToUI() {
+                document.querySelectorAll('.settings-section:nth-of-type(2) .sound-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                    if (opt.dataset.sound === appState.currentCameraSound) opt.classList.add('selected');
                 });
+                document.querySelectorAll('.settings-section:nth-of-type(3) .sound-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                    if (opt.dataset.sound === appState.currentSpeedSound) opt.classList.add('selected');
+                });
+            }
+
+            // ==================== REGION ====================
+            function selectRegion(reg) {
+                appState.region = reg;
+                regionSG.classList.toggle('selected', reg === 'sg');
+                regionIN.classList.toggle('selected', reg === 'in');
+                regionDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i><span>${reg === 'sg' ? 'Singapore' : 'India'}</span>`;
+                appState.speedLimit = speedLimitDB[reg].default;
+                speedLimitValueEl.textContent = appState.speedLimit;
+                saveSettings();
+                showNotification(`Region: ${reg === 'sg' ? 'Singapore' : 'India'}`);
+            }
+
+            // ==================== SETTINGS ====================
+            function updateCameraDistance() {
+                appState.cameraAlertDistance = parseInt(cameraDistanceSlider.value);
+                cameraDistanceValue.textContent = appState.cameraAlertDistance + 'm';
+                saveSettings();
+            }
+            function toggleCameraAlerts() { appState.cameraAlertsEnabled = cameraAlertsToggle.checked; saveSettings(); }
+            function toggleSpeedAlerts() { appState.speedAlertsEnabled = speedAlertsToggle.checked; saveSettings(); }
+            function updateCameraDistanceDisplay() {
+                cameraDistanceSlider.value = appState.cameraAlertDistance;
+                cameraDistanceValue.textContent = appState.cameraAlertDistance + 'm';
+                cameraAlertsToggle.checked = appState.cameraAlertsEnabled;
+                speedAlertsToggle.checked = appState.speedAlertsEnabled;
+            }
+            function updateRegionUI() {
+                const sg = appState.region === 'sg';
+                regionSG.classList.toggle('selected', sg);
+                regionIN.classList.toggle('selected', !sg);
+                regionDisplay.innerHTML = `<i class="fas fa-map-marker-alt"></i><span>${sg ? 'Singapore' : 'India'}</span>`;
+            }
+
+            // ==================== ALERT HANDLERS ====================
+            function closeCameraAlertHandler() { hideModal(cameraAlertModal); appState.cameraAlertActive = false; }
+            function closeSpeedAlertHandler() { hideModal(speedAlertModal); appState.speedAlertActive = false; }
+
+            // ==================== HISTORY ====================
+            function saveTripToHistory() {
+                const trip = {
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('en-SG', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }),
+                    distance: appState.distance.toFixed(2) + ' km',
+                    duration: timeEl.textContent,
+                    overspeed: overspeedEl.textContent,
+                    region: appState.region
+                };
+                appState.tripHistory.unshift(trip);
+                if (appState.tripHistory.length > 50) appState.tripHistory = appState.tripHistory.slice(0,50);
+                localStorage.setItem('motoDashHistory', JSON.stringify(appState.tripHistory));
+            }
+            function loadTripHistory() { const s = localStorage.getItem('motoDashHistory'); if(s) appState.tripHistory = JSON.parse(s); }
+            function showHistory() { loadHistoryTable(); showModal(historyModal); }
+            function loadHistoryTable() {
+                historyTableBody.innerHTML = '';
+                if (appState.tripHistory.length === 0) { emptyHistory.style.display = 'block'; return; }
+                emptyHistory.style.display = 'none';
+                appState.tripHistory.forEach(t => {
+                    const r = document.createElement('tr');
+                    r.innerHTML = `<td>${t.date}</td><td>${t.distance}</td><td>${t.duration}</td><td>${t.overspeed}</td>`;
+                    historyTableBody.appendChild(r);
+                });
+            }
+            function downloadHistory() {
+                const data = JSON.stringify(appState.tripHistory, null, 2);
+                const blob = new Blob([data], {type:'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = `motodash-${appState.region}-history-${new Date().toISOString().slice(0,10)}.json`;
+                a.click(); URL.revokeObjectURL(url); showNotification('History downloaded');
+            }
+            function uploadHistory(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const h = JSON.parse(ev.target.result);
+                        if (Array.isArray(h)) { appState.tripHistory = h.concat(appState.tripHistory).slice(0,50); localStorage.setItem('motoDashHistory', JSON.stringify(appState.tripHistory)); loadHistoryTable(); showNotification('History uploaded'); }
+                    } catch { showNotification('Invalid file'); }
+                };
+                reader.readAsText(file); e.target.value = '';
+            }
+            function clearHistory() { if (confirm('Clear all trip history?')) { appState.tripHistory = []; localStorage.removeItem('motoDashHistory'); loadHistoryTable(); showNotification('History cleared'); } }
+
+            // ==================== SETTINGS STORAGE ====================
+            function saveSettings() {
+                localStorage.setItem('motoDashSettings', JSON.stringify({
+                    region: appState.region,
+                    cameraSound: appState.currentCameraSound,
+                    speedSound: appState.currentSpeedSound,
+                    cameraDistance: appState.cameraAlertDistance,
+                    cameraAlerts: appState.cameraAlertsEnabled,
+                    speedAlerts: appState.speedAlertsEnabled
+                }));
+            }
+            function loadSettings() {
+                const s = localStorage.getItem('motoDashSettings');
+                if (s) {
+                    const set = JSON.parse(s);
+                    appState.region = set.region || 'sg';
+                    appState.currentCameraSound = set.cameraSound || 'camera2';
+                    appState.currentSpeedSound = set.speedSound || 'speed2';
+                    appState.cameraAlertDistance = set.cameraDistance || 500;
+                    appState.cameraAlertsEnabled = set.cameraAlerts !== false;
+                    appState.speedAlertsEnabled = set.speedAlerts !== false;
+                } else {
+                    appState.currentCameraSound = 'camera2';
+                    appState.currentSpeedSound = 'speed2';
+                }
+            }
+
+            // ==================== WAKE LOCK ====================
+            async function requestWakeLock() {
+                try {
+                    if ('wakeLock' in navigator) {
+                        if (appState.wakeLock) await appState.wakeLock.release(); // release old if any
+                        appState.wakeLock = await navigator.wakeLock.request('screen');
+                        document.addEventListener('visibilitychange', async () => {
+                            if (document.visibilityState === 'visible' && appState.wakeLock === null && appState.isTripActive) {
+                                appState.wakeLock = await navigator.wakeLock.request('screen');
+                            }
+                        });
+                    }
+                } catch (err) { console.log('Wake Lock error'); }
+            }
+
+            // ==================== MODAL HELPERS ====================
+            function showModal(m) { m.style.display = 'flex'; }
+            function hideModal(m) { m.style.display = 'none'; }
+
+            // ==================== NOTIFICATION ====================
+            function showNotification(msg) {
+                const n = document.createElement('div');
+                n.style.cssText = `position:fixed; bottom:calc(15vh + 30px); right:20px; background:var(--accent-blue); color:white; padding:12px 24px; border-radius:30px; font-weight:500; z-index:10000; animation:slideIn 0.3s ease; box-shadow:0 0 15px rgba(59,130,246,0.5); max-width:300px;`;
+                n.textContent = msg;
+                document.body.appendChild(n);
+                setTimeout(() => n.remove(), 3000);
+            }
+
+            // ==================== EVENT LISTENERS ====================
+            function initEventListeners() {
+                startBtn.addEventListener('click', () => showModal(startModal));
+                stopBtn.addEventListener('click', showStopConfirmation);
+                historyBtn.addEventListener('click', showHistory);
+                settingsBtn.addEventListener('click', () => showModal(settingsModal));
+
+                closeStartModal.addEventListener('click', () => hideModal(startModal));
+                closeStopModal.addEventListener('click', () => hideModal(stopModal));
+                closeSettingsModal.addEventListener('click', () => hideModal(settingsModal));
+                closeHistoryModal.addEventListener('click', () => hideModal(historyModal));
+                closeCameraAlert.addEventListener('click', closeCameraAlertHandler);
+                closeSpeedAlert.addEventListener('click', closeSpeedAlertHandler);
+
+                confirmStart.addEventListener('click', startTrip);
+                cancelStart.addEventListener('click', () => hideModal(startModal));
+                confirmStop.addEventListener('click', stopTrip);
+                cancelStop.addEventListener('click', () => hideModal(stopModal));
+
+                downloadHistoryBtn.addEventListener('click', downloadHistory);
+                uploadHistoryBtn.addEventListener('click', () => historyFileInput.click());
+                clearHistoryBtn.addEventListener('click', clearHistory);
+                historyFileInput.addEventListener('change', uploadHistory);
+
+                cameraDistanceSlider.addEventListener('input', updateCameraDistance);
+                cameraAlertsToggle.addEventListener('change', toggleCameraAlerts);
+                speedAlertsToggle.addEventListener('change', toggleSpeedAlerts);
+                
+                regionSG.addEventListener('click', () => selectRegion('sg'));
+                regionIN.addEventListener('click', () => selectRegion('in'));
+
+                // FIXED: sound selection
+                document.querySelectorAll('.sound-option').forEach(opt => {
+                    opt.addEventListener('click', function(e) {
+                        if (e.target.closest('.test-btn')) return;
+                        selectSound(this);
+                    });
+                });
+                document.querySelectorAll('.test-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const s = this.closest('.sound-option').dataset.sound;
+                        playSound(s);
+                    });
+                });
+
+                document.addEventListener('contextmenu', e => e.preventDefault());
+            }
+
+            // ==================== INIT ====================
+            document.addEventListener('DOMContentLoaded', function() {
+                initAudio();
+                loadTripHistory();
+                loadSettings();
+                requestWakeLock(); // initial lock (will be re-requested on trip start)
+                initEventListeners();
+                applySettingsToUI();
+                updateRegionUI();
+                updateCameraDistanceDisplay();
+                generateCameraLocations();
+                startGPS();
+                startMonitoring();
             });
 
-            document.addEventListener('contextmenu', e => e.preventDefault());
-        }
-
-        // ==================== INIT ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            initAudio();
-            loadTripHistory();
-            loadSettings();
-            requestWakeLock();
-            initEventListeners();
-            applySettingsToUI();
-            updateRegionUI();
-            updateCameraDistanceDisplay();
-            generateCameraLocations();
-            startGPS();
-            startMonitoring();
-        });
-
-        window.addEventListener('beforeunload', () => {
-            if (appState.watchId) navigator.geolocation.clearWatch(appState.watchId);
-        });
+            window.addEventListener('beforeunload', () => {
+                if (appState.watchId) navigator.geolocation.clearWatch(appState.watchId);
+            });
+        })();
     </script>
 </body>
 </html>
