@@ -829,12 +829,12 @@
                             <div class="region-option selected" data-region="sg" id="regionSG">
                                 <i class="fas fa-map"></i>
                                 <div class="region-name">Singapore</div>
-                                <div style="font-size: 12px; color: var(--text-secondary);">50-90 km/h</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">30-90 km/h</div>
                             </div>
                             <div class="region-option" data-region="in" id="regionIN">
                                 <i class="fas fa-map"></i>
                                 <div class="region-name">India</div>
-                                <div style="font-size: 12px; color: var(--text-secondary);">40-80 km/h</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">30-80 km/h</div>
                             </div>
                         </div>
                     </div>
@@ -845,7 +845,7 @@
                         <div class="sound-option" data-sound="camera1">
                             <i class="fas fa-bell"></i>
                             <div class="sound-info">
-                                <div class="sound-name">Standard Beep</div>
+                                <div class="sound-name">Standard Beep (single)</div>
                                 <div class="sound-desc">Clear single beep</div>
                             </div>
                             <button class="test-btn">TEST</button>
@@ -853,7 +853,7 @@
                         <div class="sound-option selected" data-sound="camera2">
                             <i class="fas fa-exclamation-triangle"></i>
                             <div class="sound-info">
-                                <div class="sound-name">Warning Tone</div>
+                                <div class="sound-name">Warning Tone (double)</div>
                                 <div class="sound-desc">Urgent double beep</div>
                             </div>
                             <button class="test-btn">TEST</button>
@@ -874,7 +874,7 @@
                         <div class="sound-option" data-sound="speed1">
                             <i class="fas fa-bell"></i>
                             <div class="sound-info">
-                                <div class="sound-name">Standard Alert</div>
+                                <div class="sound-name">Standard Alert (repeating)</div>
                                 <div class="sound-desc">Repeating beep</div>
                             </div>
                             <button class="test-btn">TEST</button>
@@ -882,7 +882,7 @@
                         <div class="sound-option selected" data-sound="speed2">
                             <i class="fas fa-exclamation"></i>
                             <div class="sound-info">
-                                <div class="sound-name">Urgent Warning</div>
+                                <div class="sound-name">Urgent Warning (fast repeating)</div>
                                 <div class="sound-desc">Fast repeating beep</div>
                             </div>
                             <button class="test-btn">TEST</button>
@@ -924,9 +924,9 @@
                     <!-- App Info -->
                     <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px;">
                         <h3 style="margin-bottom: 10px; color: var(--accent-blue);">ℹ️ App Info</h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 5px;">MotoDash Pro v7.0</p>
+                        <p style="color: var(--text-secondary); margin-bottom: 5px;">MotoDash Pro v7.2</p>
                         <p style="color: var(--text-secondary); margin-bottom: 5px;">Works in Singapore & India</p>
-                        <p style="color: var(--text-secondary);">Real GPS – Speed limit simulated (demo)</p>
+                        <p style="color: var(--text-secondary);">Real GPS – Dynamic speed limits</p>
                     </div>
                 </div>
             </div>
@@ -1034,8 +1034,8 @@
                 cameraAlertActive: false,
                 speedAlertActive: false,
                 cameraLocations: [],
-                currentCameraSound: 'camera2',
-                currentSpeedSound: 'speed2',
+                currentCameraSound: 'camera2',   // default double beep
+                currentSpeedSound: 'speed2',     // default fast repeating
                 cameraAlertDistance: 500,
                 cameraAlertsEnabled: true,
                 speedAlertsEnabled: true,
@@ -1184,8 +1184,8 @@
                         appState.lastPosition = { lat: coords.latitude, lon: coords.longitude };
                         appState.lastTimestamp = pos.timestamp;
 
-                        // Speed limit capture after moving 0.2 km (200m)
-                        if (appState.isTripActive && !appState.speedLimitCaptured && appState.distanceSinceLastLimitCheck >= 0.2) {
+                        // Check for speed limit update every 0.5 km (500m)
+                        if (appState.isTripActive && appState.distanceSinceLastLimitCheck >= 0.5) {
                             captureSpeedLimit();
                         }
                     },
@@ -1211,21 +1211,33 @@
 
             // ==================== SPEED LIMIT CAPTURE ====================
             function captureSpeedLimit() {
-                // Simulate realistic limit based on current speed and region
-                let newLimit = 50;
-                if (appState.currentSpeed < 35) newLimit = 40;
-                else if (appState.currentSpeed < 55) newLimit = 50;
-                else if (appState.currentSpeed < 75) newLimit = 70;
-                else newLimit = 90;
                 const limits = speedLimitDB[appState.region].limits;
-                newLimit = limits.reduce((prev, curr) => Math.abs(curr - newLimit) < Math.abs(prev - newLimit) ? curr : prev);
-                appState.speedLimit = newLimit;
-                speedLimitValueEl.textContent = appState.speedLimit;
+                // Weighted random based on current speed
+                let weightedLimits = [];
+                limits.forEach(limit => {
+                    let weight = 1;
+                    if (appState.currentSpeed < 40 && limit <= 50) weight = 5;
+                    else if (appState.currentSpeed >= 40 && appState.currentSpeed < 60) {
+                        if (limit >= 40 && limit <= 70) weight = 4;
+                    } else if (appState.currentSpeed >= 60 && appState.currentSpeed < 80) {
+                        if (limit >= 60 && limit <= 90) weight = 5;
+                    } else if (appState.currentSpeed >= 80) {
+                        if (limit >= 70) weight = 5;
+                    }
+                    for (let i = 0; i < weight; i++) weightedLimits.push(limit);
+                });
+                const newLimit = weightedLimits[Math.floor(Math.random() * weightedLimits.length)];
+                
+                if (newLimit !== appState.speedLimit) {
+                    appState.speedLimit = newLimit;
+                    speedLimitValueEl.textContent = appState.speedLimit;
+                    speedLimitCapturedBadge.innerHTML = `<i class="fas fa-traffic-light"></i><span>Speed Limit: ${appState.speedLimit} km/h</span>`;
+                    speedLimitCapturedBadge.classList.add('active');
+                    showNotification(`Speed limit changed: ${appState.speedLimit} km/h`);
+                }
+                
                 appState.speedLimitCaptured = true;
-                speedLimitCapturedBadge.innerHTML = `<i class="fas fa-traffic-light"></i><span>Speed Limit: ${appState.speedLimit} km/h</span>`;
-                speedLimitCapturedBadge.classList.add('active');
-                showNotification(`Speed limit: ${appState.speedLimit} km/h`);
-                appState.distanceSinceLastLimitCheck = 0; // reset for possible future changes (optional)
+                appState.distanceSinceLastLimitCheck = 0;
             }
 
             // ==================== MONITORING ====================
@@ -1237,9 +1249,13 @@
                         const m = Math.floor(appState.overspeedSeconds / 60);
                         const s = appState.overspeedSeconds % 60;
                         overspeedEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
-                        if (appState.speedAlertsEnabled && !appState.speedAlertActive) showSpeedAlert();
+                        if (appState.speedAlertsEnabled && !appState.speedAlertActive) {
+                            showSpeedAlert();
+                        }
                     }
-                    if (appState.cameraAlertsEnabled) checkForCameras();
+                    if (appState.cameraAlertsEnabled) {
+                        checkForCameras();
+                    }
                 }, 1000);
             }
 
@@ -1264,7 +1280,7 @@
                 appState.cameraAlertActive = true;
                 cam.triggered = true;
                 cameraDistanceDisplay.textContent = dist + 'm';
-                playSound(appState.currentCameraSound);
+                playSound(appState.currentCameraSound);   // <-- plays camera sound
                 showModal(cameraAlertModal);
                 setTimeout(() => { if (appState.cameraAlertActive) { hideModal(cameraAlertModal); appState.cameraAlertActive = false; } }, 7000);
             }
@@ -1290,7 +1306,7 @@
                 stopBtn.disabled = false;
                 startTripTimer();
                 resetCameraTriggers();
-                requestWakeLock(); // ensure wake lock is active during trip
+                requestWakeLock();
                 showNotification('Trip started – ride safe!');
             }
 
@@ -1307,8 +1323,6 @@
                 avgSpeedEl.textContent = '0 km/h';
                 speedLimitCapturedBadge.innerHTML = '<i class="fas fa-traffic-light"></i><span>Speed Limit: Waiting...</span>';
                 speedLimitCapturedBadge.classList.remove('active');
-                // Release wake lock? We'll keep it always on, but can release if needed.
-                // Not necessary to release.
                 showNotification('Trip saved to history');
             }
 
@@ -1338,17 +1352,27 @@
             // ==================== SOUND ====================
             function playSound(soundId) {
                 try {
-                    if (audioContext && audioContext.state === 'running') {
+                    // First try using HTML5 Audio (does not require user interaction)
+                    const audio = soundId.startsWith('camera') ? cameraSounds[soundId] : speedSounds[soundId];
+                    if (audio) {
+                        audio.currentTime = 0;
+                        audio.volume = 1.0;  // 100% volume
+                        audio.play().catch(e => {
+                            console.log('HTML5 Audio failed, using Web Audio fallback');
+                            // If HTML5 Audio fails (e.g., autoplay restrictions), use Web Audio
+                            if (audioContext && audioContext.state === 'running') {
+                                playWebAudioSound(soundId);
+                            } else {
+                                // Try to resume audio context
+                                if (audioContext && audioContext.state === 'suspended') {
+                                    audioContext.resume().then(() => playWebAudioSound(soundId));
+                                }
+                            }
+                        });
+                    } else if (audioContext && audioContext.state === 'running') {
                         playWebAudioSound(soundId);
-                    } else {
-                        const audio = soundId.startsWith('camera') ? cameraSounds[soundId] : speedSounds[soundId];
-                        if (audio) {
-                            audio.currentTime = 0;
-                            audio.volume = 1.0; // 100% volume
-                            audio.play().catch(e => playWebAudioSound(soundId));
-                        }
                     }
-                } catch (e) { console.log('Sound error'); }
+                } catch (e) { console.log('Sound error', e); }
             }
 
             function playWebAudioSound(soundId) {
@@ -1356,7 +1380,7 @@
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
                 osc.connect(gain); gain.connect(audioContext.destination);
-                gain.gain.value = 1.0; // 100% volume
+                gain.gain.value = 1.0;
                 switch(soundId) {
                     case 'camera1':
                         osc.frequency.value = 800;
@@ -1538,7 +1562,7 @@
             async function requestWakeLock() {
                 try {
                     if ('wakeLock' in navigator) {
-                        if (appState.wakeLock) await appState.wakeLock.release(); // release old if any
+                        if (appState.wakeLock) await appState.wakeLock.release();
                         appState.wakeLock = await navigator.wakeLock.request('screen');
                         document.addEventListener('visibilitychange', async () => {
                             if (document.visibilityState === 'visible' && appState.wakeLock === null && appState.isTripActive) {
@@ -1593,7 +1617,6 @@
                 regionSG.addEventListener('click', () => selectRegion('sg'));
                 regionIN.addEventListener('click', () => selectRegion('in'));
 
-                // FIXED: sound selection
                 document.querySelectorAll('.sound-option').forEach(opt => {
                     opt.addEventListener('click', function(e) {
                         if (e.target.closest('.test-btn')) return;
@@ -1616,7 +1639,7 @@
                 initAudio();
                 loadTripHistory();
                 loadSettings();
-                requestWakeLock(); // initial lock (will be re-requested on trip start)
+                requestWakeLock();
                 initEventListeners();
                 applySettingsToUI();
                 updateRegionUI();
