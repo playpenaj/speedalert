@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0c10">
 <title>SpeedSense</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,1151 +15,1288 @@
   --bg:#0a0c10;--surface:#111318;--card:#1a1d24;--border:#2a2e3a;
   --text:#e8eaf0;--muted:#6b7280;--accent:#00d4ff;--warn:#ff6b00;
   --danger:#ff2d2d;--success:#00e676;--cam:#ffd700;--police:#7b2fff;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
-html,body{
-  height:100%;width:100%;overflow:hidden;
-  background:var(--bg);color:var(--text);
-  font-family:'Rajdhani',sans-serif;
-  -webkit-font-smoothing:antialiased;
-}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:'Rajdhani',sans-serif;-webkit-font-smoothing:antialiased}
 canvas{display:block}
-#app{
-  height:100vh;height:100dvh;width:100vw;
-  display:flex;flex-direction:column;overflow:hidden;position:relative;
-  padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);
-}
+#app{height:100vh;height:100dvh;width:100vw;display:flex;flex-direction:column;
+  overflow:hidden;position:relative;padding-top:var(--st);padding-bottom:var(--sb)}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;z-index:10;
-  padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);}
+  padding-top:var(--st);padding-bottom:var(--sb)}
 .screen.active{display:flex}
 
-/* ═══════════════════════════════
-   START SCREEN
-═══════════════════════════════ */
-#startScreen{
-  background:var(--bg);align-items:center;justify-content:center;
-  gap:22px;padding:32px 24px;
-}
-.logo{
-  font-family:'Orbitron',monospace;font-size:clamp(24px,7vw,34px);
-  font-weight:900;letter-spacing:4px;color:var(--accent);text-align:center;
-}
-.logo span{
-  color:var(--warn);font-size:clamp(10px,3vw,13px);display:block;
-  letter-spacing:6px;font-weight:400;margin-top:6px;
-}
-.region-btns{display:flex;gap:12px}
-.region-btn{
-  background:var(--card);border:1.5px solid var(--border);color:var(--muted);
-  font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;
-  padding:10px 26px;border-radius:8px;cursor:pointer;transition:all .2s;
-}
+/* ── START ── */
+#startScreen{background:var(--bg);align-items:center;justify-content:center;gap:18px;padding:28px 20px;overflow-y:auto}
+.logo{font-family:'Orbitron',monospace;font-size:clamp(22px,6.5vw,32px);font-weight:900;
+  letter-spacing:4px;color:var(--accent);text-align:center}
+.logo span{color:var(--warn);font-size:clamp(9px,2.8vw,12px);display:block;letter-spacing:6px;
+  font-weight:400;margin-top:5px}
+.region-btns{display:flex;gap:10px}
+.region-btn{background:var(--card);border:1.5px solid var(--border);color:var(--muted);
+  font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;padding:9px 24px;
+  border-radius:8px;cursor:pointer;transition:all .2s}
 .region-btn.active{border-color:var(--accent);color:var(--accent);background:#00d4ff11}
-.info-text{color:var(--muted);font-size:14px;text-align:center;line-height:1.7}
-.info-text b{color:var(--text);font-weight:600}
-.start-btn{
-  background:#00d4ff15;border:1.5px solid var(--accent);color:var(--accent);
-  font-family:'Orbitron',monospace;font-size:16px;font-weight:700;letter-spacing:2px;
-  padding:16px 52px;border-radius:50px;cursor:pointer;transition:all .2s;
-}
-.start-btn:active{transform:scale(0.97);background:#00d4ff25}
+.info-text{color:var(--muted);font-size:13px;text-align:center;line-height:1.7}
+.info-text b{color:var(--text)}
+.start-btn{background:#00d4ff15;border:1.5px solid var(--accent);color:var(--accent);
+  font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:2px;
+  padding:15px 46px;border-radius:50px;cursor:pointer;transition:all .2s}
+.start-btn:active{transform:scale(.97);background:#00d4ff22}
 .start-btn.red{border-color:var(--danger);color:var(--danger);background:#ff2d2d11}
-.perm-warn{
-  background:#ff6b0015;border:1px solid var(--warn);border-radius:10px;
-  padding:12px 16px;max-width:340px;text-align:center;
-  color:var(--warn);font-size:13px;line-height:1.6;display:none;
-}
+.hist-open-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
+  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;padding:8px 20px;
+  border-radius:8px;cursor:pointer;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.hist-open-btn:active{background:var(--card)}
+.io-row{display:flex;gap:10px;align-items:center}
+.io-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
+  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;padding:7px 16px;
+  border-radius:6px;cursor:pointer;letter-spacing:.5px}
+.io-btn:active{background:var(--card)}
+.io-btn.accent{border-color:var(--accent);color:var(--accent)}
+#tripCountBadge{font-size:11px;background:var(--card);border:1px solid var(--border);
+  padding:3px 10px;border-radius:12px;color:var(--muted)}
 
-/* ═══════════════════════════════
-   RIDE SCREEN
-═══════════════════════════════ */
+/* ── RIDE SCREEN ── */
 #rideScreen{background:var(--bg)}
-#topBar{
-  background:var(--surface);border-bottom:1px solid var(--border);
-  padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;
-}
-#topBar .left{display:flex;align-items:center;gap:10px;flex:1;flex-wrap:wrap;min-width:0}
-#topBar .right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.gps-dot{
-  width:9px;height:9px;border-radius:50%;background:var(--muted);
-  flex-shrink:0;transition:background .5s;
-}
-.gps-dot.fix{background:var(--success);animation:pulse 2s infinite}
-.gps-dot.searching{background:var(--warn);animation:fastpulse 0.8s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes fastpulse{0%,100%{opacity:1}50%{opacity:.2}}
+#topBar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:7px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+#topBar .left{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;min-width:0}
+#topBar .right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .5s}
+.gps-dot.fix{background:var(--success);animation:glow 2s infinite}
+.gps-dot.searching{background:var(--warn);animation:glow .7s infinite}
+@keyframes glow{0%,100%{opacity:1}50%{opacity:.25}}
 .trip-stat{font-size:11px;color:var(--muted);white-space:nowrap}
 .trip-stat span{color:var(--text);font-weight:700}
-.accuracy-badge{
-  font-size:10px;padding:2px 6px;border-radius:4px;
-  background:var(--card);border:1px solid var(--border);color:var(--muted);
-}
-.accuracy-badge.good{border-color:var(--success);color:var(--success)}
-.accuracy-badge.poor{border-color:var(--warn);color:var(--warn)}
-.end-ride-btn{
-  background:transparent;border:1px solid var(--danger);color:var(--danger);
-  font-size:12px;font-family:'Rajdhani',sans-serif;font-weight:700;
-  padding:6px 14px;border-radius:6px;cursor:pointer;letter-spacing:1px;
-  white-space:nowrap;
-}
-.end-ride-btn:active{background:#ff2d2d22}
-
-#alertBanner{
-  position:absolute;top:0;left:0;right:0;padding:10px 16px;
-  display:none;align-items:center;gap:10px;font-size:15px;
-  font-weight:700;letter-spacing:.5px;z-index:6;
-  animation:slideIn .25s ease;
-}
+.acc-badge{font-size:10px;padding:2px 5px;border-radius:4px;background:var(--card);
+  border:1px solid var(--border);color:var(--muted)}
+.acc-badge.good{border-color:var(--success);color:var(--success)}
+.acc-badge.poor{border-color:var(--warn);color:var(--warn)}
+.wake-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:#00e67611;
+  border:1px solid #00e67644;color:#00e676}
+.wake-badge.off{background:#ff6b0011;border-color:#ff6b0044;color:var(--warn)}
+.top-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
+  font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:700;padding:5px 10px;
+  border-radius:5px;cursor:pointer;letter-spacing:.5px;white-space:nowrap}
+.top-btn.danger{border-color:var(--danger);color:var(--danger)}
+.top-btn:active{background:var(--card)}
+#alertBanner{position:absolute;top:0;left:0;right:0;padding:9px 14px;display:none;
+  align-items:center;gap:8px;font-size:14px;font-weight:700;letter-spacing:.4px;z-index:6;
+  animation:slideIn .2s ease}
 @keyframes slideIn{from{transform:translateY(-100%)}to{transform:translateY(0)}}
 #alertBanner.cam   {background:#ffd70020;border-bottom:2px solid var(--cam);   color:var(--cam)}
 #alertBanner.speed {background:#ff6b0020;border-bottom:2px solid var(--warn);  color:var(--warn)}
 #alertBanner.police{background:#7b2fff20;border-bottom:2px solid var(--police);color:var(--police)}
 #alertBanner.info  {background:#00d4ff15;border-bottom:2px solid var(--accent);color:var(--accent)}
-
 #mainView{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 #speedCanvas{flex:1;display:block;width:100%;touch-action:none}
-
-#stopTimer{
-  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
-  background:#ffd70020;border:1px solid var(--cam);color:var(--cam);
-  font-size:12px;padding:4px 16px;border-radius:20px;display:none;
-  z-index:5;white-space:nowrap;font-weight:600;
-}
-
-#bottomPanel{
-  background:var(--surface);border-top:1px solid var(--border);
-  padding:10px 14px;display:flex;gap:8px;align-items:center;flex-shrink:0;
-}
-.stat-card{
-  flex:1;background:var(--card);border:1px solid var(--border);
-  border-radius:10px;padding:7px 8px;text-align:center;min-width:0;
-}
-.stat-card .label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;line-height:1}
-.stat-card .val{
-  font-family:'Orbitron',monospace;font-size:clamp(15px,3.5vw,21px);
-  font-weight:700;color:var(--text);line-height:1.3;
-}
+#stopTimer{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  background:#ffd70018;border:1px solid var(--cam);color:var(--cam);font-size:11px;
+  padding:3px 14px;border-radius:16px;display:none;z-index:5;white-space:nowrap;font-weight:600}
+#bottomPanel{background:var(--surface);border-top:1px solid var(--border);
+  padding:8px 12px;display:flex;gap:7px;align-items:center;flex-shrink:0}
+.stat-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:9px;
+  padding:6px 7px;text-align:center;min-width:0;cursor:default}
+.stat-card.clickable{cursor:pointer}
+.stat-card .label{font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;line-height:1}
+.stat-card .val{font-family:'Orbitron',monospace;font-size:clamp(14px,3.2vw,20px);
+  font-weight:700;color:var(--text);line-height:1.25}
 .stat-card .val.warn  {color:var(--warn)}
 .stat-card .val.danger{color:var(--danger)}
 .stat-card .val.cam   {color:var(--cam)}
 .stat-card .val.good  {color:var(--success)}
 
-#historyPanel{
-  background:var(--surface);border-top:1px solid var(--border);
-  max-height:0;overflow:hidden;transition:max-height .3s;flex-shrink:0;
-}
-#historyPanel.open{max-height:100px}
-.hist-row{
-  display:flex;gap:8px;padding:6px 14px;overflow-x:auto;
-  align-items:center;scrollbar-width:none;
-}
-.hist-row::-webkit-scrollbar{display:none}
-.hist-item{
-  background:var(--card);border:1px solid var(--border);border-radius:8px;
-  padding:5px 10px;font-size:11px;white-space:nowrap;flex-shrink:0;
-}
-.hist-item .hi-label{color:var(--muted)}
-.hist-item .hi-val  {color:var(--accent);font-weight:700}
-.hist-item .hi-exc  {color:var(--danger);font-weight:700}
-
-/* ═══════════════════════════════
-   END SCREEN
-═══════════════════════════════ */
-#endScreen{
-  background:var(--bg);align-items:center;justify-content:center;
-  gap:20px;padding:24px;
-}
-#endStats{
-  background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:22px;width:100%;max-width:360px;
-  display:grid;grid-template-columns:1fr 1fr;gap:16px;
-}
+/* ── END SCREEN ── */
+#endScreen{background:var(--bg);align-items:center;justify-content:center;gap:18px;padding:20px;overflow-y:auto}
+#endStats{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:20px;width:100%;max-width:360px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .end-stat{text-align:center}
-.end-stat .el{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
-.end-stat .ev{
-  font-family:'Orbitron',monospace;font-size:clamp(18px,5vw,24px);
-  font-weight:700;color:var(--text);margin-top:4px;
-}
+.end-stat .el{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.end-stat .ev{font-family:'Orbitron',monospace;font-size:clamp(16px,4.5vw,22px);
+  font-weight:700;color:var(--text);margin-top:3px}
+.end-route{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;width:100%;max-width:360px;font-size:12px}
+.end-route .rl{color:var(--muted);font-size:10px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.end-route .rv{color:var(--text);font-weight:600;line-height:1.5}
 
-/* ═══════════════════════════════
-   CONFIRMATION OVERLAY
-═══════════════════════════════ */
-#confirmation{
-  position:absolute;inset:0;background:#000000dd;
-  display:none;align-items:center;justify-content:center;
-  z-index:30;flex-direction:column;padding:32px;
-}
-#confirmation.visible{display:flex}
-.confirm-box{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;padding:28px 28px 24px;
-  max-width:320px;width:100%;text-align:center;
-}
-.confirm-box h3{
-  font-family:'Orbitron',monospace;font-size:15px;
-  margin-bottom:10px;color:var(--text);letter-spacing:1px;
-}
-.confirm-box p{color:var(--muted);font-size:14px;margin-bottom:22px;line-height:1.6}
-.confirm-btns{display:flex;gap:12px;justify-content:center}
-.btn-c{
-  padding:11px 26px;border-radius:8px;cursor:pointer;
-  font-family:'Rajdhani',sans-serif;font-size:15px;
-  font-weight:700;letter-spacing:1px;border:1.5px solid;
-}
-.btn-yes    {background:#00d4ff15;border-color:var(--accent); color:var(--accent)}
-.btn-yes:active{background:#00d4ff25}
-.btn-no     {background:#ff2d2d10;border-color:var(--danger); color:var(--danger)}
-.btn-no:active{background:#ff2d2d20}
-.btn-yes.red{background:#ff2d2d10;border-color:var(--danger); color:var(--danger)}
+/* ── TRIP HISTORY SCREEN ── */
+#histScreen{background:var(--bg);flex-direction:column}
+#histHeader{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#histHeader h2{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+  color:var(--accent);letter-spacing:2px;flex:1}
+#histList{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+#histList::-webkit-scrollbar{width:4px}
+#histList::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.trip-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px;cursor:pointer;transition:border-color .2s}
+.trip-card:hover{border-color:var(--accent)}
+.trip-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.trip-card-title{font-family:'Orbitron',monospace;font-size:12px;color:var(--accent);font-weight:700}
+.trip-card-date{font-size:11px;color:var(--muted)}
+.trip-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.tc-stat{text-align:center;background:var(--surface);border-radius:6px;padding:4px}
+.tc-stat .tl{font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.tc-stat .tv{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--text)}
+.trip-route-line{font-size:11px;color:var(--muted);line-height:1.5}
+.trip-route-line b{color:var(--text);font-weight:600}
+.viol-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:4px}
+.no-trips{display:flex;align-items:center;justify-content:center;height:100%;
+  color:var(--muted);font-size:14px;flex-direction:column;gap:8px}
 
-/* GPS error overlay */
-#gpsError{
-  position:absolute;inset:0;background:#000000cc;
-  display:none;align-items:center;justify-content:center;
-  z-index:25;padding:32px;
-}
-#gpsError.visible{display:flex}
-.gps-error-box{
-  background:var(--surface);border:1px solid var(--danger);
-  border-radius:16px;padding:28px;max-width:320px;text-align:center;
-}
-.gps-error-box h3{color:var(--danger);font-family:'Orbitron',monospace;font-size:14px;margin-bottom:10px}
-.gps-error-box p{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:18px}
+/* ── TRIP DETAIL SCREEN ── */
+#detailScreen{background:var(--bg);flex-direction:column}
+#detailHeader{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#detailHeader h2{font-family:'Orbitron',monospace;font-size:13px;color:var(--accent);
+  letter-spacing:1.5px;font-weight:700;flex:1}
+#detailBody{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+#detailBody::-webkit-scrollbar{width:4px}
+#detailBody::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.detail-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px}
+.detail-section h3{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.route-strip{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.route-pin{font-size:12px;font-weight:700;color:var(--accent);
+  background:var(--surface);padding:4px 10px;border-radius:16px;border:1px solid var(--border)}
+.route-arrow{color:var(--muted);font-size:12px}
+.speed-timeline{display:flex;flex-direction:column;gap:4px}
+.tl-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 8px;border-radius:6px}
+.tl-row.over{background:#ff2d2d12;border-left:3px solid var(--danger)}
+.tl-row.warn{background:#ff6b0010;border-left:3px solid var(--warn)}
+.tl-row.ok  {background:#00e67608;border-left:3px solid var(--success)}
+.tl-time{color:var(--muted);font-size:10px;min-width:42px}
+.tl-speed{font-family:'Orbitron',monospace;font-weight:700;font-size:13px;min-width:52px}
+.tl-road{color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-spd-over{color:var(--danger)}
+.tl-spd-warn{color:var(--warn)}
+.tl-spd-ok  {color:var(--success)}
+.graph-canvas{width:100%;height:120px;display:block;border-radius:6px;background:var(--surface)}
+.viol-list{display:flex;flex-direction:column;gap:6px}
+.viol-item{background:var(--surface);border-radius:6px;padding:6px 10px;font-size:11px}
+.viol-item .vi-loc{color:var(--accent);font-weight:600;font-size:12px}
+.viol-item .vi-detail{color:var(--muted);margin-top:2px}
+.viol-item .vi-pin{color:var(--warn);font-size:10px;margin-top:1px}
+
+/* ── OVERLAY ── */
+#overlay{position:absolute;inset:0;background:#000000e8;display:none;
+  align-items:center;justify-content:center;z-index:40;flex-direction:column;padding:28px}
+#overlay.visible{display:flex}
+.ov-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:26px 24px 22px;max-width:320px;width:100%;text-align:center}
+.ov-box h3{font-family:'Orbitron',monospace;font-size:14px;margin-bottom:8px;
+  color:var(--text);letter-spacing:1px}
+.ov-box p{color:var(--muted);font-size:13px;margin-bottom:20px;line-height:1.6}
+.ov-btns{display:flex;gap:10px;justify-content:center}
+.btn-c{padding:10px 22px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;
+  font-size:14px;font-weight:700;letter-spacing:1px;border:1.5px solid}
+.btn-y{background:#00d4ff12;border-color:var(--accent);color:var(--accent)}
+.btn-y:active{background:#00d4ff22}
+.btn-n{background:#ff2d2d0a;border-color:var(--danger);color:var(--danger)}
+.btn-n:active{background:#ff2d2d18}
+.btn-y.red{background:#ff2d2d0a;border-color:var(--danger);color:var(--danger)}
+#gpsErrBox{position:absolute;inset:0;background:#000000cc;display:none;
+  align-items:center;justify-content:center;z-index:30;padding:28px}
+#gpsErrBox.visible{display:flex}
+.gerr{background:var(--surface);border:1px solid var(--danger);border-radius:14px;
+  padding:24px;max-width:300px;text-align:center}
+.gerr h3{color:var(--danger);font-family:'Orbitron',monospace;font-size:13px;margin-bottom:8px}
+.gerr p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:16px}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- ══════════ START SCREEN ══════════ -->
-  <div id="startScreen" class="screen active">
-    <div class="logo">SPEEDSENSE<span>DRIVE SAFE · ARRIVE SAFE</span></div>
+<!-- ══════ START SCREEN ══════ -->
+<div id="startScreen" class="screen active">
+  <div class="logo">SPEEDSENSE<span>DRIVE SAFE · ARRIVE SAFE</span></div>
+  <div class="region-btns">
+    <button class="region-btn active" onclick="setRegion('SG')">🇸🇬 Singapore</button>
+    <button class="region-btn"        onclick="setRegion('IN')">🇮🇳 India</button>
+  </div>
+  <div class="info-text">Live GPS · OSM speed limits · Camera alerts<br>for <b id="regionName">Singapore</b> roads</div>
+  <button class="start-btn" onclick="confirmStart()">START RIDE</button>
+  <div style="display:flex;gap:12px;align-items:center">
+    <button class="hist-open-btn" onclick="openHistory()">📋 TRIP HISTORY <span id="tripCountBadge">0 trips</span></button>
+  </div>
+  <div class="io-row">
+    <button class="io-btn accent" onclick="downloadHistory()">⬇ Export JSON</button>
+    <label class="io-btn" style="cursor:pointer">⬆ Import JSON
+      <input type="file" accept=".json" style="display:none" onchange="importHistory(event)">
+    </label>
+    <button class="io-btn" onclick="clearAllHistory()" style="color:var(--danger);border-color:var(--danger)">🗑 Clear</button>
+  </div>
+  <div class="info-text" style="font-size:11px">History stored in browser · No server · Export to backup</div>
+</div>
 
-    <div class="region-btns">
-      <button class="region-btn active" onclick="setRegion('SG')">🇸🇬 Singapore</button>
-      <button class="region-btn"        onclick="setRegion('IN')">🇮🇳 India</button>
+<!-- ══════ RIDE SCREEN ══════ -->
+<div id="rideScreen" class="screen">
+  <div id="topBar">
+    <div class="left">
+      <div class="gps-dot searching" id="gpsDot"></div>
+      <div class="trip-stat">TIME <span id="tripTime">00:00</span></div>
+      <div class="trip-stat">DIST <span id="tripDist">0.0</span>km</div>
+      <div class="trip-stat" style="max-width:130px;overflow:hidden;text-overflow:ellipsis"><span id="roadName">Locating…</span></div>
+      <div class="acc-badge" id="accBadge">±—m</div>
+      <div class="wake-badge off" id="wakeBadge">DIMMING</div>
     </div>
-
-    <div class="info-text">
-      Live GPS speed · Road speed limits · Camera alerts<br>
-      for <b id="regionName">Singapore</b> roads
-    </div>
-
-    <div class="perm-warn" id="permWarn">
-      ⚠ Location permission is required.<br>
-      Please allow GPS access when prompted.
-    </div>
-
-    <button class="start-btn" onclick="confirmStart()">START RIDE</button>
-    <div class="info-text" style="font-size:12px;margin-top:-6px">
-      Requires GPS · Uses OpenStreetMap data
+    <div class="right">
+      <button class="top-btn" onclick="confirmEnd()" style="border-color:var(--danger);color:var(--danger)">END</button>
     </div>
   </div>
-
-  <!-- ══════════ RIDE SCREEN ══════════ -->
-  <div id="rideScreen" class="screen">
-    <div id="topBar">
-      <div class="left">
-        <div class="gps-dot searching" id="gpsDot"></div>
-        <div class="trip-stat">TIME <span id="tripTime">00:00</span></div>
-        <div class="trip-stat">DIST <span id="tripDist">0.0</span>km</div>
-        <div class="trip-stat" id="roadStat" style="max-width:140px;overflow:hidden;text-overflow:ellipsis">
-          <span id="roadName">Locating…</span>
-        </div>
-        <div class="accuracy-badge" id="accBadge">±—m</div>
-      </div>
-      <div class="right">
-        <button class="end-ride-btn" onclick="confirmEnd()">END RIDE</button>
-      </div>
+  <div id="alertBanner"><span id="alertText">Alert</span></div>
+  <div id="mainView">
+    <canvas id="speedCanvas"></canvas>
+    <div id="stopTimer">Stopped: <span id="stopTimerVal">0:00</span> / 10:00</div>
+  </div>
+  <div id="bottomPanel">
+    <div class="stat-card">
+      <div class="label">Limit</div>
+      <div class="val cam" id="limitDisplay">—</div>
     </div>
-
-    <div id="alertBanner">
-      <span id="alertText">Alert</span>
+    <div class="stat-card">
+      <div class="label">Max</div>
+      <div class="val" id="maxSpeedDisplay">0</div>
     </div>
-
-    <div id="mainView">
-      <canvas id="speedCanvas"></canvas>
-      <div id="stopTimer">Stopped: <span id="stopTimerVal">0:00</span> / 10:00</div>
+    <div class="stat-card">
+      <div class="label">Viol.</div>
+      <div class="val danger" id="violationsDisplay">0</div>
     </div>
-
-    <div id="bottomPanel">
-      <div class="stat-card">
-        <div class="label">Limit</div>
-        <div class="val cam" id="limitDisplay">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Max km/h</div>
-        <div class="val" id="maxSpeedDisplay">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">Violations</div>
-        <div class="val danger" id="violationsDisplay">0</div>
-      </div>
-      <div class="stat-card" onclick="toggleHistory()" style="cursor:pointer">
-        <div class="label">History ▾</div>
-        <div class="val" id="histCount">0</div>
-      </div>
+    <div class="stat-card">
+      <div class="label">Cams</div>
+      <div class="val cam" id="camDisplay">0</div>
     </div>
-
-    <div id="historyPanel">
-      <div class="hist-row" id="histRow"></div>
+    <div class="stat-card clickable" onclick="confirmEnd()" style="border-color:#ff2d2d44">
+      <div class="label">Tap</div>
+      <div class="val danger">END</div>
     </div>
   </div>
+</div>
 
-  <!-- ══════════ END SCREEN ══════════ -->
-  <div id="endScreen" class="screen">
-    <div class="logo">RIDE COMPLETE<span>SESSION SUMMARY</span></div>
-    <div id="endStats">
-      <div class="end-stat"><div class="el">Distance</div>  <div class="ev" id="esDist">0</div></div>
-      <div class="end-stat"><div class="el">Duration</div>  <div class="ev" id="esTime">—</div></div>
-      <div class="end-stat"><div class="el">Max Speed</div> <div class="ev" id="esMax">0</div></div>
-      <div class="end-stat"><div class="el">Avg Speed</div> <div class="ev" id="esAvg">0</div></div>
-      <div class="end-stat"><div class="el">Violations</div><div class="ev" id="esViol">0</div></div>
-      <div class="end-stat"><div class="el">Cam Alerts</div><div class="ev" id="esCam">0</div></div>
-    </div>
-    <button class="start-btn" onclick="resetApp()">NEW RIDE</button>
+<!-- ══════ END SCREEN ══════ -->
+<div id="endScreen" class="screen">
+  <div class="logo">RIDE COMPLETE<span>SESSION SUMMARY</span></div>
+  <div id="endStats">
+    <div class="end-stat"><div class="el">Distance</div>  <div class="ev" id="esDist">—</div></div>
+    <div class="end-stat"><div class="el">Duration</div>  <div class="ev" id="esTime">—</div></div>
+    <div class="end-stat"><div class="el">Max Speed</div> <div class="ev" id="esMax">—</div></div>
+    <div class="end-stat"><div class="el">Avg Speed</div> <div class="ev" id="esAvg">—</div></div>
+    <div class="end-stat"><div class="el">Violations</div><div class="ev" id="esViol">—</div></div>
+    <div class="end-stat"><div class="el">Cam Alerts</div><div class="ev" id="esCam">—</div></div>
   </div>
+  <div class="end-route">
+    <div class="rl">Route</div>
+    <div class="rv" id="esRoute">—</div>
+  </div>
+  <button class="start-btn" onclick="resetApp()">NEW RIDE</button>
+  <button class="hist-open-btn" onclick="openHistory()" style="margin-top:-4px">📋 VIEW HISTORY</button>
+</div>
 
-  <!-- ══════════ CONFIRM OVERLAY ══════════ -->
-  <div id="confirmation">
-    <div class="confirm-box">
-      <h3 id="confirmTitle">Confirm</h3>
-      <p  id="confirmMsg">Are you sure?</p>
-      <div class="confirm-btns">
-        <button class="btn-c btn-yes" id="confirmYes" onclick="confirmAction()">CONFIRM</button>
-        <button class="btn-c btn-no"                  onclick="dismissConfirm()">CANCEL</button>
-      </div>
-    </div>
+<!-- ══════ HISTORY SCREEN ══════ -->
+<div id="histScreen" class="screen">
+  <div id="histHeader">
+    <h2>TRIP HISTORY</h2>
+    <button class="io-btn accent" onclick="downloadHistory()" style="font-size:11px">⬇ Export</button>
+    <button class="top-btn" onclick="showScreen('startScreen')">← BACK</button>
   </div>
+  <div id="histList"><div class="no-trips"><span style="font-size:28px">🚗</span><span>No trips recorded yet</span></div></div>
+</div>
 
-  <!-- ══════════ GPS ERROR OVERLAY ══════════ -->
-  <div id="gpsError">
-    <div class="gps-error-box">
-      <h3>GPS Error</h3>
-      <p id="gpsErrorMsg">Unable to get your location. Please check that location permissions are enabled for your browser.</p>
-      <button class="btn-c btn-yes" onclick="retryGPS()">RETRY</button>
+<!-- ══════ TRIP DETAIL SCREEN ══════ -->
+<div id="detailScreen" class="screen">
+  <div id="detailHeader">
+    <h2 id="detailTitle">TRIP DETAIL</h2>
+    <button class="top-btn" onclick="showScreen('histScreen');renderHistoryList()">← BACK</button>
+  </div>
+  <div id="detailBody"></div>
+</div>
+
+<!-- ══════ CONFIRM OVERLAY ══════ -->
+<div id="overlay">
+  <div class="ov-box">
+    <h3 id="ovTitle">Confirm</h3>
+    <p  id="ovMsg">Are you sure?</p>
+    <div class="ov-btns">
+      <button class="btn-c btn-y" id="ovYes" onclick="confirmAction()">CONFIRM</button>
+      <button class="btn-c btn-n"            onclick="dismissOverlay()">CANCEL</button>
     </div>
   </div>
+</div>
+
+<!-- ══════ GPS ERROR ══════ -->
+<div id="gpsErrBox">
+  <div class="gerr">
+    <h3>GPS Error</h3>
+    <p id="gpsErrMsg">Location permission denied. Enable GPS access in browser settings.</p>
+    <button class="btn-c btn-y" onclick="retryGPS()">RETRY</button>
+  </div>
+</div>
 
 </div><!-- /app -->
 
 <script>
 'use strict';
-
-/* ═══════════════════════════════════════════════════════════
-   REGION CONFIG
-═══════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   CONSTANTS & REGION CONFIG
+════════════════════════════════════════════════════════════ */
 const REGIONS = {
-  SG: {
-    name: 'Singapore',
-    defaultLimit: 50,
-    /* OSM speed_camera node tags common in SG */
-    overpassRadius: 500
-  },
-  IN: {
-    name: 'India',
-    defaultLimit: 50,
-    overpassRadius: 600
-  }
+  SG:{ name:'Singapore', defaultLimit:50, camRadius:600 },
+  IN:{ name:'India',     defaultLimit:50, camRadius:800 }
 };
 
-/* ═══════════════════════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════════════════════ */
-let region        = 'SG';
-let rideActive    = false;
-let pendingAction = null;
-let watchId       = null;
+const DB_KEY    = 'speedsense_trips_v2';
+const CAM_DIST  = 250;  // metres — alert radius for cameras
+const CAM_FETCH_INTERVAL = 25000; // ms between Overpass fetches
+const GEO_FETCH_INTERVAL = 7000;  // ms between Nominatim reverse-geocodes
+
+/* ════════════════════════════════════════════════════════════
+   APP STATE
+════════════════════════════════════════════════════════════ */
+let region      = 'SG';
+let rideActive  = false;
+let pendingAct  = null;
+let watchId     = null;
+let wakeLock    = null;
+let rafId       = null;
+let tripTimerId = null;
+let noSleepVid  = null;  // iOS fallback
 
 const state = {
-  speed: 0,          // current GPS speed km/h
-  speedLimit: null,  // from OSM or default
-  maxSpeed: 0,
-  violations: 0,
-  camAlerts: 0,
-  distance: 0,
-  startTime: null,
-  stopTime: null,
-  stopDuration: 0,
-  history: [],
-  speedHistory: [],
-  roadName: 'Locating…',
-  accuracy: null,
-  lat: null, lng: null,
-  prevLat: null, prevLng: null,
-  nearCamera: false,
-  camCooldown: 0,
-  speedExceeded: false,
-  exceedStart: null,
-  alertTimeout: null,
-  nearbySpeedCameras: [],   // [{lat,lng,maxspeed}]
-  lastGeocode: 0,
-  lastOverpass: 0,
-  avgSpeedSum: 0,
-  avgSpeedCount: 0
+  speed:0, speedLimit:50, maxSpeed:0,
+  violations:0, camAlerts:0,
+  distance:0, startTime:null,
+  stopTime:null, stopDuration:0,
+  history:[],            // [{time,road,limit,exc}]
+  speedLog:[],           // [{t,spd,limit,lat,lng,road}] — full speed log
+  violationLog:[],       // [{time,lat,lng,speed,limit,road,postcode}]
+  cameraLog:[],          // [{time,lat,lng,road}]
+  speedHistory:[],       // for live graph (speed values)
+  roadName:'Locating…',
+  accuracy:null, lat:null, lng:null, prevLat:null, prevLng:null,
+  nearCamera:false,
+  cameraAlertedIds:new Set(),  // OSM node IDs already alerted this session
+  nearbySpeedCameras:[],
+  speedExceeded:false, exceedStart:null, alertTimeout:null,
+  avgSpeedSum:0, avgSpeedCount:0,
+  lastGeocode:0, lastOverpass:0,
+  startPostcode:'', endPostcode:'',
+  startAddress:'', endAddress:''
 };
 
-/* ═══════════════════════════════════════════════════════════
-   AUDIO
-═══════════════════════════════════════════════════════════ */
-let audioCtx      = null;
-let beepInterval  = null;
-let alarmInterval = null;
+/* ════════════════════════════════════════════════════════════
+   PERSISTENT STORAGE — IndexedDB + localStorage fallback
+════════════════════════════════════════════════════════════ */
+function saveTrips(trips){ try{ localStorage.setItem(DB_KEY,JSON.stringify(trips)); }catch(e){} }
+function loadTrips(){ try{ return JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }catch(e){ return []; } }
 
-function getAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
+function appendTrip(trip){
+  const trips = loadTrips();
+  trips.push(trip);
+  saveTrips(trips);
+  updateTripCount();
 }
 
-function tone(freq, dur, type = 'sine', vol = 0.28) {
-  try {
-    const ctx = getAudio();
-    if (ctx.state === 'suspended') ctx.resume();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = type; o.frequency.value = freq;
-    g.gain.setValueAtTime(vol, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-    o.start(); o.stop(ctx.currentTime + dur);
-  } catch(e) {}
+function updateTripCount(){
+  const n = loadTrips().length;
+  document.getElementById('tripCountBadge').textContent = n+' trip'+(n===1?'':'s');
 }
 
-function camBeep() {
-  tone(1200, 0.07);
-  setTimeout(() => tone(1200, 0.07), 140);
+/* ════════════════════════════════════════════════════════════
+   AUDIO — production-grade mobile fix
+   Uses BufferSource nodes (NOT oscillators) for iOS/Android reliability
+════════════════════════════════════════════════════════════ */
+let _actx = null;
+let _beepBufCache = {};
+
+function getACtx(){
+  if(!_actx){
+    _actx = new (window.AudioContext||window.webkitAudioContext)();
+  }
+  if(_actx.state==='suspended') _actx.resume();
+  return _actx;
 }
 
-function speedBeepOnce() { tone(900, 0.1, 'square', 0.18); }
-
-function policeBeep() {
-  tone(440, 0.14, 'sawtooth', 0.22);
-  setTimeout(() => tone(660, 0.14, 'sawtooth', 0.22), 200);
-  setTimeout(() => tone(440, 0.14, 'sawtooth', 0.22), 400);
+/* Generate a short PCM buffer of a given frequency & duration */
+function makeBeepBuffer(freq, dur, type='sine', vol=0.4){
+  const ctx  = getACtx();
+  const sr   = ctx.sampleRate;
+  const len  = Math.ceil(sr * dur);
+  const buf  = ctx.createBuffer(1, len, sr);
+  const data = buf.getChannelData(0);
+  const ramp = 0.02; // fade out
+  for(let i=0;i<len;i++){
+    let s=0;
+    const t=i/sr;
+    if(type==='sine')     s = Math.sin(2*Math.PI*freq*t);
+    else if(type==='square') s = Math.sign(Math.sin(2*Math.PI*freq*t));
+    else if(type==='sawtooth') s = 2*(t*freq - Math.floor(t*freq+0.5));
+    const env = i>(len-sr*ramp) ? (len-i)/(sr*ramp) : 1;
+    data[i] = s * vol * env;
+  }
+  return buf;
 }
 
-function setAlarm(on) {
-  if (on && !alarmInterval) {
-    alarmInterval = setInterval(() => tone(700, 0.09, 'square', 0.14), 380);
-  } else if (!on && alarmInterval) {
-    clearInterval(alarmInterval); alarmInterval = null;
+function playBuf(buf, delay=0){
+  try{
+    const ctx = getACtx();
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(ctx.currentTime + delay);
+  }catch(e){}
+}
+
+/* Pre-build buffers once audio context is alive */
+let _bufs = null;
+function ensureBufs(){
+  if(_bufs) return;
+  _bufs = {
+    cam1:    makeBeepBuffer(1200, 0.08, 'sine',     0.35),
+    cam2:    makeBeepBuffer(1200, 0.08, 'sine',     0.35),
+    speed:   makeBeepBuffer(880,  0.12, 'square',   0.22),
+    police1: makeBeepBuffer(440,  0.15, 'sawtooth', 0.28),
+    police2: makeBeepBuffer(660,  0.15, 'sawtooth', 0.28),
+    alarm:   makeBeepBuffer(700,  0.09, 'square',   0.18),
+  };
+}
+
+function unlockAudio(){
+  try{
+    const ctx = getACtx();
+    ctx.resume().then(()=>{ ensureBufs(); });
+    // iOS: play 0-volume node to unlock
+    const buf = ctx.createBuffer(1,1,22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.connect(ctx.destination); src.start();
+  }catch(e){}
+}
+
+function camBeep(){ ensureBufs(); playBuf(_bufs.cam1,0); playBuf(_bufs.cam2,0.14); }
+function policeBeep(){ ensureBufs(); playBuf(_bufs.police1,0); playBuf(_bufs.police2,0.21); playBuf(_bufs.police1,0.42); }
+
+let _speedBeepItv  = null;
+let _alarmItv      = null;
+
+function setSpeedBeep(on){
+  if(on && !_speedBeepItv){
+    ensureBufs();
+    _speedBeepItv = setInterval(()=>{ playBuf(_bufs.speed); }, 700);
+  } else if(!on && _speedBeepItv){
+    clearInterval(_speedBeepItv); _speedBeepItv=null;
   }
 }
 
-function setSpeedBeep(on) {
-  if (on && !beepInterval) {
-    beepInterval = setInterval(speedBeepOnce, 650);
-  } else if (!on && beepInterval) {
-    clearInterval(beepInterval); beepInterval = null;
+function setAlarm(on){
+  if(on && !_alarmItv){
+    ensureBufs();
+    _alarmItv = setInterval(()=>{ playBuf(_bufs.alarm); }, 380);
+  } else if(!on && _alarmItv){
+    clearInterval(_alarmItv); _alarmItv=null;
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
+   WAKE LOCK — keep screen on
+════════════════════════════════════════════════════════════ */
+async function requestWakeLock(){
+  // Method 1: Screen Wake Lock API (Chrome 84+, Android)
+  if('wakeLock' in navigator){
+    try{
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release',()=>{
+        document.getElementById('wakeBadge').textContent='DIMMING';
+        document.getElementById('wakeBadge').className='wake-badge off';
+        // re-request on visibility change
+      });
+      setBadge(true);
+      return;
+    }catch(e){ /* fall through */ }
+  }
+  // Method 2: iOS / older fallback — tiny invisible looping video trick
+  try{
+    noSleepVid = document.createElement('video');
+    noSleepVid.setAttribute('playsinline','');
+    noSleepVid.setAttribute('muted','');
+    noSleepVid.setAttribute('loop','');
+    // 1x1 transparent mp4 data URI (minimal valid mp4, ~200 bytes)
+    noSleepVid.src='data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAu1tZGF0AAACrAYF//+s3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE0MiByMjQ3OSBkZDc5YTYxIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNCAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEwIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAABWWWIhAAT//73gb8yy1GNL+o2GNKR2V4cxFqFkVrJBPaD+TelAAAACgAAAwAAAwDhxBVh6AAAAPgBgAAAAAAAAAA=';
+    noSleepVid.style.cssText='position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:0.01';
+    document.body.appendChild(noSleepVid);
+    await noSleepVid.play();
+    setBadge(true);
+  }catch(e){ setBadge(false); }
+}
+
+function releaseWakeLock(){
+  if(wakeLock){ wakeLock.release().catch(()=>{}); wakeLock=null; }
+  if(noSleepVid){ noSleepVid.pause(); noSleepVid.remove(); noSleepVid=null; }
+  setBadge(false);
+}
+
+function setBadge(on){
+  const b=document.getElementById('wakeBadge');
+  if(!b) return;
+  b.textContent = on?'SCREEN ON':'DIMMING';
+  b.className   = 'wake-badge'+(on?'':' off');
+}
+
+// Re-acquire wake lock when tab becomes visible again
+document.addEventListener('visibilitychange',()=>{
+  if(rideActive && document.visibilityState==='visible') requestWakeLock();
+});
+
+/* ════════════════════════════════════════════════════════════
    UI HELPERS
-═══════════════════════════════════════════════════════════ */
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+════════════════════════════════════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function showAlert(type, msg) {
-  const b = document.getElementById('alertBanner');
-  b.className = type;
-  b.style.display = 'flex';
-  document.getElementById('alertText').textContent = msg;
-  if (state.alertTimeout) clearTimeout(state.alertTimeout);
-  state.alertTimeout = setTimeout(() => { b.style.display = 'none'; }, 5000);
+function showAlert(type, msg){
+  const b=document.getElementById('alertBanner');
+  b.className=type; b.style.display='flex';
+  document.getElementById('alertText').textContent=msg;
+  if(state.alertTimeout) clearTimeout(state.alertTimeout);
+  state.alertTimeout=setTimeout(()=>{ b.style.display='none'; },5000);
 }
 
-function setRegion(r) {
-  region = r;
-  document.querySelectorAll('.region-btn').forEach((b, i) => {
-    b.classList.toggle('active', (i === 0 && r === 'SG') || (i === 1 && r === 'IN'));
+function setRegion(r){
+  region=r;
+  document.querySelectorAll('.region-btn').forEach((b,i)=>{
+    b.classList.toggle('active',(i===0&&r==='SG')||(i===1&&r==='IN'));
   });
-  document.getElementById('regionName').textContent = REGIONS[r].name;
+  document.getElementById('regionName').textContent=REGIONS[r].name;
 }
 
-function toggleHistory() {
-  document.getElementById('historyPanel').classList.toggle('open');
+/* ════════════════════════════════════════════════════════════
+   CONFIRM OVERLAY
+════════════════════════════════════════════════════════════ */
+function confirmStart(){
+  pendingAct='start';
+  document.getElementById('ovTitle').textContent='Start Ride?';
+  document.getElementById('ovMsg').textContent=`Live GPS monitoring will activate for ${REGIONS[region].name}. Mount your phone safely.`;
+  document.getElementById('ovYes').className='btn-c btn-y';
+  document.getElementById('overlay').classList.add('visible');
 }
-
-function updateHistoryUI() {
-  document.getElementById('histCount').textContent = state.history.length;
-  document.getElementById('histRow').innerHTML = state.history.slice().reverse().map(h => `
-    <div class="hist-item">
-      <div class="hi-label">${h.time} · ${h.road}</div>
-      <div class="hi-val">${h.limit ? h.limit + ' km/h' : '—'} &nbsp;<span class="hi-exc">${h.exc || 0} exc</span></div>
-    </div>`).join('');
+function confirmEnd(){
+  pendingAct='end';
+  document.getElementById('ovTitle').textContent='End This Ride?';
+  document.getElementById('ovMsg').textContent='GPS tracking stops and your session summary will be saved.';
+  document.getElementById('ovYes').className='btn-c btn-y red';
+  document.getElementById('overlay').classList.add('visible');
 }
+function confirmAction(){ dismissOverlay(); if(pendingAct==='start') startRide(); else if(pendingAct==='end') endRide(); pendingAct=null; }
+function dismissOverlay(){ document.getElementById('overlay').classList.remove('visible'); }
 
-/* ═══════════════════════════════════════════════════════════
-   CONFIRMATION FLOW
-═══════════════════════════════════════════════════════════ */
-function confirmStart() {
-  pendingAction = 'start';
-  document.getElementById('confirmTitle').textContent = 'Start Ride?';
-  document.getElementById('confirmMsg').textContent =
-    `Live GPS monitoring will activate for ${REGIONS[region].name}. Keep your phone mounted safely.`;
-  document.getElementById('confirmYes').className = 'btn-c btn-yes';
-  document.getElementById('confirmation').classList.add('visible');
-}
-
-function confirmEnd() {
-  pendingAction = 'end';
-  document.getElementById('confirmTitle').textContent = 'End This Ride?';
-  document.getElementById('confirmMsg').textContent =
-    'GPS tracking will stop and your session summary will be shown.';
-  document.getElementById('confirmYes').className = 'btn-c btn-yes red';
-  document.getElementById('confirmation').classList.add('visible');
-}
-
-function confirmAction() {
-  dismissConfirm();
-  if (pendingAction === 'start') startRide();
-  else if (pendingAction === 'end') endRide();
-  pendingAction = null;
-}
-
-function dismissConfirm() {
-  document.getElementById('confirmation').classList.remove('visible');
-}
-
-/* ═══════════════════════════════════════════════════════════
-   GPS
-═══════════════════════════════════════════════════════════ */
-function startRide() {
-  // reset state
-  Object.assign(state, {
-    speed: 0, speedLimit: REGIONS[region].defaultLimit,
-    maxSpeed: 0, violations: 0, camAlerts: 0,
-    distance: 0, startTime: Date.now(),
-    stopTime: null, stopDuration: 0,
-    history: [], speedHistory: [],
-    roadName: 'Locating…', accuracy: null,
-    lat: null, lng: null, prevLat: null, prevLng: null,
-    nearCamera: false, camCooldown: 0,
-    speedExceeded: false, exceedStart: null, alertTimeout: null,
-    nearbySpeedCameras: [],
-    lastGeocode: 0, lastOverpass: 0,
-    avgSpeedSum: 0, avgSpeedCount: 0
+/* ════════════════════════════════════════════════════════════
+   RIDE LIFECYCLE
+════════════════════════════════════════════════════════════ */
+function startRide(){
+  Object.assign(state,{
+    speed:0, speedLimit:REGIONS[region].defaultLimit, maxSpeed:0,
+    violations:0, camAlerts:0, distance:0, startTime:Date.now(),
+    stopTime:null, stopDuration:0, history:[], speedLog:[],
+    violationLog:[], cameraLog:[], speedHistory:[],
+    roadName:'Locating…', accuracy:null, lat:null, lng:null,
+    prevLat:null, prevLng:null, nearCamera:false,
+    cameraAlertedIds: new Set(), nearbySpeedCameras:[],
+    speedExceeded:false, exceedStart:null, alertTimeout:null,
+    avgSpeedSum:0, avgSpeedCount:0, lastGeocode:0, lastOverpass:0,
+    startPostcode:'', endPostcode:'', startAddress:'', endAddress:''
   });
-  rideActive = true;
-
+  rideActive=true;
   showScreen('rideScreen');
   initCanvas();
   startTripTimer();
   gameLoop();
   startGPS();
+  requestWakeLock();
+  unlockAudio();
 }
 
-function startGPS() {
-  if (!navigator.geolocation) {
-    showGPSError('Geolocation is not supported by this browser.');
-    return;
-  }
-
-  const dot = document.getElementById('gpsDot');
-  dot.className = 'gps-dot searching';
-
-  watchId = navigator.geolocation.watchPosition(
-    onGPSSuccess,
-    onGPSError,
-    {
-      enableHighAccuracy: true,
-      maximumAge: 1000,
-      timeout: 15000
-    }
-  );
+/* ════════════════════════════════════════════════════════════
+   GPS
+════════════════════════════════════════════════════════════ */
+function startGPS(){
+  if(!navigator.geolocation){ showGPSErr('Geolocation not supported.'); return; }
+  document.getElementById('gpsDot').className='gps-dot searching';
+  watchId=navigator.geolocation.watchPosition(onGPSSuccess, onGPSError,
+    { enableHighAccuracy:true, maximumAge:1000, timeout:20000 });
 }
 
-function onGPSSuccess(pos) {
-  if (!rideActive) return;
+function onGPSSuccess(pos){
+  if(!rideActive) return;
+  document.getElementById('gpsDot').className='gps-dot fix';
+  const {latitude:lat, longitude:lng, speed, accuracy} = pos.coords;
+  state.prevLat=state.lat; state.prevLng=state.lng;
+  state.lat=lat; state.lng=lng;
+  state.accuracy=Math.round(accuracy);
 
-  const dot = document.getElementById('gpsDot');
-  dot.className = 'gps-dot fix';
+  const kmh = (speed!=null && speed>=0) ? speed*3.6 : 0;
+  state.speed = Math.max(0, kmh);
 
-  const { latitude, longitude, speed, accuracy } = pos.coords;
-
-  state.prevLat = state.lat;
-  state.prevLng = state.lng;
-  state.lat     = latitude;
-  state.lng     = longitude;
-  state.accuracy = Math.round(accuracy);
-
-  // GPS speed in m/s → km/h
-  const gpsSpeed = speed != null ? speed * 3.6 : 0;
-  state.speed = Math.max(0, gpsSpeed);
-
-  if (state.speed > state.maxSpeed) state.maxSpeed = state.speed;
-  if (state.speed > 2) {
-    state.avgSpeedSum += state.speed;
-    state.avgSpeedCount++;
-  }
-
-  // Accumulate distance
-  if (state.prevLat !== null) {
-    state.distance += haversine(state.prevLat, state.prevLng, latitude, longitude);
-  }
+  if(state.speed>state.maxSpeed) state.maxSpeed=state.speed;
+  if(state.speed>2){ state.avgSpeedSum+=state.speed; state.avgSpeedCount++; }
+  if(state.prevLat!==null) state.distance+=haversine(state.prevLat,state.prevLng,lat,lng);
 
   // Accuracy badge
-  const ab = document.getElementById('accBadge');
-  ab.textContent = `±${state.accuracy}m`;
-  ab.className = 'accuracy-badge' + (accuracy < 20 ? ' good' : accuracy > 50 ? ' poor' : '');
+  const ab=document.getElementById('accBadge');
+  ab.textContent=`±${state.accuracy}m`;
+  ab.className='acc-badge'+(accuracy<20?' good':accuracy>60?' poor':'');
 
   state.speedHistory.push(state.speed);
-  if (state.speedHistory.length > 300) state.speedHistory.shift();
+  if(state.speedHistory.length>400) state.speedHistory.shift();
 
-  // Reverse geocode + speed limit (throttled)
-  const now = Date.now();
-  if (now - state.lastGeocode > 8000) {
-    state.lastGeocode = now;
-    reverseGeocode(latitude, longitude);
-  }
+  // Speed log entry (every fix)
+  state.speedLog.push({
+    t: Date.now(), spd: Math.round(state.speed),
+    limit: state.speedLimit, lat, lng, road: state.roadName
+  });
+  if(state.speedLog.length>2000) state.speedLog.shift();
 
-  // Overpass speed cameras (throttled)
-  if (now - state.lastOverpass > 30000) {
-    state.lastOverpass = now;
-    fetchSpeedCameras(latitude, longitude);
-  }
-
-  // Check proximity to cameras
-  checkCameraProximity(latitude, longitude);
-
-  // Stop detection
+  const now=Date.now();
+  if(now-state.lastGeocode>GEO_FETCH_INTERVAL){ state.lastGeocode=now; reverseGeocode(lat,lng); }
+  if(now-state.lastOverpass>CAM_FETCH_INTERVAL){ state.lastOverpass=now; fetchSpeedCameras(lat,lng); }
+  checkCameraProximity(lat,lng);
   handleStopDetection();
+  handleViolation(lat,lng);
 
-  // Violation logic
-  handleViolation();
-
-  document.getElementById('limitDisplay').textContent =
-    state.speedLimit ? state.speedLimit : '—';
-  document.getElementById('maxSpeedDisplay').textContent = Math.round(state.maxSpeed);
-  document.getElementById('violationsDisplay').textContent = state.violations;
+  document.getElementById('limitDisplay').textContent=state.speedLimit?state.speedLimit:'—';
+  document.getElementById('maxSpeedDisplay').textContent=Math.round(state.maxSpeed);
+  document.getElementById('violationsDisplay').textContent=state.violations;
+  document.getElementById('camDisplay').textContent=state.camAlerts;
 }
 
-function onGPSError(err) {
-  const messages = {
-    1: 'Location permission denied. Please enable GPS access in your browser settings.',
-    2: 'GPS signal unavailable. Make sure you are outdoors with clear sky view.',
-    3: 'GPS timed out. Retrying…'
-  };
-  if (err.code === 3) {
-    // timeout — just keep waiting, don't show error
-    return;
-  }
-  showGPSError(messages[err.code] || 'GPS error occurred.');
+function onGPSError(err){
+  const msgs={1:'Permission denied. Enable GPS in browser settings.',
+              2:'GPS signal unavailable. Go outdoors.',3:'GPS timeout — retrying…'};
+  if(err.code===3) return;
+  showGPSErr(msgs[err.code]||'GPS error.');
 }
 
-function showGPSError(msg) {
-  document.getElementById('gpsErrorMsg').textContent = msg;
-  document.getElementById('gpsError').classList.add('visible');
-}
+function showGPSErr(m){ document.getElementById('gpsErrMsg').textContent=m; document.getElementById('gpsErrBox').classList.add('visible'); }
+function retryGPS(){ document.getElementById('gpsErrBox').classList.remove('visible'); if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; } startGPS(); }
 
-function retryGPS() {
-  document.getElementById('gpsError').classList.remove('visible');
-  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-  startGPS();
-}
+/* ════════════════════════════════════════════════════════════
+   REVERSE GEOCODE  (Nominatim)
+════════════════════════════════════════════════════════════ */
+async function reverseGeocode(lat,lng){
+  try{
+    const r=await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=17&addressdetails=1&extratags=1`,
+      {headers:{'Accept-Language':'en','User-Agent':'SpeedSenseApp/2.0'}}
+    );
+    if(!r.ok) return;
+    const d=await r.json();
+    const addr=d.address||{};
+    const road=addr.road||addr.pedestrian||addr.path||addr.motorway||
+               addr.trunk||addr.primary||addr.secondary||addr.suburb||
+               d.display_name?.split(',')[0]||'Unknown Road';
+    state.roadName=road;
+    document.getElementById('roadName').textContent=road;
 
-/* ═══════════════════════════════════════════════════════════
-   REVERSE GEOCODE  (Nominatim — free, no key)
-═══════════════════════════════════════════════════════════ */
-async function reverseGeocode(lat, lng) {
-  try {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=17&addressdetails=1&extratags=1`;
-    const res  = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-    if (!res.ok) return;
-    const data = await res.json();
+    // Postcode
+    const pc=addr.postcode||'';
+    if(!state.startPostcode && pc){ state.startPostcode=pc; state.startAddress=road+', '+pc; }
+    state.endPostcode=pc; state.endAddress=road+(pc?', '+pc:'');
 
-    // Road name
-    const addr = data.address || {};
-    const road = addr.road || addr.pedestrian || addr.path ||
-                 addr.cycleway || addr.footway || addr.motorway ||
-                 addr.trunk || addr.primary || addr.secondary ||
-                 data.display_name?.split(',')[0] || 'Unknown Road';
-    state.roadName = road;
-    document.getElementById('roadName').textContent = road;
-
-    // Speed limit from OSM extratags
-    const extra = data.extratags || {};
-    const rawLimit = extra.maxspeed || extra['maxspeed:forward'] || extra['maxspeed:backward'];
-    if (rawLimit) {
-      const parsed = parseSpeedLimit(rawLimit);
-      if (parsed && parsed !== state.speedLimit) {
-        const prev = state.speedLimit;
-        state.speedLimit = parsed;
-        document.getElementById('limitDisplay').textContent = parsed;
-
-        // Log to history on limit change
-        const timeStr = new Date().toLocaleTimeString('en-SG', {hour:'2-digit',minute:'2-digit'});
-        state.history.push({ road, limit: parsed, time: timeStr, exc: 0 });
-        updateHistoryUI();
-
-        if (parsed < prev) {
-          showAlert('info', `🔽 Speed limit reduced to ${parsed} km/h`);
-        }
+    // Speed limit from OSM
+    const ex=d.extratags||{};
+    const raw=ex.maxspeed||ex['maxspeed:forward']||ex['maxspeed:backward'];
+    if(raw){
+      const parsed=parseLimit(raw);
+      if(parsed && parsed!==state.speedLimit){
+        const prev=state.speedLimit;
+        state.speedLimit=parsed;
+        document.getElementById('limitDisplay').textContent=parsed;
+        const ts=fmtTime(Date.now());
+        state.history.push({time:ts,road,limit:parsed,exc:0});
+        if(parsed<prev) showAlert('info',`🔽 Speed limit reduced to ${parsed} km/h`);
       }
     }
-  } catch(e) { /* network error — silent */ }
+  }catch(e){}
 }
 
-function parseSpeedLimit(raw) {
-  if (!raw) return null;
-  const s = String(raw).trim().toLowerCase();
-  // "50 mph" → convert; "50" or "50 km/h"
-  const mph = s.match(/^(\d+)\s*mph/);
-  if (mph) return Math.round(parseInt(mph[1]) * 1.60934);
-  const km  = s.match(/^(\d+)/);
-  if (km) return parseInt(km[1]);
-  // living_street, walk, etc.
-  if (s === 'walk' || s === 'walking') return 10;
-  if (s === 'living_street') return 20;
+function parseLimit(raw){
+  if(!raw) return null;
+  const s=String(raw).trim().toLowerCase();
+  const mph=s.match(/^(\d+)\s*mph/); if(mph) return Math.round(parseInt(mph[1])*1.60934);
+  const km=s.match(/^(\d+)/); if(km) return parseInt(km[1]);
+  if(s==='walk'||s==='walking') return 10;
+  if(s==='living_street') return 20;
   return null;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   OVERPASS API — fetch speed cameras & police radars nearby
-═══════════════════════════════════════════════════════════ */
-async function fetchSpeedCameras(lat, lng) {
-  try {
-    const r   = REGIONS[region].overpassRadius;
-    // Query for speed cameras AND enforcement nodes
-    const query = `
-      [out:json][timeout:10];
-      (
-        node["highway"="speed_camera"](around:${r},${lat},${lng});
-        node["enforcement"="maxspeed"](around:${r},${lat},${lng});
-        node["amenity"="enforcement"](around:${r},${lat},${lng});
-        node["device"="speed_camera"](around:${r},${lat},${lng});
-      );
-      out body;`;
-
-    const res  = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent(query)
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-
-    state.nearbySpeedCameras = (data.elements || []).map(el => ({
+/* ════════════════════════════════════════════════════════════
+   OVERPASS — Speed Cameras (fixed: all node types + ways)
+════════════════════════════════════════════════════════════ */
+async function fetchSpeedCameras(lat,lng){
+  try{
+    const R=REGIONS[region].camRadius;
+    /* Query ALL known speed enforcement tags in OSM */
+    const q=`[out:json][timeout:15];
+(
+  node["highway"="speed_camera"](around:${R},${lat},${lng});
+  node["man_made"="monitoring_station"]["monitoring:vehicle"](around:${R},${lat},${lng});
+  node["enforcement"="maxspeed"](around:${R},${lat},${lng});
+  node["enforcement"="speed"](around:${R},${lat},${lng});
+  node["amenity"="police"](around:${R},${lat},${lng});
+  node["device"="speed_camera"](around:${R},${lat},${lng});
+  node["highway"="enforcement"](around:${R},${lat},${lng});
+  node["traffic_calming"="camera"](around:${R},${lat},${lng});
+);
+out body;`;
+    const res=await fetch('https://overpass-api.de/api/interpreter',
+      {method:'POST', body:'data='+encodeURIComponent(q),
+       headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    if(!res.ok) return;
+    const data=await res.json();
+    state.nearbySpeedCameras=(data.elements||[]).map(el=>({
+      id: el.id,
       lat: el.lat, lng: el.lon,
-      maxspeed: el.tags?.maxspeed ? parseSpeedLimit(el.tags.maxspeed) : null
+      maxspeed: el.tags?.maxspeed?parseLimit(el.tags.maxspeed):null,
+      type: el.tags?.amenity==='police'?'police':'camera'
     }));
-
-  } catch(e) { /* network error */ }
+  }catch(e){}
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CAMERA PROXIMITY CHECK
-═══════════════════════════════════════════════════════════ */
-function checkCameraProximity(lat, lng) {
-  if (state.camCooldown > 0) { state.camCooldown--; return; }
+/* ════════════════════════════════════════════════════════════
+   CAMERA PROXIMITY — checks every GPS fix, no cooldown per-camera
+════════════════════════════════════════════════════════════ */
+function checkCameraProximity(lat,lng){
+  let closestDist=Infinity, closestCam=null;
 
-  let closest = Infinity;
-  for (const cam of state.nearbySpeedCameras) {
-    const d = haversine(lat, lng, cam.lat, cam.lng) * 1000; // metres
-    if (d < closest) closest = d;
+  for(const cam of state.nearbySpeedCameras){
+    const d=haversine(lat,lng,cam.lat,cam.lng)*1000;
+    if(d<closestDist){ closestDist=d; closestCam=cam; }
   }
 
-  const wasNear = state.nearCamera;
+  if(closestCam && closestDist<=CAM_DIST){
+    state.nearCamera=true;
+    const camId=closestCam.id;
+    const isPolice=closestCam.type==='police';
 
-  if (closest < 200) {
-    state.nearCamera = true;
-    if (!wasNear) {
+    // Alert once per camera per approach (cleared when >CAM_DIST*1.5 away)
+    if(!state.cameraAlertedIds.has(camId)){
+      state.cameraAlertedIds.add(camId);
       state.camAlerts++;
-      state.camCooldown = 30; // ~30 GPS fixes before re-alerting same camera
-      camBeep();
-      if (state.speed > state.speedLimit) {
-        showAlert('cam', `📷 SPEED CAMERA ${Math.round(closest)}m — SLOW DOWN!`);
-        setAlarm(true);
+      state.cameraLog.push({time:fmtTime(Date.now()),lat,lng,road:state.roadName,
+        dist:Math.round(closestDist),type:closestCam.type});
+      document.getElementById('camDisplay').textContent=state.camAlerts;
+
+      if(isPolice){
+        policeBeep();
+        showAlert('police',`🚔 POLICE RADAR ${Math.round(closestDist)}m — Speed Check!`);
       } else {
-        showAlert('cam', `📷 Speed camera ${Math.round(closest)}m ahead`);
+        camBeep();
+        if(state.speed>(state.speedLimit||50)){
+          showAlert('cam',`📷 SPEED CAM ${Math.round(closestDist)}m — SLOW DOWN NOW!`);
+          setAlarm(true);
+        } else {
+          showAlert('cam',`📷 Speed camera ${Math.round(closestDist)}m ahead`);
+        }
       }
     }
-    // If near camera and speed not reduced
-    if (state.speed > (state.speedLimit || 50) - 10) {
+
+    // Continuous alarm if still over limit near camera
+    if(!isPolice && state.speed>(state.speedLimit||50)-5){
       setAlarm(true);
-    } else {
+    } else if(!state.speedExceeded){
       setAlarm(false);
     }
+
   } else {
-    state.nearCamera = false;
-    if (wasNear) setAlarm(false);
+    state.nearCamera=false;
+    // Clear alerted IDs when sufficiently past cameras
+    if(closestDist>CAM_DIST*1.5){
+      state.cameraAlertedIds.clear();
+    }
+    if(!state.speedExceeded) setAlarm(false);
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    STOP DETECTION
-═══════════════════════════════════════════════════════════ */
-function handleStopDetection() {
-  const el = document.getElementById('stopTimer');
-  if (state.speed < 2) {
-    if (!state.stopTime) state.stopTime = Date.now();
-    state.stopDuration = (Date.now() - state.stopTime) / 1000;
-    el.style.display = 'block';
-    const m = Math.floor(state.stopDuration / 60);
-    const s = Math.floor(state.stopDuration % 60);
-    document.getElementById('stopTimerVal').textContent =
-      `${m}:${s.toString().padStart(2, '0')}`;
-    if (state.stopDuration >= 600) { endRide(); }
+════════════════════════════════════════════════════════════ */
+function handleStopDetection(){
+  const el=document.getElementById('stopTimer');
+  if(state.speed<1){
+    if(!state.stopTime) state.stopTime=Date.now();
+    state.stopDuration=(Date.now()-state.stopTime)/1000;
+    el.style.display='block';
+    const m=Math.floor(state.stopDuration/60), s=Math.floor(state.stopDuration%60);
+    document.getElementById('stopTimerVal').textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    if(state.stopDuration>=600){ endRide(); }
   } else {
-    state.stopTime     = null;
-    state.stopDuration = 0;
-    el.style.display = 'none';
+    state.stopTime=null; state.stopDuration=0; el.style.display='none';
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    VIOLATION LOGIC
-═══════════════════════════════════════════════════════════ */
-function handleViolation() {
-  const limit    = state.speedLimit || REGIONS[region].defaultLimit;
-  const exceeded = state.speed > limit;
-  const margin   = state.speed - limit;
+════════════════════════════════════════════════════════════ */
+function handleViolation(lat,lng){
+  const limit=state.speedLimit||REGIONS[region].defaultLimit;
+  const exc=state.speed>limit;
+  const margin=state.speed-limit;
 
-  if (exceeded) {
-    if (!state.exceedStart) state.exceedStart = Date.now();
-
-    if (Date.now() - state.exceedStart > 2000) {
-      if (!state.speedExceeded) {
-        state.speedExceeded = true;
+  if(exc){
+    if(!state.exceedStart) state.exceedStart=Date.now();
+    if(Date.now()-state.exceedStart>1500){
+      if(!state.speedExceeded){
+        state.speedExceeded=true;
         state.violations++;
-        if (state.history.length > 0) {
-          state.history[state.history.length - 1].exc =
-            (state.history[state.history.length - 1].exc || 0) + 1;
-          updateHistoryUI();
-        }
-        showAlert('speed',
-          `⚠ OVER LIMIT: ${Math.round(state.speed)} / ${limit} km/h (+${Math.round(margin)})`);
+        if(state.history.length>0) state.history[state.history.length-1].exc=(state.history[state.history.length-1].exc||0)+1;
+        // Record violation with location
+        state.violationLog.push({
+          time:fmtTime(Date.now()), lat, lng,
+          speed:Math.round(state.speed), limit,
+          road:state.roadName, postcode:state.endPostcode
+        });
+        showAlert('speed',`⚠ OVER LIMIT: ${Math.round(state.speed)} / ${limit} km/h (+${Math.round(margin)})`);
+        setAlarm(true);
       }
-
-      // Escalating beep: only if >20 over limit
-      setSpeedBeep(margin > 20);
+      setSpeedBeep(margin>20);
     }
   } else {
-    state.exceedStart   = null;
-    state.speedExceeded = false;
+    state.exceedStart=null; state.speedExceeded=false;
     setSpeedBeep(false);
-    if (!state.nearCamera) setAlarm(false);
+    if(!state.nearCamera) setAlarm(false);
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TRIP TIMER (1 s interval — independent of GPS)
-═══════════════════════════════════════════════════════════ */
-let tripTimerId = null;
-
-function startTripTimer() {
-  tripTimerId = setInterval(() => {
-    if (!rideActive) return;
-    const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-    const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
-    const ss = (elapsed % 60).toString().padStart(2, '0');
-    document.getElementById('tripTime').textContent = `${mm}:${ss}`;
-    document.getElementById('tripDist').textContent = state.distance.toFixed(2);
-  }, 1000);
+/* ════════════════════════════════════════════════════════════
+   TRIP TIMER
+════════════════════════════════════════════════════════════ */
+function startTripTimer(){
+  tripTimerId=setInterval(()=>{
+    if(!rideActive) return;
+    const e=Math.floor((Date.now()-state.startTime)/1000);
+    document.getElementById('tripTime').textContent=
+      `${Math.floor(e/60).toString().padStart(2,'0')}:${(e%60).toString().padStart(2,'0')}`;
+    document.getElementById('tripDist').textContent=state.distance.toFixed(2);
+  },1000);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CANVAS + RENDER LOOP
-═══════════════════════════════════════════════════════════ */
-let canvas, ctx, canvasW, canvasH;
-let rafId = null;
-
-function initCanvas() {
-  canvas = document.getElementById('speedCanvas');
-  ctx    = canvas.getContext('2d');
+/* ════════════════════════════════════════════════════════════
+   CANVAS
+════════════════════════════════════════════════════════════ */
+let canvas,ctx,cW,cH;
+function initCanvas(){
+  canvas=document.getElementById('speedCanvas');
+  ctx=canvas.getContext('2d');
   resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('resize',resizeCanvas);
+}
+function resizeCanvas(){
+  if(!canvas) return;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*dpr; canvas.height=canvas.offsetHeight*dpr;
+  cW=canvas.width; cH=canvas.height;
 }
 
-function resizeCanvas() {
-  if (!canvas) return;
-  const dpr  = window.devicePixelRatio || 1;
-  canvas.width  = canvas.offsetWidth  * dpr;
-  canvas.height = canvas.offsetHeight * dpr;
-  canvasW = canvas.width;
-  canvasH = canvas.height;
-}
+function gameLoop(){ if(!rideActive) return; draw(); rafId=requestAnimationFrame(gameLoop); }
 
-function gameLoop() {
-  if (!rideActive) return;
-  draw();
-  rafId = requestAnimationFrame(gameLoop);
-}
-
-/* ═══════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    DRAW
-═══════════════════════════════════════════════════════════ */
-function draw() {
-  if (!ctx) return;
-  ctx.clearRect(0, 0, canvasW, canvasH);
-
-  const limit       = state.speedLimit || REGIONS[region].defaultLimit;
-  const exceeded    = state.speed > limit;
-  const margin      = state.speed - limit;
-  const needleColor = margin > 20 ? '#ff2d2d' : exceeded ? '#ff6b00' : '#00d4ff';
-
-  const cx = canvasW / 2;
-  const cy = canvasH * 0.46;
-  const r  = Math.min(canvasW * 0.42, canvasH * 0.42);
-
-  drawArc(cx, cy, r, needleColor, limit);
-  drawSpeedDigits(cx, cy, r, needleColor);
-  drawLimitBadge(cx, cy, r, limit);
-  if (state.nearCamera)  drawCamBadge(cx, cy, r);
-  if (state.speed < 2 && state.lat !== null) drawStoppedLabel(cx, cy, r);
+════════════════════════════════════════════════════════════ */
+function draw(){
+  if(!ctx) return;
+  ctx.clearRect(0,0,cW,cH);
+  const limit=state.speedLimit||REGIONS[region].defaultLimit;
+  const margin=state.speed-limit;
+  const color=margin>20?'#ff2d2d':margin>0?'#ff6b00':'#00d4ff';
+  const cx=cW/2, cy=cH*0.455;
+  const r=Math.min(cW*0.41,cH*0.41);
+  drawArc(cx,cy,r,color,limit);
+  drawDigits(cx,cy,r,color);
+  drawLimitBadge(cx,cy,r,limit);
+  if(state.nearCamera) drawCamBadge(cx,cy,r);
+  if(state.speed<1&&state.lat!==null) drawStopped(cx,cy,r);
   drawGraph();
 }
 
-function drawArc(cx, cy, r, color, limit) {
-  const dpr    = window.devicePixelRatio || 1;
-  const startA = Math.PI * 0.75;
-  const endA   = Math.PI * 2.25;
-  const range  = endA - startA;
-  const maxKmh = 160;
-
-  const speedFrac = Math.min(state.speed / maxKmh, 1);
-  const limitFrac = Math.min(limit / maxKmh, 1);
-  const speedA    = startA + speedFrac * range;
-  const limitA    = startA + limitFrac * range;
-
-  ctx.lineCap = 'round';
-
-  // Track bg
-  ctx.beginPath(); ctx.arc(cx, cy, r, startA, endA);
-  ctx.strokeStyle = '#1c1f28'; ctx.lineWidth = r * 0.082; ctx.stroke();
-
-  // Safe zone
-  ctx.beginPath(); ctx.arc(cx, cy, r, startA, limitA);
-  ctx.strokeStyle = '#00e676'; ctx.lineWidth = r * 0.058; ctx.stroke();
-
-  // Over-limit zone
-  if (speedA > limitA) {
-    ctx.beginPath(); ctx.arc(cx, cy, r, limitA, speedA);
-    ctx.strokeStyle = color; ctx.lineWidth = r * 0.058; ctx.stroke();
-  }
-
-  // Tick marks + labels
-  const ticks = 16;
-  for (let i = 0; i <= ticks; i++) {
-    const a       = startA + (i / ticks) * range;
-    const isMajor = i % 2 === 0;
-    const len     = isMajor ? r * 0.10 : r * 0.055;
-    const r1      = r + r * 0.055;
-    const r2      = r1 - len;
-    ctx.beginPath();
-    ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
-    ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
-    ctx.strokeStyle = '#353945'; ctx.lineWidth = (isMajor ? 2 : 1) * dpr; ctx.stroke();
-
-    if (isMajor) {
-      const spd = Math.round((i / ticks) * maxKmh);
-      const tr  = r1 + r * 0.09;
-      ctx.font         = `${r * 0.095}px Orbitron, monospace`;
-      ctx.fillStyle    = '#44485a';
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(spd, cx + Math.cos(a) * tr, cy + Math.sin(a) * tr);
+function drawArc(cx,cy,r,color,limit){
+  const dpr=window.devicePixelRatio||1;
+  const sa=Math.PI*0.75, ea=Math.PI*2.25, rng=ea-sa;
+  const maxK=160;
+  const sf=Math.min(state.speed/maxK,1), lf=Math.min(limit/maxK,1);
+  const sA=sa+sf*rng, lA=sa+lf*rng;
+  ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(cx,cy,r,sa,ea); ctx.strokeStyle='#1c1f28'; ctx.lineWidth=r*.082; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,r,sa,lA); ctx.strokeStyle='#00e676'; ctx.lineWidth=r*.058; ctx.stroke();
+  if(sA>lA){ ctx.beginPath(); ctx.arc(cx,cy,r,lA,sA); ctx.strokeStyle=color; ctx.lineWidth=r*.058; ctx.stroke(); }
+  for(let i=0;i<=16;i++){
+    const a=sa+(i/16)*rng, maj=i%2===0;
+    const l=maj?r*.10:r*.055, r1=r+r*.055, r2=r1-l;
+    ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);
+    ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);
+    ctx.strokeStyle='#353945'; ctx.lineWidth=(maj?2:1)*dpr; ctx.stroke();
+    if(maj){
+      ctx.font=`${r*.09}px Orbitron,monospace`; ctx.fillStyle='#44485a';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(Math.round((i/16)*maxK),cx+Math.cos(a)*(r1+r*.09),cy+Math.sin(a)*(r1+r*.09));
     }
   }
-
-  // Needle
-  const nx = cx + Math.cos(speedA) * (r * 0.74);
-  const ny = cy + Math.sin(speedA) * (r * 0.74);
-  ctx.shadowColor = color; ctx.shadowBlur = 18 * dpr;
-  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(nx, ny);
-  ctx.strokeStyle = color; ctx.lineWidth = 3 * dpr; ctx.stroke();
-  ctx.shadowBlur = 0;
-
-  // Hub
-  ctx.beginPath(); ctx.arc(cx, cy, r * 0.065, 0, Math.PI * 2);
-  ctx.fillStyle = color; ctx.fill();
-  ctx.beginPath(); ctx.arc(cx, cy, r * 0.032, 0, Math.PI * 2);
-  ctx.fillStyle = '#0a0c10'; ctx.fill();
+  const nx=cx+Math.cos(sA)*(r*.74), ny=cy+Math.sin(sA)*(r*.74);
+  ctx.shadowColor=color; ctx.shadowBlur=18*dpr;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(nx,ny);
+  ctx.strokeStyle=color; ctx.lineWidth=3*dpr; ctx.stroke(); ctx.shadowBlur=0;
+  ctx.beginPath(); ctx.arc(cx,cy,r*.065,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,r*.030,0,Math.PI*2); ctx.fillStyle='#0a0c10'; ctx.fill();
 }
 
-function drawSpeedDigits(cx, cy, r, color) {
-  const dpr = window.devicePixelRatio || 1;
-  ctx.font         = `900 ${r * 0.56}px Orbitron, monospace`;
-  ctx.fillStyle    = color;
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor  = color; ctx.shadowBlur = 28 * dpr;
-  ctx.fillText(Math.round(state.speed), cx, cy + r * 0.08);
-  ctx.shadowBlur = 0;
-
-  ctx.font      = `600 ${r * 0.13}px Rajdhani, sans-serif`;
-  ctx.fillStyle = '#5a6070';
-  ctx.fillText('km/h', cx, cy + r * 0.41);
-
-  // Accuracy hint
-  if (state.accuracy !== null) {
-    ctx.font      = `500 ${r * 0.09}px Rajdhani, sans-serif`;
-    ctx.fillStyle = state.accuracy < 15 ? '#00e67660' : '#ff6b0060';
-    ctx.fillText(`GPS ±${state.accuracy}m`, cx, cy + r * 0.56);
+function drawDigits(cx,cy,r,color){
+  const dpr=window.devicePixelRatio||1;
+  ctx.font=`900 ${r*.55}px Orbitron,monospace`; ctx.fillStyle=color;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor=color; ctx.shadowBlur=26*dpr;
+  ctx.fillText(Math.round(state.speed),cx,cy+r*.07); ctx.shadowBlur=0;
+  ctx.font=`600 ${r*.125}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
+  ctx.fillText('km/h',cx,cy+r*.40);
+  if(state.accuracy!==null){
+    ctx.font=`500 ${r*.085}px Rajdhani,sans-serif`;
+    ctx.fillStyle=state.accuracy<15?'#00e67660':'#ff6b0060';
+    ctx.fillText(`GPS ±${state.accuracy}m`,cx,cy+r*.54);
   }
 }
 
-function drawLimitBadge(cx, cy, r, limit) {
-  const bx = cx - r * 0.94;
-  const by = cy + r * 0.06;
-  const br = r * 0.21;
-  ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2);
-  ctx.fillStyle = '#1a1d24'; ctx.fill();
-  ctx.strokeStyle = '#ff2d2d'; ctx.lineWidth = 3 * (window.devicePixelRatio || 1); ctx.stroke();
-
-  ctx.font         = `900 ${r * 0.16}px Orbitron, monospace`;
-  ctx.fillStyle    = '#ffffff';
-  ctx.textAlign    = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(limit, bx, by - r * 0.035);
-
-  ctx.font      = `600 ${r * 0.085}px Rajdhani, sans-serif`;
-  ctx.fillStyle = '#ff2d2d';
-  ctx.fillText('LIMIT', bx, by + r * 0.12);
+function drawLimitBadge(cx,cy,r,limit){
+  const bx=cx-r*.94, by=cy+r*.05, br=r*.21;
+  ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2);
+  ctx.fillStyle='#1a1d24'; ctx.fill();
+  ctx.strokeStyle='#ff2d2d'; ctx.lineWidth=3*(window.devicePixelRatio||1); ctx.stroke();
+  ctx.font=`900 ${r*.155}px Orbitron,monospace`; ctx.fillStyle='#fff';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(limit,bx,by-r*.03);
+  ctx.font=`600 ${r*.08}px Rajdhani,sans-serif`; ctx.fillStyle='#ff2d2d';
+  ctx.fillText('LIMIT',bx,by+r*.115);
 }
 
-function drawCamBadge(cx, cy, r) {
-  const bx    = cx + r * 0.94;
-  const by    = cy + r * 0.06;
-  const bw    = r * 0.38;
-  const bh    = r * 0.32;
-  const flash = Math.sin(Date.now() / 220) > 0;
-
-  ctx.fillStyle   = flash ? '#ffd70030' : '#ffd70012';
-  ctx.strokeStyle = '#ffd700';
-  ctx.lineWidth   = 2 * (window.devicePixelRatio || 1);
-  rRect(bx - bw/2, by - bh/2, bw, bh, 8);
-  ctx.fill(); ctx.stroke();
-
-  ctx.font = `${r * 0.17}px sans-serif`;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('📷', bx, by - r * 0.035);
-
-  ctx.font      = `700 ${r * 0.085}px Rajdhani, sans-serif`;
-  ctx.fillStyle = '#ffd700';
-  ctx.fillText('CAMERA', bx, by + r * 0.115);
+function drawCamBadge(cx,cy,r){
+  const bx=cx+r*.94, by=cy+r*.05, bw=r*.37, bh=r*.31;
+  const flash=Math.sin(Date.now()/200)>0;
+  ctx.fillStyle=flash?'#ffd70030':'#ffd70010'; ctx.strokeStyle='#ffd700';
+  ctx.lineWidth=2*(window.devicePixelRatio||1);
+  rRect(bx-bw/2,by-bh/2,bw,bh,7); ctx.fill(); ctx.stroke();
+  ctx.font=`${r*.16}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('📷',bx,by-r*.03);
+  ctx.font=`700 ${r*.08}px Rajdhani,sans-serif`; ctx.fillStyle='#ffd700';
+  ctx.fillText('CAMERA',bx,by+r*.11);
 }
 
-function drawStoppedLabel(cx, cy, r) {
-  ctx.font      = `700 ${r * 0.12}px Rajdhani, sans-serif`;
-  ctx.fillStyle = '#5a6070';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('STOPPED', cx, cy - r * 0.52);
+function drawStopped(cx,cy,r){
+  ctx.font=`700 ${r*.11}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('STOPPED',cx,cy-r*.50);
 }
 
-function drawGraph() {
-  const pts = state.speedHistory;
-  if (pts.length < 2) return;
-
-  const dpr  = window.devicePixelRatio || 1;
-  const gh   = canvasH * 0.13;
-  const gw   = canvasW * 0.84;
-  const gx   = (canvasW - gw) / 2;
-  const gy   = canvasH - gh - canvasH * 0.035;
-  const maxV = Math.max(160, ...pts);
-  const limit = state.speedLimit || 50;
-
-  ctx.fillStyle = '#12151c99';
-  rRect(gx, gy, gw, gh, 8); ctx.fill();
-
-  // Fill
+function drawGraph(){
+  const pts=state.speedHistory; if(pts.length<2) return;
+  const dpr=window.devicePixelRatio||1;
+  const gh=cH*.125, gw=cW*.85, gx=(cW-gw)/2, gy=cH-gh-cH*.03;
+  const maxV=Math.max(160,...pts), limit=state.speedLimit||50;
+  ctx.fillStyle='#12151c99'; rRect(gx,gy,gw,gh,8); ctx.fill();
   ctx.beginPath();
-  pts.forEach((v, i) => {
-    const px = gx + (i / (pts.length - 1)) * gw;
-    const py = gy + gh - (v / maxV) * gh;
-    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-  });
-  ctx.lineTo(gx + gw, gy + gh); ctx.lineTo(gx, gy + gh); ctx.closePath();
-  ctx.fillStyle = '#00d4ff14'; ctx.fill();
-
-  // Line
+  pts.forEach((v,i)=>{ const px=gx+(i/(pts.length-1))*gw, py=gy+gh-(v/maxV)*gh; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+  ctx.lineTo(gx+gw,gy+gh); ctx.lineTo(gx,gy+gh); ctx.closePath();
+  ctx.fillStyle='#00d4ff12'; ctx.fill();
   ctx.beginPath();
-  pts.forEach((v, i) => {
-    const px = gx + (i / (pts.length - 1)) * gw;
-    const py = gy + gh - (v / maxV) * gh;
-    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-  });
-  ctx.strokeStyle = '#00d4ff70'; ctx.lineWidth = 1.5 * dpr; ctx.stroke();
-
-  // Limit line
-  const lpy = gy + gh - (limit / maxV) * gh;
-  ctx.beginPath(); ctx.setLineDash([5, 4]);
-  ctx.moveTo(gx, lpy); ctx.lineTo(gx + gw, lpy);
-  ctx.strokeStyle = '#ff2d2d55'; ctx.lineWidth = 1 * dpr; ctx.stroke();
-  ctx.setLineDash([]);
-
-  ctx.font = `${8.5 * dpr}px Rajdhani, sans-serif`;
-  ctx.fillStyle = '#5a6070'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  ctx.fillText('SPEED HISTORY', gx + 5, gy + 4);
+  pts.forEach((v,i)=>{ const px=gx+(i/(pts.length-1))*gw, py=gy+gh-(v/maxV)*gh; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+  ctx.strokeStyle='#00d4ff70'; ctx.lineWidth=1.5*dpr; ctx.stroke();
+  const lpy=gy+gh-(limit/maxV)*gh;
+  ctx.beginPath(); ctx.setLineDash([5,4]);
+  ctx.moveTo(gx,lpy); ctx.lineTo(gx+gw,lpy);
+  ctx.strokeStyle='#ff2d2d55'; ctx.lineWidth=1*dpr; ctx.stroke(); ctx.setLineDash([]);
+  ctx.font=`${8.5*dpr}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
+  ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillText('SPEED HISTORY',gx+5,gy+4);
 }
 
-function rRect(x, y, w, h, rad) {
-  if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, rad); return; }
-  ctx.beginPath();
-  ctx.moveTo(x + rad, y);
-  ctx.lineTo(x + w - rad, y); ctx.quadraticCurveTo(x + w, y, x + w, y + rad);
-  ctx.lineTo(x + w, y + h - rad); ctx.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
-  ctx.lineTo(x + rad, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - rad);
-  ctx.lineTo(x, y + rad); ctx.quadraticCurveTo(x, y, x + rad, y);
-  ctx.closePath();
+function rRect(x,y,w,h,rad){
+  if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x,y,w,h,rad); return; }
+  ctx.beginPath(); ctx.moveTo(x+rad,y);
+  ctx.lineTo(x+w-rad,y); ctx.quadraticCurveTo(x+w,y,x+w,y+rad);
+  ctx.lineTo(x+w,y+h-rad); ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
+  ctx.lineTo(x+rad,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-rad);
+  ctx.lineTo(x,y+rad); ctx.quadraticCurveTo(x,y,x+rad,y); ctx.closePath();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   HAVERSINE DISTANCE  (returns km)
-═══════════════════════════════════════════════════════════ */
-function haversine(lat1, lon1, lat2, lon2) {
-  const R  = 6371;
-  const dL = (lat2 - lat1) * Math.PI / 180;
-  const dG = (lon2 - lon1) * Math.PI / 180;
-  const a  = Math.sin(dL/2)**2 +
-             Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dG/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-/* ═══════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════════════════
    END RIDE
-═══════════════════════════════════════════════════════════ */
-function endRide() {
-  if (!rideActive) return;
-  rideActive = false;
+════════════════════════════════════════════════════════════ */
+function endRide(){
+  if(!rideActive) return;
+  rideActive=false;
+  cancelAnimationFrame(rafId); clearInterval(tripTimerId);
+  setSpeedBeep(false); setAlarm(false); releaseWakeLock();
+  if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
 
-  cancelAnimationFrame(rafId);
-  clearInterval(tripTimerId);
-  setSpeedBeep(false);
-  setAlarm(false);
+  const elapsed=Math.floor((Date.now()-state.startTime)/1000);
+  const mm=Math.floor(elapsed/60).toString().padStart(2,'0');
+  const ss=(elapsed%60).toString().padStart(2,'0');
+  const avg=state.avgSpeedCount>0?Math.round(state.avgSpeedSum/state.avgSpeedCount):0;
 
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
+  // Build trip record
+  const trip={
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'}),
+    time: new Date(state.startTime).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}),
+    region,
+    duration:`${mm}:${ss}`,
+    distance: parseFloat(state.distance.toFixed(2)),
+    maxSpeed: Math.round(state.maxSpeed),
+    avgSpeed: avg,
+    violations: state.violations,
+    camAlerts: state.camAlerts,
+    startAddress: state.startAddress||'Unknown',
+    endAddress: state.endAddress||'Unknown',
+    startPostcode: state.startPostcode,
+    endPostcode: state.endPostcode,
+    speedLog: state.speedLog.slice(-500), // keep last 500 for detail view
+    violationLog: state.violationLog,
+    cameraLog: state.cameraLog,
+    history: state.history
+  };
+  appendTrip(trip);
 
-  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-  const mm = Math.floor(elapsed / 60).toString().padStart(2, '0');
-  const ss = (elapsed % 60).toString().padStart(2, '0');
-  const avg = state.avgSpeedCount > 0
-    ? Math.round(state.avgSpeedSum / state.avgSpeedCount) : 0;
-
-  document.getElementById('esDist').textContent = state.distance.toFixed(2) + ' km';
-  document.getElementById('esTime').textContent = `${mm}:${ss}`;
-  document.getElementById('esMax').textContent  = Math.round(state.maxSpeed) + ' km/h';
-  document.getElementById('esAvg').textContent  = avg + ' km/h';
-  document.getElementById('esViol').textContent = state.violations;
-  document.getElementById('esCam').textContent  = state.camAlerts;
-
+  // Populate end screen
+  const routeText=`${state.startAddress||'Start'} → ${state.endAddress||'End'}`;
+  document.getElementById('esDist').textContent=state.distance.toFixed(2)+' km';
+  document.getElementById('esTime').textContent=`${mm}:${ss}`;
+  document.getElementById('esMax').textContent=Math.round(state.maxSpeed)+' km/h';
+  document.getElementById('esAvg').textContent=avg+' km/h';
+  document.getElementById('esViol').textContent=state.violations;
+  document.getElementById('esCam').textContent=state.camAlerts;
+  document.getElementById('esRoute').textContent=routeText;
   showScreen('endScreen');
 }
 
-function resetApp() { showScreen('startScreen'); }
+function resetApp(){ updateTripCount(); showScreen('startScreen'); }
 
-/* ═══════════════════════════════════════════════════════════
-   AUDIO UNLOCK ON FIRST TOUCH
-═══════════════════════════════════════════════════════════ */
-['touchstart', 'click'].forEach(ev =>
-  document.addEventListener(ev, () => {
-    try { getAudio().resume(); } catch(e) {}
-  }, { once: true })
+/* ════════════════════════════════════════════════════════════
+   HISTORY SCREEN
+════════════════════════════════════════════════════════════ */
+function openHistory(){ renderHistoryList(); showScreen('histScreen'); }
+
+function renderHistoryList(){
+  const trips=loadTrips().reverse();
+  const el=document.getElementById('histList');
+  if(!trips.length){
+    el.innerHTML='<div class="no-trips"><span style="font-size:28px">🚗</span><span>No trips recorded yet</span></div>';
+    return;
+  }
+  el.innerHTML=trips.map((t,i)=>{
+    const vCol=t.violations>0?'style="color:var(--danger)"':'style="color:var(--success)"';
+    return `<div class="trip-card" onclick="openTripDetail(${t.id})">
+      <div class="trip-card-header">
+        <div class="trip-card-title">TRIP #${trips.length-i}</div>
+        <div class="trip-card-date">${t.date} ${t.time}</div>
+      </div>
+      <div class="trip-card-stats">
+        <div class="tc-stat"><div class="tl">Dist</div><div class="tv">${t.distance}km</div></div>
+        <div class="tc-stat"><div class="tl">Max</div><div class="tv">${t.maxSpeed}km/h</div></div>
+        <div class="tc-stat"><div class="tl">Violations</div><div class="tv" ${vCol}>${t.violations}</div></div>
+      </div>
+      <div class="trip-route-line">
+        📍<b>${t.startAddress||t.startPostcode||'Unknown'}</b><br>
+        🏁<b>${t.endAddress||t.endPostcode||'Unknown'}</b>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   TRIP DETAIL SCREEN
+════════════════════════════════════════════════════════════ */
+function openTripDetail(id){
+  const trips=loadTrips();
+  const t=trips.find(x=>x.id===id);
+  if(!t) return;
+
+  document.getElementById('detailTitle').textContent=`${t.date} ${t.time}`;
+  const body=document.getElementById('detailBody');
+
+  // Summary
+  body.innerHTML=`
+  <div class="detail-section">
+    <h3>Summary</h3>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${[['Distance',t.distance+'km'],['Duration',t.duration],['Max Speed',t.maxSpeed+'km/h'],
+         ['Avg Speed',t.avgSpeed+'km/h'],['Violations',t.violations],['Cam Alerts',t.camAlerts]]
+        .map(([l,v])=>`<div class="tc-stat"><div class="tl">${l}</div><div class="tv">${v}</div></div>`).join('')}
+    </div>
+  </div>
+  <div class="detail-section">
+    <h3>Route</h3>
+    <div class="route-strip">
+      <div class="route-pin">📍 ${t.startPostcode||'Start'}</div>
+      <div class="route-arrow">────────►</div>
+      <div class="route-pin">🏁 ${t.endPostcode||'End'}</div>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted);line-height:1.6">
+      From: <span style="color:var(--text)">${t.startAddress||'Unknown'}</span><br>
+      To: <span style="color:var(--text)">${t.endAddress||'Unknown'}</span>
+    </div>
+  </div>`;
+
+  // Speed timeline (sample every Nth point for readability)
+  if(t.speedLog && t.speedLog.length>0){
+    const step=Math.max(1,Math.floor(t.speedLog.length/60));
+    const rows=t.speedLog.filter((_,i)=>i%step===0).map(e=>{
+      const m=e.spd-e.limit;
+      const cls=m>20?'over':m>0?'warn':'ok';
+      const sc=m>20?'tl-spd-over':m>0?'tl-spd-warn':'tl-spd-ok';
+      const ts=new Date(e.t).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      return `<div class="tl-row ${cls}">
+        <span class="tl-time">${ts.slice(0,5)}</span>
+        <span class="tl-speed ${sc}">${e.spd}km/h</span>
+        <span class="tl-road">${e.road||'—'}</span>
+        <span style="font-size:10px;color:var(--muted)">${e.limit}lim</span>
+      </div>`;
+    }).join('');
+    body.innerHTML+=`<div class="detail-section"><h3>Speed Timeline (color-coded)</h3>
+      <div style="margin-bottom:6px;font-size:10px;color:var(--muted)">
+        <span style="color:var(--success)">■</span> Safe &nbsp;
+        <span style="color:var(--warn)">■</span> Over limit &nbsp;
+        <span style="color:var(--danger)">■</span> +20 over limit
+      </div>
+      <div class="speed-timeline" style="max-height:220px;overflow-y:auto">${rows}</div>
+    </div>`;
+
+    // Mini graph
+    body.innerHTML+=`<div class="detail-section"><h3>Speed Graph</h3>
+      <canvas class="graph-canvas" id="detailGraph"></canvas></div>`;
+    requestAnimationFrame(()=>renderDetailGraph(t.speedLog));
+  }
+
+  // Violations
+  if(t.violationLog && t.violationLog.length>0){
+    const items=t.violationLog.map(v=>`
+      <div class="viol-item">
+        <div class="vi-loc">${v.road||'Unknown Road'}</div>
+        <div class="vi-detail">${v.time} · ${v.speed} km/h in ${v.limit} zone (+${v.speed-v.limit})</div>
+        ${v.postcode?`<div class="vi-pin">📍 ${v.postcode}</div>`:''}
+        ${v.lat?`<div class="vi-pin" style="color:var(--muted)">${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}</div>`:''}
+      </div>`).join('');
+    body.innerHTML+=`<div class="detail-section"><h3>Violations (${t.violationLog.length})</h3>
+      <div class="viol-list">${items}</div></div>`;
+  }
+
+  // Camera alerts
+  if(t.cameraLog && t.cameraLog.length>0){
+    const items=t.cameraLog.map(c=>`
+      <div class="viol-item">
+        <div class="vi-loc" style="color:var(--cam)">${c.type==='police'?'🚔 Police Radar':'📷 Speed Camera'}</div>
+        <div class="vi-detail">${c.time} · ${c.road||'—'} · ${c.dist}m away</div>
+      </div>`).join('');
+    body.innerHTML+=`<div class="detail-section"><h3>Camera Alerts (${t.cameraLog.length})</h3>
+      <div class="viol-list">${items}</div></div>`;
+  }
+
+  showScreen('detailScreen');
+}
+
+function renderDetailGraph(log){
+  const c=document.getElementById('detailGraph'); if(!c) return;
+  const dpr=window.devicePixelRatio||1;
+  c.width=c.offsetWidth*dpr; c.height=c.offsetHeight*dpr;
+  const gx=c.getContext('2d');
+  const W=c.width, H=c.height;
+  const maxV=Math.max(80,...log.map(e=>e.spd));
+  const step=Math.max(1,Math.floor(log.length/W));
+  const pts=log.filter((_,i)=>i%step===0);
+  gx.fillStyle='#1a1d24'; gx.fillRect(0,0,W,H);
+
+  // Colored segments
+  pts.forEach((e,i)=>{
+    if(i===0) return;
+    const x1=(  (i-1)/(pts.length-1))*W, x2=(i/(pts.length-1))*W;
+    const y1=H-(pts[i-1].spd/maxV)*H, y2=H-(e.spd/maxV)*H;
+    const m=e.spd-e.limit;
+    gx.beginPath(); gx.moveTo(x1,y1); gx.lineTo(x2,y2);
+    gx.strokeStyle=m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';
+    gx.lineWidth=2*dpr; gx.stroke();
+  });
+
+  // Limit line
+  if(log.length>0){
+    const lim=log[Math.floor(log.length/2)].limit;
+    const ly=H-(lim/maxV)*H;
+    gx.beginPath(); gx.setLineDash([4,3]);
+    gx.moveTo(0,ly); gx.lineTo(W,ly);
+    gx.strokeStyle='#ff2d2d66'; gx.lineWidth=1*dpr; gx.stroke();
+    gx.setLineDash([]);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   IMPORT / EXPORT
+════════════════════════════════════════════════════════════ */
+function downloadHistory(){
+  const trips=loadTrips();
+  const blob=new Blob([JSON.stringify(trips,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`speedsense_trips_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function importHistory(evt){
+  const file=evt.target.files[0]; if(!file) return;
+  const fr=new FileReader();
+  fr.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data)) throw new Error('Invalid format');
+      const existing=loadTrips();
+      const existIds=new Set(existing.map(t=>t.id));
+      const merged=[...existing,...data.filter(t=>!existIds.has(t.id))];
+      merged.sort((a,b)=>a.id-b.id);
+      saveTrips(merged);
+      updateTripCount();
+      alert(`Imported ${data.length} trips. Total: ${merged.length}`);
+      if(document.getElementById('histScreen').classList.contains('active')) renderHistoryList();
+    }catch(ex){ alert('Import failed: '+ex.message); }
+  };
+  fr.readAsText(file);
+  evt.target.value='';
+}
+
+function clearAllHistory(){
+  if(!confirm('Delete ALL trip history? This cannot be undone.')) return;
+  saveTrips([]);
+  updateTripCount();
+  if(document.getElementById('histScreen').classList.contains('active')) renderHistoryList();
+}
+
+/* ════════════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════════════ */
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371,dL=(lat2-lat1)*Math.PI/180,dG=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dG/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function fmtTime(ts){
+  return new Date(ts).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIO UNLOCK — must happen on first user gesture
+   Multiple events cover iOS/Android edge cases
+════════════════════════════════════════════════════════════ */
+const _unlock=()=>{ unlockAudio(); };
+['touchstart','touchend','mousedown','keydown','click'].forEach(ev=>
+  document.addEventListener(ev,_unlock,{once:true,passive:true})
 );
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════ */
+updateTripCount();
 </script>
 </body>
 </html>
