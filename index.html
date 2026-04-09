@@ -2,19 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0c10">
 <title>SpeedSense</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0c10;--surface:#111318;--card:#1a1d24;--border:#2a2e3a;
   --text:#e8eaf0;--muted:#6b7280;--accent:#00d4ff;--warn:#ff6b00;
-  --danger:#ff2d2d;--success:#00e676;--cam:#ffd700;--police:#7b2fff;
+  --danger:#ff2d2d;--success:#00e676;--cam:#ffd700;--police:#a855f7;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
 html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);
@@ -26,189 +27,194 @@ canvas{display:block}
   padding-top:var(--st);padding-bottom:var(--sb)}
 .screen.active{display:flex}
 
-/* ── START ── */
-#startScreen{background:var(--bg);align-items:center;justify-content:center;gap:18px;padding:28px 20px;overflow-y:auto}
-.logo{font-family:'Orbitron',monospace;font-size:clamp(22px,6.5vw,32px);font-weight:900;
-  letter-spacing:4px;color:var(--accent);text-align:center}
-.logo span{color:var(--warn);font-size:clamp(9px,2.8vw,12px);display:block;letter-spacing:6px;
-  font-weight:400;margin-top:5px}
+/* ══ START ══ */
+#startScreen{background:var(--bg);align-items:center;justify-content:center;gap:16px;padding:24px 20px;overflow-y:auto}
+.logo{font-family:'Orbitron',monospace;font-size:clamp(22px,6vw,32px);font-weight:900;letter-spacing:4px;color:var(--accent);text-align:center}
+.logo span{color:var(--warn);font-size:clamp(9px,2.5vw,12px);display:block;letter-spacing:6px;font-weight:400;margin-top:4px}
 .region-btns{display:flex;gap:10px}
-.region-btn{background:var(--card);border:1.5px solid var(--border);color:var(--muted);
-  font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;padding:9px 24px;
-  border-radius:8px;cursor:pointer;transition:all .2s}
+.region-btn{background:var(--card);border:1.5px solid var(--border);color:var(--muted);font-family:'Rajdhani',sans-serif;
+  font-size:15px;font-weight:600;padding:9px 22px;border-radius:8px;cursor:pointer;transition:all .2s}
 .region-btn.active{border-color:var(--accent);color:var(--accent);background:#00d4ff11}
 .info-text{color:var(--muted);font-size:13px;text-align:center;line-height:1.7}
 .info-text b{color:var(--text)}
 .start-btn{background:#00d4ff15;border:1.5px solid var(--accent);color:var(--accent);
   font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:2px;
-  padding:15px 46px;border-radius:50px;cursor:pointer;transition:all .2s}
+  padding:15px 44px;border-radius:50px;cursor:pointer;transition:all .2s}
 .start-btn:active{transform:scale(.97);background:#00d4ff22}
-.start-btn.red{border-color:var(--danger);color:var(--danger);background:#ff2d2d11}
 .hist-open-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
-  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;padding:8px 20px;
-  border-radius:8px;cursor:pointer;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;padding:8px 18px;
+  border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .hist-open-btn:active{background:var(--card)}
-.io-row{display:flex;gap:10px;align-items:center}
+.io-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
 .io-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
-  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;padding:7px 16px;
-  border-radius:6px;cursor:pointer;letter-spacing:.5px}
+  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;
+  border-radius:6px;cursor:pointer}
 .io-btn:active{background:var(--card)}
 .io-btn.accent{border-color:var(--accent);color:var(--accent)}
-#tripCountBadge{font-size:11px;background:var(--card);border:1px solid var(--border);
-  padding:3px 10px;border-radius:12px;color:var(--muted)}
+#tripCountBadge{font-size:11px;background:var(--card);border:1px solid var(--border);padding:2px 8px;border-radius:10px;color:var(--muted)}
 
-/* ── RIDE SCREEN ── */
+/* ══ RIDE ══ */
 #rideScreen{background:var(--bg)}
-#topBar{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:7px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
-#topBar .left{display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap;min-width:0}
-#topBar .right{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .5s}
-.gps-dot.fix{background:var(--success);animation:glow 2s infinite}
-.gps-dot.searching{background:var(--warn);animation:glow .7s infinite}
-@keyframes glow{0%,100%{opacity:1}50%{opacity:.25}}
+#topBar{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 10px;
+  display:flex;align-items:center;gap:7px;flex-shrink:0}
+#topBar .left{display:flex;align-items:center;gap:7px;flex:1;flex-wrap:wrap;min-width:0}
+#topBar .right{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.gps-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .4s}
+.gps-dot.fix{background:var(--success);animation:blink 2s infinite}
+.gps-dot.searching{background:var(--warn);animation:blink .6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .trip-stat{font-size:11px;color:var(--muted);white-space:nowrap}
 .trip-stat span{color:var(--text);font-weight:700}
-.acc-badge{font-size:10px;padding:2px 5px;border-radius:4px;background:var(--card);
-  border:1px solid var(--border);color:var(--muted)}
+.acc-badge{font-size:10px;padding:2px 5px;border-radius:4px;background:var(--card);border:1px solid var(--border);color:var(--muted)}
 .acc-badge.good{border-color:var(--success);color:var(--success)}
 .acc-badge.poor{border-color:var(--warn);color:var(--warn)}
-.wake-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:#00e67611;
-  border:1px solid #00e67644;color:#00e676}
-.wake-badge.off{background:#ff6b0011;border-color:#ff6b0044;color:var(--warn)}
-.top-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
-  font-size:11px;font-family:'Rajdhani',sans-serif;font-weight:700;padding:5px 10px;
-  border-radius:5px;cursor:pointer;letter-spacing:.5px;white-space:nowrap}
-.top-btn.danger{border-color:var(--danger);color:var(--danger)}
+.wake-badge{font-size:10px;padding:2px 5px;border-radius:4px;background:#00e67611;border:1px solid #00e67640;color:#00e676}
+.wake-badge.off{background:#ff6b0011;border-color:#ff6b0040;color:var(--warn)}
+.top-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;
+  font-family:'Rajdhani',sans-serif;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;white-space:nowrap}
 .top-btn:active{background:var(--card)}
-#alertBanner{position:absolute;top:0;left:0;right:0;padding:9px 14px;display:none;
-  align-items:center;gap:8px;font-size:14px;font-weight:700;letter-spacing:.4px;z-index:6;
-  animation:slideIn .2s ease}
-@keyframes slideIn{from{transform:translateY(-100%)}to{transform:translateY(0)}}
-#alertBanner.cam   {background:#ffd70020;border-bottom:2px solid var(--cam);   color:var(--cam)}
-#alertBanner.speed {background:#ff6b0020;border-bottom:2px solid var(--warn);  color:var(--warn)}
-#alertBanner.police{background:#7b2fff20;border-bottom:2px solid var(--police);color:var(--police)}
-#alertBanner.info  {background:#00d4ff15;border-bottom:2px solid var(--accent);color:var(--accent)}
+
+/* ══ ALERT ICONS (replaces banner) ══ */
+#alertIcons{position:absolute;top:0;left:0;right:0;display:flex;gap:6px;padding:6px 10px;
+  pointer-events:none;z-index:8;flex-wrap:wrap}
+.alert-icon{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;
+  font-size:12px;font-weight:700;letter-spacing:.3px;animation:popIn .2s ease;
+  pointer-events:auto;transition:opacity .4s}
+.alert-icon.fade{opacity:0}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.alert-icon.cam   {background:#ffd70022;border:1.5px solid var(--cam);   color:var(--cam)}
+.alert-icon.speed {background:#ff2d2d22;border:1.5px solid var(--danger); color:var(--danger)}
+.alert-icon.warn  {background:#ff6b0020;border:1.5px solid var(--warn);  color:var(--warn)}
+.alert-icon.police{background:#a855f720;border:1.5px solid var(--police);color:var(--police)}
+.alert-icon.info  {background:#00d4ff15;border:1.5px solid var(--accent);color:var(--accent)}
+.aico{font-size:16px;line-height:1}
+
 #mainView{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 #speedCanvas{flex:1;display:block;width:100%;touch-action:none}
-#stopTimer{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+#stopTimer{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
   background:#ffd70018;border:1px solid var(--cam);color:var(--cam);font-size:11px;
-  padding:3px 14px;border-radius:16px;display:none;z-index:5;white-space:nowrap;font-weight:600}
-#bottomPanel{background:var(--surface);border-top:1px solid var(--border);
-  padding:8px 12px;display:flex;gap:7px;align-items:center;flex-shrink:0}
-.stat-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:9px;
-  padding:6px 7px;text-align:center;min-width:0;cursor:default}
-.stat-card.clickable{cursor:pointer}
-.stat-card .label{font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;line-height:1}
-.stat-card .val{font-family:'Orbitron',monospace;font-size:clamp(14px,3.2vw,20px);
-  font-weight:700;color:var(--text);line-height:1.25}
-.stat-card .val.warn  {color:var(--warn)}
-.stat-card .val.danger{color:var(--danger)}
-.stat-card .val.cam   {color:var(--cam)}
-.stat-card .val.good  {color:var(--success)}
+  padding:3px 14px;border-radius:14px;display:none;z-index:5;white-space:nowrap;font-weight:600}
 
-/* ── END SCREEN ── */
-#endScreen{background:var(--bg);align-items:center;justify-content:center;gap:18px;padding:20px;overflow-y:auto}
+#bottomPanel{background:var(--surface);border-top:1px solid var(--border);
+  padding:8px 10px;display:flex;gap:6px;align-items:center;flex-shrink:0}
+.stat-card{flex:1;background:var(--card);border:1px solid var(--border);border-radius:9px;
+  padding:6px 5px;text-align:center;min-width:0}
+.stat-card.tap{cursor:pointer}
+.stat-card .label{font-size:9px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;line-height:1}
+.stat-card .val{font-family:'Orbitron',monospace;font-size:clamp(13px,3vw,19px);font-weight:700;color:var(--text);line-height:1.25}
+.stat-card .val.warn{color:var(--warn)}.stat-card .val.danger{color:var(--danger)}
+.stat-card .val.cam{color:var(--cam)}.stat-card .val.good{color:var(--success)}
+
+/* ══ END SCREEN ══ */
+#endScreen{background:var(--bg);align-items:center;justify-content:center;gap:16px;padding:20px;overflow-y:auto}
 #endStats{background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:20px;width:100%;max-width:360px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  padding:18px;width:100%;max-width:360px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .end-stat{text-align:center}
-.end-stat .el{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
-.end-stat .ev{font-family:'Orbitron',monospace;font-size:clamp(16px,4.5vw,22px);
-  font-weight:700;color:var(--text);margin-top:3px}
+.end-stat .el{font-size:10px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase}
+.end-stat .ev{font-family:'Orbitron',monospace;font-size:clamp(15px,4vw,21px);font-weight:700;color:var(--text);margin-top:2px}
 .end-route{background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:10px 14px;width:100%;max-width:360px;font-size:12px}
-.end-route .rl{color:var(--muted);font-size:10px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+  padding:10px 12px;width:100%;max-width:360px;font-size:12px}
+.end-route .rl{color:var(--muted);font-size:10px;letter-spacing:.7px;text-transform:uppercase;margin-bottom:4px}
 .end-route .rv{color:var(--text);font-weight:600;line-height:1.5}
 
-/* ── TRIP HISTORY SCREEN ── */
+/* ══ HISTORY ══ */
 #histScreen{background:var(--bg);flex-direction:column}
 #histHeader{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-#histHeader h2{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
-  color:var(--accent);letter-spacing:2px;flex:1}
-#histList{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+  padding:10px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+#histHeader h2{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:2px;flex:1}
+#histList{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
 #histList::-webkit-scrollbar{width:4px}
 #histList::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.trip-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:14px;cursor:pointer;transition:border-color .2s}
-.trip-card:hover{border-color:var(--accent)}
-.trip-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.trip-card-title{font-family:'Orbitron',monospace;font-size:12px;color:var(--accent);font-weight:700}
-.trip-card-date{font-size:11px;color:var(--muted)}
-.trip-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
-.tc-stat{text-align:center;background:var(--surface);border-radius:6px;padding:4px}
-.tc-stat .tl{font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
-.tc-stat .tv{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--text)}
-.trip-route-line{font-size:11px;color:var(--muted);line-height:1.5}
-.trip-route-line b{color:var(--text);font-weight:600}
-.viol-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:4px}
-.no-trips{display:flex;align-items:center;justify-content:center;height:100%;
-  color:var(--muted);font-size:14px;flex-direction:column;gap:8px}
+.trip-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:border-color .15s}
+.trip-card:active{border-color:var(--accent)}
+.tc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px}
+.tc-title{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);font-weight:700}
+.tc-date{font-size:10px;color:var(--muted)}
+.tc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:7px}
+.tcs{text-align:center;background:var(--surface);border-radius:5px;padding:4px}
+.tcs .tl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.tcs .tv{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--text)}
+.tc-route{font-size:11px;color:var(--muted);line-height:1.5}
+.tc-route b{color:var(--text)}
+.no-trips{display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:14px;flex-direction:column;gap:8px}
 
-/* ── TRIP DETAIL SCREEN ── */
+/* ══ DETAIL ══ */
 #detailScreen{background:var(--bg);flex-direction:column}
 #detailHeader{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-#detailHeader h2{font-family:'Orbitron',monospace;font-size:13px;color:var(--accent);
-  letter-spacing:1.5px;font-weight:700;flex:1}
-#detailBody{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+  padding:9px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+#detailHeader h2{font-family:'Orbitron',monospace;font-size:12px;color:var(--accent);letter-spacing:1px;font-weight:700;flex:1}
+#detailBody{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
 #detailBody::-webkit-scrollbar{width:4px}
 #detailBody::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.detail-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px}
-.detail-section h3{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;
-  margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.route-strip{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.route-pin{font-size:12px;font-weight:700;color:var(--accent);
-  background:var(--surface);padding:4px 10px;border-radius:16px;border:1px solid var(--border)}
-.route-arrow{color:var(--muted);font-size:12px}
-.speed-timeline{display:flex;flex-direction:column;gap:4px}
-.tl-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 8px;border-radius:6px}
-.tl-row.over{background:#ff2d2d12;border-left:3px solid var(--danger)}
-.tl-row.warn{background:#ff6b0010;border-left:3px solid var(--warn)}
-.tl-row.ok  {background:#00e67608;border-left:3px solid var(--success)}
-.tl-time{color:var(--muted);font-size:10px;min-width:42px}
-.tl-speed{font-family:'Orbitron',monospace;font-weight:700;font-size:13px;min-width:52px}
-.tl-road{color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tl-spd-over{color:var(--danger)}
-.tl-spd-warn{color:var(--warn)}
-.tl-spd-ok  {color:var(--success)}
-.graph-canvas{width:100%;height:120px;display:block;border-radius:6px;background:var(--surface)}
+.dsec{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px}
+.dsec h3{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.route-strip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.route-pin{font-size:12px;font-weight:700;color:var(--accent);background:var(--surface);
+  padding:4px 10px;border-radius:14px;border:1px solid var(--border)}
+.route-arrow{color:var(--muted);font-size:11px;flex:1;text-align:center}
+.osm-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--accent);
+  text-decoration:none;padding:6px 12px;border:1px solid var(--accent);border-radius:6px;
+  background:#00d4ff0a;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:600}
+#mapContainer{width:100%;height:240px;border-radius:8px;overflow:hidden;margin-top:8px;
+  border:1px solid var(--border);position:relative}
+#routeMap{width:100%;height:100%}
+.map-legend{position:absolute;bottom:6px;left:6px;background:#000000bb;
+  border-radius:6px;padding:4px 8px;font-size:10px;z-index:1000;display:flex;gap:8px}
+.ml{display:flex;align-items:center;gap:3px;color:#ccc}
+.mld{width:12px;height:3px;border-radius:1px}
+.speed-tl{display:flex;flex-direction:column;gap:3px;max-height:200px;overflow-y:auto}
+.speed-tl::-webkit-scrollbar{width:3px}
+.speed-tl::-webkit-scrollbar-thumb{background:var(--border)}
+.tl-row{display:flex;align-items:center;gap:7px;font-size:11px;padding:4px 7px;border-radius:5px}
+.tl-row.over{background:#ff2d2d10;border-left:2.5px solid var(--danger)}
+.tl-row.wrn {background:#ff6b0010;border-left:2.5px solid var(--warn)}
+.tl-row.ok  {background:#00e67608;border-left:2.5px solid var(--success)}
+.tl-t{color:var(--muted);font-size:10px;min-width:40px}
+.tl-s{font-family:'Orbitron',monospace;font-weight:700;font-size:12px;min-width:50px}
+.tl-s.over{color:var(--danger)}.tl-s.wrn{color:var(--warn)}.tl-s.ok{color:var(--success)}
+.tl-r{color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.graph-wrap{width:100%;height:110px;border-radius:6px;overflow:hidden;background:var(--surface);margin-top:8px}
+.graph-wrap canvas{width:100%;height:100%;display:block}
 .viol-list{display:flex;flex-direction:column;gap:6px}
-.viol-item{background:var(--surface);border-radius:6px;padding:6px 10px;font-size:11px}
-.viol-item .vi-loc{color:var(--accent);font-weight:600;font-size:12px}
-.viol-item .vi-detail{color:var(--muted);margin-top:2px}
-.viol-item .vi-pin{color:var(--warn);font-size:10px;margin-top:1px}
+.vi{background:var(--surface);border-radius:6px;padding:7px 10px}
+.vi .vr{color:var(--danger);font-weight:700;font-size:12px}
+.vi .vd{color:var(--muted);font-size:11px;margin-top:2px}
+.vi .vp{color:var(--warn);font-size:10px;margin-top:2px}
+.vi .vmap{color:var(--accent);font-size:10px;margin-top:3px;cursor:pointer;text-decoration:underline}
 
-/* ── OVERLAY ── */
-#overlay{position:absolute;inset:0;background:#000000e8;display:none;
-  align-items:center;justify-content:center;z-index:40;flex-direction:column;padding:28px}
+/* ══ OVERLAY ══ */
+#overlay{position:absolute;inset:0;background:#000000e0;display:none;
+  align-items:center;justify-content:center;z-index:40;padding:24px}
 #overlay.visible{display:flex}
-.ov-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;
-  padding:26px 24px 22px;max-width:320px;width:100%;text-align:center}
-.ov-box h3{font-family:'Orbitron',monospace;font-size:14px;margin-bottom:8px;
-  color:var(--text);letter-spacing:1px}
-.ov-box p{color:var(--muted);font-size:13px;margin-bottom:20px;line-height:1.6}
+.ov-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:24px 22px 20px;max-width:310px;width:100%;text-align:center}
+.ov-box h3{font-family:'Orbitron',monospace;font-size:14px;margin-bottom:8px;color:var(--text);letter-spacing:1px}
+.ov-box p{color:var(--muted);font-size:13px;margin-bottom:18px;line-height:1.6}
 .ov-btns{display:flex;gap:10px;justify-content:center}
-.btn-c{padding:10px 22px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;
+.btn-c{padding:10px 20px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;
   font-size:14px;font-weight:700;letter-spacing:1px;border:1.5px solid}
-.btn-y{background:#00d4ff12;border-color:var(--accent);color:var(--accent)}
-.btn-y:active{background:#00d4ff22}
-.btn-n{background:#ff2d2d0a;border-color:var(--danger);color:var(--danger)}
-.btn-n:active{background:#ff2d2d18}
-.btn-y.red{background:#ff2d2d0a;border-color:var(--danger);color:var(--danger)}
+.btn-y{background:#00d4ff10;border-color:var(--accent);color:var(--accent)}
+.btn-y:active{background:#00d4ff20}
+.btn-n{background:#ff2d2d08;border-color:var(--danger);color:var(--danger)}
+.btn-n:active{background:#ff2d2d15}
+.btn-y.red{background:#ff2d2d08;border-color:var(--danger);color:var(--danger)}
 #gpsErrBox{position:absolute;inset:0;background:#000000cc;display:none;
-  align-items:center;justify-content:center;z-index:30;padding:28px}
+  align-items:center;justify-content:center;z-index:30;padding:24px}
 #gpsErrBox.visible{display:flex}
-.gerr{background:var(--surface);border:1px solid var(--danger);border-radius:14px;
-  padding:24px;max-width:300px;text-align:center}
+.gerr{background:var(--surface);border:1px solid var(--danger);border-radius:12px;padding:22px;max-width:290px;text-align:center}
 .gerr h3{color:var(--danger);font-family:'Orbitron',monospace;font-size:13px;margin-bottom:8px}
-.gerr p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:16px}
+.gerr p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:14px}
+
+/* Leaflet dark overrides */
+.leaflet-container{background:#1a1d24!important}
+.leaflet-tile{filter:brightness(.7) saturate(.6) hue-rotate(180deg)}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- ══════ START SCREEN ══════ -->
+<!-- ══ START ══ -->
 <div id="startScreen" class="screen active">
   <div class="logo">SPEEDSENSE<span>DRIVE SAFE · ARRIVE SAFE</span></div>
   <div class="region-btns">
@@ -217,9 +223,7 @@ canvas{display:block}
   </div>
   <div class="info-text">Live GPS · OSM speed limits · Camera alerts<br>for <b id="regionName">Singapore</b> roads</div>
   <button class="start-btn" onclick="confirmStart()">START RIDE</button>
-  <div style="display:flex;gap:12px;align-items:center">
-    <button class="hist-open-btn" onclick="openHistory()">📋 TRIP HISTORY <span id="tripCountBadge">0 trips</span></button>
-  </div>
+  <button class="hist-open-btn" onclick="openHistory()">📋 TRIP HISTORY <span id="tripCountBadge">0 trips</span></button>
   <div class="io-row">
     <button class="io-btn accent" onclick="downloadHistory()">⬇ Export JSON</button>
     <label class="io-btn" style="cursor:pointer">⬆ Import JSON
@@ -227,17 +231,17 @@ canvas{display:block}
     </label>
     <button class="io-btn" onclick="clearAllHistory()" style="color:var(--danger);border-color:var(--danger)">🗑 Clear</button>
   </div>
-  <div class="info-text" style="font-size:11px">History stored in browser · No server · Export to backup</div>
+  <div class="info-text" style="font-size:11px">History in browser · Export to backup</div>
 </div>
 
-<!-- ══════ RIDE SCREEN ══════ -->
+<!-- ══ RIDE ══ -->
 <div id="rideScreen" class="screen">
   <div id="topBar">
     <div class="left">
       <div class="gps-dot searching" id="gpsDot"></div>
       <div class="trip-stat">TIME <span id="tripTime">00:00</span></div>
       <div class="trip-stat">DIST <span id="tripDist">0.0</span>km</div>
-      <div class="trip-stat" style="max-width:130px;overflow:hidden;text-overflow:ellipsis"><span id="roadName">Locating…</span></div>
+      <div class="trip-stat" style="max-width:110px;overflow:hidden;text-overflow:ellipsis"><span id="roadName">Locating…</span></div>
       <div class="acc-badge" id="accBadge">±—m</div>
       <div class="wake-badge off" id="wakeBadge">DIMMING</div>
     </div>
@@ -245,11 +249,15 @@ canvas{display:block}
       <button class="top-btn" onclick="confirmEnd()" style="border-color:var(--danger);color:var(--danger)">END</button>
     </div>
   </div>
-  <div id="alertBanner"><span id="alertText">Alert</span></div>
+
+  <!-- Alert Icons — replaces the old banner popup -->
+  <div id="alertIcons"></div>
+
   <div id="mainView">
     <canvas id="speedCanvas"></canvas>
     <div id="stopTimer">Stopped: <span id="stopTimerVal">0:00</span> / 10:00</div>
   </div>
+
   <div id="bottomPanel">
     <div class="stat-card">
       <div class="label">Limit</div>
@@ -260,21 +268,21 @@ canvas{display:block}
       <div class="val" id="maxSpeedDisplay">0</div>
     </div>
     <div class="stat-card">
-      <div class="label">Viol.</div>
-      <div class="val danger" id="violationsDisplay">0</div>
+      <div class="label">Viol</div>
+      <div class="val danger" id="violDisplay">0</div>
     </div>
     <div class="stat-card">
       <div class="label">Cams</div>
       <div class="val cam" id="camDisplay">0</div>
     </div>
-    <div class="stat-card clickable" onclick="confirmEnd()" style="border-color:#ff2d2d44">
+    <div class="stat-card tap" onclick="confirmEnd()" style="border-color:#ff2d2d44">
       <div class="label">Tap</div>
       <div class="val danger">END</div>
     </div>
   </div>
 </div>
 
-<!-- ══════ END SCREEN ══════ -->
+<!-- ══ END ══ -->
 <div id="endScreen" class="screen">
   <div class="logo">RIDE COMPLETE<span>SESSION SUMMARY</span></div>
   <div id="endStats">
@@ -290,20 +298,20 @@ canvas{display:block}
     <div class="rv" id="esRoute">—</div>
   </div>
   <button class="start-btn" onclick="resetApp()">NEW RIDE</button>
-  <button class="hist-open-btn" onclick="openHistory()" style="margin-top:-4px">📋 VIEW HISTORY</button>
+  <button class="hist-open-btn" onclick="openHistory()">📋 VIEW HISTORY</button>
 </div>
 
-<!-- ══════ HISTORY SCREEN ══════ -->
+<!-- ══ HISTORY ══ -->
 <div id="histScreen" class="screen">
   <div id="histHeader">
     <h2>TRIP HISTORY</h2>
     <button class="io-btn accent" onclick="downloadHistory()" style="font-size:11px">⬇ Export</button>
     <button class="top-btn" onclick="showScreen('startScreen')">← BACK</button>
   </div>
-  <div id="histList"><div class="no-trips"><span style="font-size:28px">🚗</span><span>No trips recorded yet</span></div></div>
+  <div id="histList"><div class="no-trips"><span style="font-size:26px">🚗</span><span>No trips yet</span></div></div>
 </div>
 
-<!-- ══════ TRIP DETAIL SCREEN ══════ -->
+<!-- ══ DETAIL ══ -->
 <div id="detailScreen" class="screen">
   <div id="detailHeader">
     <h2 id="detailTitle">TRIP DETAIL</h2>
@@ -312,7 +320,7 @@ canvas{display:block}
   <div id="detailBody"></div>
 </div>
 
-<!-- ══════ CONFIRM OVERLAY ══════ -->
+<!-- ══ CONFIRM ══ -->
 <div id="overlay">
   <div class="ov-box">
     <h3 id="ovTitle">Confirm</h3>
@@ -324,244 +332,316 @@ canvas{display:block}
   </div>
 </div>
 
-<!-- ══════ GPS ERROR ══════ -->
+<!-- ══ GPS ERROR ══ -->
 <div id="gpsErrBox">
   <div class="gerr">
     <h3>GPS Error</h3>
-    <p id="gpsErrMsg">Location permission denied. Enable GPS access in browser settings.</p>
+    <p id="gpsErrMsg">Location permission denied.</p>
     <button class="btn-c btn-y" onclick="retryGPS()">RETRY</button>
   </div>
 </div>
 
 </div><!-- /app -->
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 'use strict';
-/* ════════════════════════════════════════════════════════════
-   CONSTANTS & REGION CONFIG
-════════════════════════════════════════════════════════════ */
-const REGIONS = {
-  SG:{ name:'Singapore', defaultLimit:50, camRadius:600 },
-  IN:{ name:'India',     defaultLimit:50, camRadius:800 }
+
+/* ════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════ */
+const REGIONS={
+  SG:{name:'Singapore',defaultLimit:50,camRadius:600},
+  IN:{name:'India',    defaultLimit:50,camRadius:800}
 };
+const DB_KEY='speedsense_trips_v3';
+const CAM_ALERT_DIST=250;  // metres
+const GEO_MS=7000, OVP_MS=28000;
 
-const DB_KEY    = 'speedsense_trips_v2';
-const CAM_DIST  = 250;  // metres — alert radius for cameras
-const CAM_FETCH_INTERVAL = 25000; // ms between Overpass fetches
-const GEO_FETCH_INTERVAL = 7000;  // ms between Nominatim reverse-geocodes
+/* ════════════════════════════════════════════════
+   AUDIO ENGINE — guaranteed mobile-safe
+   Strategy: generate PCM buffers once, replay via BufferSource.
+   buffers are regenerated after any context reset.
+   A heartbeat silently touches the context every 25 s so iOS
+   never suspends it during long drives.
+════════════════════════════════════════════════ */
+let _ac=null, _bufs=null, _heartbeat=null;
 
-/* ════════════════════════════════════════════════════════════
-   APP STATE
-════════════════════════════════════════════════════════════ */
-let region      = 'SG';
-let rideActive  = false;
-let pendingAct  = null;
-let watchId     = null;
-let wakeLock    = null;
-let rafId       = null;
-let tripTimerId = null;
-let noSleepVid  = null;  // iOS fallback
-
-const state = {
-  speed:0, speedLimit:50, maxSpeed:0,
-  violations:0, camAlerts:0,
-  distance:0, startTime:null,
-  stopTime:null, stopDuration:0,
-  history:[],            // [{time,road,limit,exc}]
-  speedLog:[],           // [{t,spd,limit,lat,lng,road}] — full speed log
-  violationLog:[],       // [{time,lat,lng,speed,limit,road,postcode}]
-  cameraLog:[],          // [{time,lat,lng,road}]
-  speedHistory:[],       // for live graph (speed values)
-  roadName:'Locating…',
-  accuracy:null, lat:null, lng:null, prevLat:null, prevLng:null,
-  nearCamera:false,
-  cameraAlertedIds:new Set(),  // OSM node IDs already alerted this session
-  nearbySpeedCameras:[],
-  speedExceeded:false, exceedStart:null, alertTimeout:null,
-  avgSpeedSum:0, avgSpeedCount:0,
-  lastGeocode:0, lastOverpass:0,
-  startPostcode:'', endPostcode:'',
-  startAddress:'', endAddress:''
-};
-
-/* ════════════════════════════════════════════════════════════
-   PERSISTENT STORAGE — IndexedDB + localStorage fallback
-════════════════════════════════════════════════════════════ */
-function saveTrips(trips){ try{ localStorage.setItem(DB_KEY,JSON.stringify(trips)); }catch(e){} }
-function loadTrips(){ try{ return JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }catch(e){ return []; } }
-
-function appendTrip(trip){
-  const trips = loadTrips();
-  trips.push(trip);
-  saveTrips(trips);
-  updateTripCount();
-}
-
-function updateTripCount(){
-  const n = loadTrips().length;
-  document.getElementById('tripCountBadge').textContent = n+' trip'+(n===1?'':'s');
-}
-
-/* ════════════════════════════════════════════════════════════
-   AUDIO — production-grade mobile fix
-   Uses BufferSource nodes (NOT oscillators) for iOS/Android reliability
-════════════════════════════════════════════════════════════ */
-let _actx = null;
-let _beepBufCache = {};
-
-function getACtx(){
-  if(!_actx){
-    _actx = new (window.AudioContext||window.webkitAudioContext)();
+function ac(){
+  if(!_ac||_ac.state==='closed'){
+    _ac=new(window.AudioContext||window.webkitAudioContext)();
+    _bufs=null; // force rebuild
   }
-  if(_actx.state==='suspended') _actx.resume();
-  return _actx;
+  return _ac;
 }
 
-/* Generate a short PCM buffer of a given frequency & duration */
-function makeBeepBuffer(freq, dur, type='sine', vol=0.4){
-  const ctx  = getACtx();
-  const sr   = ctx.sampleRate;
-  const len  = Math.ceil(sr * dur);
-  const buf  = ctx.createBuffer(1, len, sr);
-  const data = buf.getChannelData(0);
-  const ramp = 0.02; // fade out
+function resumeAC(){
+  const ctx=ac();
+  if(ctx.state==='suspended') return ctx.resume().then(buildBufs);
+  buildBufs();
+  return Promise.resolve();
+}
+
+/* PCM waveform builder */
+function mkBuf(freq,dur,type,vol){
+  const ctx=ac(), sr=ctx.sampleRate, len=Math.ceil(sr*dur);
+  const buf=ctx.createBuffer(1,len,sr), d=buf.getChannelData(0);
+  const fadeLen=Math.ceil(sr*.04);
   for(let i=0;i<len;i++){
-    let s=0;
     const t=i/sr;
-    if(type==='sine')     s = Math.sin(2*Math.PI*freq*t);
-    else if(type==='square') s = Math.sign(Math.sin(2*Math.PI*freq*t));
-    else if(type==='sawtooth') s = 2*(t*freq - Math.floor(t*freq+0.5));
-    const env = i>(len-sr*ramp) ? (len-i)/(sr*ramp) : 1;
-    data[i] = s * vol * env;
+    let s=0;
+    switch(type){
+      case 'sine':     s=Math.sin(2*Math.PI*freq*t); break;
+      case 'square':   s=Math.sign(Math.sin(2*Math.PI*freq*t)); break;
+      case 'sawtooth': s=2*(t*freq-Math.floor(.5+t*freq)); break;
+      case 'tri':      s=2*Math.abs(2*(t*freq-Math.floor(t*freq+.5)))-1; break;
+    }
+    const env=i>(len-fadeLen)?(len-i)/fadeLen:Math.min(1,i/(fadeLen*.5));
+    d[i]=s*vol*env;
   }
   return buf;
 }
 
-function playBuf(buf, delay=0){
-  try{
-    const ctx = getACtx();
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    src.connect(ctx.destination);
-    src.start(ctx.currentTime + delay);
-  }catch(e){}
-}
-
-/* Pre-build buffers once audio context is alive */
-let _bufs = null;
-function ensureBufs(){
+/* Two distinct tones for camera vs speed */
+function buildBufs(){
   if(_bufs) return;
-  _bufs = {
-    cam1:    makeBeepBuffer(1200, 0.08, 'sine',     0.35),
-    cam2:    makeBeepBuffer(1200, 0.08, 'sine',     0.35),
-    speed:   makeBeepBuffer(880,  0.12, 'square',   0.22),
-    police1: makeBeepBuffer(440,  0.15, 'sawtooth', 0.28),
-    police2: makeBeepBuffer(660,  0.15, 'sawtooth', 0.28),
-    alarm:   makeBeepBuffer(700,  0.09, 'square',   0.18),
-  };
+  try{
+    _bufs={
+      /* Camera alert: two descending chime tones — melodic, calm */
+      cam_a: mkBuf(1046,0.18,'sine',  0.85),  // C6
+      cam_b: mkBuf( 784,0.22,'sine',  0.80),  // G5
+
+      /* Speed exceeded: harsh square-wave buzz burst — urgent */
+      spd_a: mkBuf( 660,0.15,'square',0.75),
+      spd_b: mkBuf( 550,0.15,'square',0.70),
+
+      /* Speed continuous beep (>20 over): slow pulsed square */
+      spd_pulse: mkBuf(880,0.12,'square',0.60),
+
+      /* Camera near + over limit alarm: sawtooth warble */
+      alarm_a: mkBuf(740,0.10,'sawtooth',0.55),
+      alarm_b: mkBuf(620,0.10,'sawtooth',0.50),
+
+      /* Police: tri-tone siren */
+      pol_a: mkBuf(440,0.14,'tri',0.70),
+      pol_b: mkBuf(660,0.14,'tri',0.65),
+      pol_c: mkBuf(550,0.14,'tri',0.55),
+    };
+  }catch(e){ _bufs=null; }
 }
 
-function unlockAudio(){
+function play(buf, delay=0){
+  if(!buf) return;
   try{
-    const ctx = getACtx();
-    ctx.resume().then(()=>{ ensureBufs(); });
-    // iOS: play 0-volume node to unlock
-    const buf = ctx.createBuffer(1,1,22050);
-    const src = ctx.createBufferSource();
-    src.buffer = buf; src.connect(ctx.destination); src.start();
+    const ctx=ac();
+    if(ctx.state!=='running'){ ctx.resume(); }
+    const src=ctx.createBufferSource();
+    const gain=ctx.createGain();
+    gain.gain.value=1.0;
+    src.buffer=buf;
+    src.connect(gain); gain.connect(ctx.destination);
+    src.start(ctx.currentTime+delay);
   }catch(e){}
 }
 
-function camBeep(){ ensureBufs(); playBuf(_bufs.cam1,0); playBuf(_bufs.cam2,0.14); }
-function policeBeep(){ ensureBufs(); playBuf(_bufs.police1,0); playBuf(_bufs.police2,0.21); playBuf(_bufs.police1,0.42); }
+/* Camera chime: two-note descending — played slowly, clearly distinct from speed */
+function playCamBeep(){
+  buildBufs(); if(!_bufs) return;
+  play(_bufs.cam_a, 0);
+  play(_bufs.cam_b, 0.28);
+}
 
-let _speedBeepItv  = null;
-let _alarmItv      = null;
+/* Speed exceeded burst: two harsh tones */
+function playSpdBeep(){
+  buildBufs(); if(!_bufs) return;
+  play(_bufs.spd_a, 0);
+  play(_bufs.spd_b, 0.20);
+}
 
-function setSpeedBeep(on){
-  if(on && !_speedBeepItv){
-    ensureBufs();
-    _speedBeepItv = setInterval(()=>{ playBuf(_bufs.speed); }, 700);
-  } else if(!on && _speedBeepItv){
-    clearInterval(_speedBeepItv); _speedBeepItv=null;
-  }
+/* Police */
+function playPolice(){
+  buildBufs(); if(!_bufs) return;
+  play(_bufs.pol_a, 0);
+  play(_bufs.pol_b, 0.20);
+  play(_bufs.pol_c, 0.40);
+}
+
+/* Intervals */
+let _spdItv=null, _almItv=null;
+let _spdStep=0, _almStep=0;
+
+function setSpdBeep(on){
+  if(on&&!_spdItv){
+    buildBufs();
+    _spdStep=0;
+    /* slow pulsed beep: every 1.4s */
+    _spdItv=setInterval(()=>{
+      buildBufs(); if(!_bufs) return;
+      _spdStep++;
+      play(_bufs.spd_pulse);
+    },1400);
+  } else if(!on&&_spdItv){ clearInterval(_spdItv); _spdItv=null; }
 }
 
 function setAlarm(on){
-  if(on && !_alarmItv){
-    ensureBufs();
-    _alarmItv = setInterval(()=>{ playBuf(_bufs.alarm); }, 380);
-  } else if(!on && _alarmItv){
-    clearInterval(_alarmItv); _alarmItv=null;
-  }
+  if(on&&!_almItv){
+    buildBufs();
+    _almStep=0;
+    /* warble alarm: alternating tones every 500ms */
+    _almItv=setInterval(()=>{
+      buildBufs(); if(!_bufs) return;
+      _almStep++;
+      play(_almStep%2===0?_bufs.alarm_a:_bufs.alarm_b);
+    },500);
+  } else if(!on&&_almItv){ clearInterval(_almItv); _almItv=null; }
 }
 
-/* ════════════════════════════════════════════════════════════
-   WAKE LOCK — keep screen on
-════════════════════════════════════════════════════════════ */
-async function requestWakeLock(){
-  // Method 1: Screen Wake Lock API (Chrome 84+, Android)
-  if('wakeLock' in navigator){
+function startAudioHeartbeat(){
+  if(_heartbeat) return;
+  _heartbeat=setInterval(()=>{
     try{
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release',()=>{
-        document.getElementById('wakeBadge').textContent='DIMMING';
-        document.getElementById('wakeBadge').className='wake-badge off';
-        // re-request on visibility change
-      });
-      setBadge(true);
-      return;
-    }catch(e){ /* fall through */ }
-  }
-  // Method 2: iOS / older fallback — tiny invisible looping video trick
+      const ctx=ac();
+      if(ctx.state==='suspended') ctx.resume().then(()=>{_bufs=null; buildBufs();});
+      // play a silent 1-sample buffer — keeps iOS audio session alive
+      const buf=ctx.createBuffer(1,1,ctx.sampleRate);
+      const src=ctx.createBufferSource(); src.buffer=buf;
+      src.connect(ctx.destination); src.start();
+    }catch(e){}
+  },25000);
+}
+
+function stopAudioHeartbeat(){ if(_heartbeat){ clearInterval(_heartbeat); _heartbeat=null; } }
+
+function unlockAudio(){
   try{
-    noSleepVid = document.createElement('video');
-    noSleepVid.setAttribute('playsinline','');
-    noSleepVid.setAttribute('muted','');
-    noSleepVid.setAttribute('loop','');
-    // 1x1 transparent mp4 data URI (minimal valid mp4, ~200 bytes)
-    noSleepVid.src='data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAu1tZGF0AAACrAYF//+s3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE0MiByMjQ3OSBkZDc5YTYxIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNCAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTEgbG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRlcmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJfcHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTEwIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAABWWWIhAAT//73gb8yy1GNL+o2GNKR2V4cxFqFkVrJBPaD+TelAAAACgAAAwAAAwDhxBVh6AAAAPgBgAAAAAAAAAA=';
-    noSleepVid.style.cssText='position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:0.01';
-    document.body.appendChild(noSleepVid);
-    await noSleepVid.play();
-    setBadge(true);
-  }catch(e){ setBadge(false); }
+    const ctx=ac();
+    ctx.resume().then(()=>{
+      buildBufs();
+      // iOS unlock: play 1-sample silence
+      const buf=ctx.createBuffer(1,1,ctx.sampleRate);
+      const src=ctx.createBufferSource(); src.buffer=buf;
+      src.connect(ctx.destination); src.start();
+    });
+  }catch(e){}
 }
 
-function releaseWakeLock(){
-  if(wakeLock){ wakeLock.release().catch(()=>{}); wakeLock=null; }
-  if(noSleepVid){ noSleepVid.pause(); noSleepVid.remove(); noSleepVid=null; }
-  setBadge(false);
-}
-
-function setBadge(on){
-  const b=document.getElementById('wakeBadge');
-  if(!b) return;
-  b.textContent = on?'SCREEN ON':'DIMMING';
-  b.className   = 'wake-badge'+(on?'':' off');
-}
-
-// Re-acquire wake lock when tab becomes visible again
+// Unlock on every possible first-gesture event
+['touchstart','touchend','pointerdown','mousedown','click','keydown'].forEach(e=>
+  document.addEventListener(e,()=>{ unlockAudio(); startAudioHeartbeat(); },{once:true,passive:true})
+);
+// Re-unlock when tab regains focus (handles iOS lock/unlock)
 document.addEventListener('visibilitychange',()=>{
-  if(rideActive && document.visibilityState==='visible') requestWakeLock();
+  if(document.visibilityState==='visible') unlockAudio();
 });
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
+   STORAGE
+════════════════════════════════════════════════ */
+function saveTrips(t){ try{localStorage.setItem(DB_KEY,JSON.stringify(t));}catch(e){} }
+function loadTrips(){ try{return JSON.parse(localStorage.getItem(DB_KEY)||'[]');}catch(e){return[];} }
+function appendTrip(t){ const a=loadTrips(); a.push(t); saveTrips(a); updateTripCount(); }
+function updateTripCount(){
+  const n=loadTrips().length;
+  const el=document.getElementById('tripCountBadge');
+  if(el) el.textContent=n+' trip'+(n===1?'':'s');
+}
+
+/* ════════════════════════════════════════════════
+   WAKE LOCK
+════════════════════════════════════════════════ */
+let _wl=null, _noSleep=null;
+async function requestWakeLock(){
+  if('wakeLock' in navigator){
+    try{
+      _wl=await navigator.wakeLock.request('screen');
+      _wl.addEventListener('release',()=>setBadge(false));
+      setBadge(true); return;
+    }catch(e){}
+  }
+  // iOS fallback: tiny looping video
+  try{
+    _noSleep=document.createElement('video');
+    _noSleep.setAttribute('playsinline',''); _noSleep.setAttribute('muted',''); _noSleep.setAttribute('loop','');
+    _noSleep.src='data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAA'
+      +'u1tZGF0AAACrAYF//+s3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE0MiByMjQ3OSBkZDc5YTYxIC0gSC4yNj'
+      +'QvTVBFRy00IEFWQ';
+    _noSleep.style.cssText='position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:.01;pointer-events:none';
+    document.body.appendChild(_noSleep);
+    await _noSleep.play(); setBadge(true);
+  }catch(e){ setBadge(false); }
+}
+function releaseWakeLock(){
+  if(_wl){_wl.release().catch(()=>{});_wl=null;}
+  if(_noSleep){_noSleep.pause();_noSleep.remove();_noSleep=null;}
+  setBadge(false);
+}
+function setBadge(on){
+  const b=document.getElementById('wakeBadge'); if(!b) return;
+  b.textContent=on?'SCREEN ON':'DIMMING'; b.className='wake-badge'+(on?'':' off');
+}
+document.addEventListener('visibilitychange',()=>{
+  if(rideActive&&document.visibilityState==='visible') requestWakeLock();
+});
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+let region='SG', rideActive=false, pendingAct=null, watchId=null;
+let rafId=null, tripTimerId=null;
+
+const S={
+  speed:0, speedLimit:50, maxSpeed:0, violations:0, camAlerts:0,
+  distance:0, startTime:null, stopTime:null, stopDuration:0,
+  history:[], speedLog:[], violationLog:[], cameraLog:[], speedHistory:[],
+  roadName:'Locating…', accuracy:null, lat:null, lng:null, prevLat:null, prevLng:null,
+  nearCamera:false, alertedCamIds:new Set(), nearbyCams:[],
+  speedExceeded:false, exceedStart:null,
+  avgSpeedSum:0, avgSpeedCount:0,
+  lastGeo:0, lastOvp:0,
+  startPC:'', endPC:'', startAddr:'', endAddr:''
+};
+
+/* ════════════════════════════════════════════════
+   ALERT ICONS
+════════════════════════════════════════════════ */
+const _activeIcons={};
+
+function showIcon(key, cls, icon, text, duration=6000){
+  const container=document.getElementById('alertIcons');
+  if(!container) return;
+
+  // Remove old icon of same key if present
+  if(_activeIcons[key]){ clearTimeout(_activeIcons[key].tid); _activeIcons[key].el.remove(); }
+
+  const div=document.createElement('div');
+  div.className=`alert-icon ${cls}`;
+  div.innerHTML=`<span class="aico">${icon}</span><span>${text}</span>`;
+  container.appendChild(div);
+
+  const tid=setTimeout(()=>{
+    div.classList.add('fade');
+    setTimeout(()=>div.remove(),400);
+    delete _activeIcons[key];
+  },duration);
+
+  _activeIcons[key]={el:div,tid};
+}
+
+function clearIcon(key){
+  if(_activeIcons[key]){ clearTimeout(_activeIcons[key].tid); _activeIcons[key].el.remove(); delete _activeIcons[key]; }
+}
+
+function clearAllIcons(){
+  Object.keys(_activeIcons).forEach(k=>clearIcon(k));
+}
+
+/* ════════════════════════════════════════════════
    UI HELPERS
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
-function showAlert(type, msg){
-  const b=document.getElementById('alertBanner');
-  b.className=type; b.style.display='flex';
-  document.getElementById('alertText').textContent=msg;
-  if(state.alertTimeout) clearTimeout(state.alertTimeout);
-  state.alertTimeout=setTimeout(()=>{ b.style.display='none'; },5000);
-}
-
 function setRegion(r){
   region=r;
   document.querySelectorAll('.region-btn').forEach((b,i)=>{
@@ -570,157 +650,134 @@ function setRegion(r){
   document.getElementById('regionName').textContent=REGIONS[r].name;
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    CONFIRM OVERLAY
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 function confirmStart(){
   pendingAct='start';
   document.getElementById('ovTitle').textContent='Start Ride?';
-  document.getElementById('ovMsg').textContent=`Live GPS monitoring will activate for ${REGIONS[region].name}. Mount your phone safely.`;
+  document.getElementById('ovMsg').textContent=`Live GPS monitoring for ${REGIONS[region].name}. Mount your phone safely.`;
   document.getElementById('ovYes').className='btn-c btn-y';
   document.getElementById('overlay').classList.add('visible');
 }
 function confirmEnd(){
   pendingAct='end';
   document.getElementById('ovTitle').textContent='End This Ride?';
-  document.getElementById('ovMsg').textContent='GPS tracking stops and your session summary will be saved.';
+  document.getElementById('ovMsg').textContent='GPS tracking will stop and your trip will be saved.';
   document.getElementById('ovYes').className='btn-c btn-y red';
   document.getElementById('overlay').classList.add('visible');
 }
 function confirmAction(){ dismissOverlay(); if(pendingAct==='start') startRide(); else if(pendingAct==='end') endRide(); pendingAct=null; }
 function dismissOverlay(){ document.getElementById('overlay').classList.remove('visible'); }
 
-/* ════════════════════════════════════════════════════════════
-   RIDE LIFECYCLE
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════
+   RIDE
+════════════════════════════════════════════════ */
 function startRide(){
-  Object.assign(state,{
+  Object.assign(S,{
     speed:0, speedLimit:REGIONS[region].defaultLimit, maxSpeed:0,
     violations:0, camAlerts:0, distance:0, startTime:Date.now(),
-    stopTime:null, stopDuration:0, history:[], speedLog:[],
-    violationLog:[], cameraLog:[], speedHistory:[],
-    roadName:'Locating…', accuracy:null, lat:null, lng:null,
-    prevLat:null, prevLng:null, nearCamera:false,
-    cameraAlertedIds: new Set(), nearbySpeedCameras:[],
-    speedExceeded:false, exceedStart:null, alertTimeout:null,
-    avgSpeedSum:0, avgSpeedCount:0, lastGeocode:0, lastOverpass:0,
-    startPostcode:'', endPostcode:'', startAddress:'', endAddress:''
+    stopTime:null, stopDuration:0, history:[], speedLog:[], violationLog:[],
+    cameraLog:[], speedHistory:[], roadName:'Locating…', accuracy:null,
+    lat:null, lng:null, prevLat:null, prevLng:null, nearCamera:false,
+    alertedCamIds:new Set(), nearbyCams:[],
+    speedExceeded:false, exceedStart:null,
+    avgSpeedSum:0, avgSpeedCount:0, lastGeo:0, lastOvp:0,
+    startPC:'', endPC:'', startAddr:'', endAddr:''
   });
   rideActive=true;
+  clearAllIcons();
   showScreen('rideScreen');
-  initCanvas();
-  startTripTimer();
-  gameLoop();
-  startGPS();
-  requestWakeLock();
-  unlockAudio();
+  initCanvas(); startTripTimer(); gameLoop();
+  startGPS(); requestWakeLock(); unlockAudio(); startAudioHeartbeat();
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    GPS
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 function startGPS(){
   if(!navigator.geolocation){ showGPSErr('Geolocation not supported.'); return; }
   document.getElementById('gpsDot').className='gps-dot searching';
-  watchId=navigator.geolocation.watchPosition(onGPSSuccess, onGPSError,
-    { enableHighAccuracy:true, maximumAge:1000, timeout:20000 });
+  watchId=navigator.geolocation.watchPosition(onGPS, onGPSErr,
+    {enableHighAccuracy:true,maximumAge:1000,timeout:20000});
 }
 
-function onGPSSuccess(pos){
+function onGPS(pos){
   if(!rideActive) return;
   document.getElementById('gpsDot').className='gps-dot fix';
-  const {latitude:lat, longitude:lng, speed, accuracy} = pos.coords;
-  state.prevLat=state.lat; state.prevLng=state.lng;
-  state.lat=lat; state.lng=lng;
-  state.accuracy=Math.round(accuracy);
+  const {latitude:lat,longitude:lng,speed,accuracy}=pos.coords;
+  S.prevLat=S.lat; S.prevLng=S.lng;
+  S.lat=lat; S.lng=lng; S.accuracy=Math.round(accuracy);
+  const kmh=(speed!=null&&speed>=0)?speed*3.6:0;
+  S.speed=Math.max(0,kmh);
+  if(S.speed>S.maxSpeed) S.maxSpeed=S.speed;
+  if(S.speed>2){ S.avgSpeedSum+=S.speed; S.avgSpeedCount++; }
+  if(S.prevLat!==null) S.distance+=haversine(S.prevLat,S.prevLng,lat,lng);
 
-  const kmh = (speed!=null && speed>=0) ? speed*3.6 : 0;
-  state.speed = Math.max(0, kmh);
-
-  if(state.speed>state.maxSpeed) state.maxSpeed=state.speed;
-  if(state.speed>2){ state.avgSpeedSum+=state.speed; state.avgSpeedCount++; }
-  if(state.prevLat!==null) state.distance+=haversine(state.prevLat,state.prevLng,lat,lng);
-
-  // Accuracy badge
   const ab=document.getElementById('accBadge');
-  ab.textContent=`±${state.accuracy}m`;
+  ab.textContent=`±${S.accuracy}m`;
   ab.className='acc-badge'+(accuracy<20?' good':accuracy>60?' poor':'');
 
-  state.speedHistory.push(state.speed);
-  if(state.speedHistory.length>400) state.speedHistory.shift();
+  S.speedHistory.push(S.speed);
+  if(S.speedHistory.length>500) S.speedHistory.shift();
 
-  // Speed log entry (every fix)
-  state.speedLog.push({
-    t: Date.now(), spd: Math.round(state.speed),
-    limit: state.speedLimit, lat, lng, road: state.roadName
-  });
-  if(state.speedLog.length>2000) state.speedLog.shift();
+  S.speedLog.push({t:Date.now(),spd:Math.round(S.speed),limit:S.speedLimit,lat,lng,road:S.roadName});
+  if(S.speedLog.length>2000) S.speedLog.shift();
 
   const now=Date.now();
-  if(now-state.lastGeocode>GEO_FETCH_INTERVAL){ state.lastGeocode=now; reverseGeocode(lat,lng); }
-  if(now-state.lastOverpass>CAM_FETCH_INTERVAL){ state.lastOverpass=now; fetchSpeedCameras(lat,lng); }
-  checkCameraProximity(lat,lng);
-  handleStopDetection();
+  if(now-S.lastGeo>GEO_MS){ S.lastGeo=now; revGeo(lat,lng); }
+  if(now-S.lastOvp>OVP_MS){ S.lastOvp=now; fetchCams(lat,lng); }
+  checkCams(lat,lng);
+  handleStop();
   handleViolation(lat,lng);
 
-  document.getElementById('limitDisplay').textContent=state.speedLimit?state.speedLimit:'—';
-  document.getElementById('maxSpeedDisplay').textContent=Math.round(state.maxSpeed);
-  document.getElementById('violationsDisplay').textContent=state.violations;
-  document.getElementById('camDisplay').textContent=state.camAlerts;
+  document.getElementById('limitDisplay').textContent=S.speedLimit?S.speedLimit:'—';
+  document.getElementById('maxSpeedDisplay').textContent=Math.round(S.maxSpeed);
+  document.getElementById('violDisplay').textContent=S.violations;
+  document.getElementById('camDisplay').textContent=S.camAlerts;
 }
 
-function onGPSError(err){
-  const msgs={1:'Permission denied. Enable GPS in browser settings.',
-              2:'GPS signal unavailable. Go outdoors.',3:'GPS timeout — retrying…'};
-  if(err.code===3) return;
-  showGPSErr(msgs[err.code]||'GPS error.');
+function onGPSErr(err){
+  if(err.code===3) return; // timeout — keep waiting
+  const m={1:'Permission denied. Enable GPS in browser settings.',2:'GPS signal unavailable.'};
+  showGPSErr(m[err.code]||'GPS error.');
 }
-
 function showGPSErr(m){ document.getElementById('gpsErrMsg').textContent=m; document.getElementById('gpsErrBox').classList.add('visible'); }
-function retryGPS(){ document.getElementById('gpsErrBox').classList.remove('visible'); if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; } startGPS(); }
+function retryGPS(){ document.getElementById('gpsErrBox').classList.remove('visible'); if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;} startGPS(); }
 
-/* ════════════════════════════════════════════════════════════
-   REVERSE GEOCODE  (Nominatim)
-════════════════════════════════════════════════════════════ */
-async function reverseGeocode(lat,lng){
+/* ════════════════════════════════════════════════
+   REVERSE GEOCODE
+════════════════════════════════════════════════ */
+async function revGeo(lat,lng){
   try{
     const r=await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=17&addressdetails=1&extratags=1`,
-      {headers:{'Accept-Language':'en','User-Agent':'SpeedSenseApp/2.0'}}
+      {headers:{'Accept-Language':'en','User-Agent':'SpeedSenseApp/3.0'}}
     );
     if(!r.ok) return;
     const d=await r.json();
-    const addr=d.address||{};
-    const road=addr.road||addr.pedestrian||addr.path||addr.motorway||
-               addr.trunk||addr.primary||addr.secondary||addr.suburb||
-               d.display_name?.split(',')[0]||'Unknown Road';
-    state.roadName=road;
+    const a=d.address||{};
+    const road=a.road||a.pedestrian||a.motorway||a.trunk||a.primary||a.secondary||
+               a.path||a.footway||a.suburb||d.display_name?.split(',')[0]||'Unknown Road';
+    S.roadName=road;
     document.getElementById('roadName').textContent=road;
-
-    // Postcode
-    const pc=addr.postcode||'';
-    if(!state.startPostcode && pc){ state.startPostcode=pc; state.startAddress=road+', '+pc; }
-    state.endPostcode=pc; state.endAddress=road+(pc?', '+pc:'');
-
-    // Speed limit from OSM
+    const pc=a.postcode||'';
+    if(!S.startPC&&pc){ S.startPC=pc; S.startAddr=road+(pc?', '+pc:''); }
+    S.endPC=pc; S.endAddr=road+(pc?', '+pc:'');
     const ex=d.extratags||{};
     const raw=ex.maxspeed||ex['maxspeed:forward']||ex['maxspeed:backward'];
     if(raw){
-      const parsed=parseLimit(raw);
-      if(parsed && parsed!==state.speedLimit){
-        const prev=state.speedLimit;
-        state.speedLimit=parsed;
-        document.getElementById('limitDisplay').textContent=parsed;
-        const ts=fmtTime(Date.now());
-        state.history.push({time:ts,road,limit:parsed,exc:0});
-        if(parsed<prev) showAlert('info',`🔽 Speed limit reduced to ${parsed} km/h`);
+      const p=parseLimit(raw);
+      if(p&&p!==S.speedLimit){
+        const prev=S.speedLimit; S.speedLimit=p;
+        document.getElementById('limitDisplay').textContent=p;
+        S.history.push({time:fmtTime(Date.now()),road,limit:p,exc:0});
+        if(p<prev) showIcon('limit','info','🔽',`Limit: ${p} km/h`,5000);
       }
     }
   }catch(e){}
 }
-
 function parseLimit(raw){
-  if(!raw) return null;
   const s=String(raw).trim().toLowerCase();
   const mph=s.match(/^(\d+)\s*mph/); if(mph) return Math.round(parseInt(mph[1])*1.60934);
   const km=s.match(/^(\d+)/); if(km) return parseInt(km[1]);
@@ -729,293 +786,279 @@ function parseLimit(raw){
   return null;
 }
 
-/* ════════════════════════════════════════════════════════════
-   OVERPASS — Speed Cameras (fixed: all node types + ways)
-════════════════════════════════════════════════════════════ */
-async function fetchSpeedCameras(lat,lng){
+/* ════════════════════════════════════════════════
+   OVERPASS — ALL camera tag variants
+════════════════════════════════════════════════ */
+async function fetchCams(lat,lng){
   try{
     const R=REGIONS[region].camRadius;
-    /* Query ALL known speed enforcement tags in OSM */
     const q=`[out:json][timeout:15];
 (
   node["highway"="speed_camera"](around:${R},${lat},${lng});
-  node["man_made"="monitoring_station"]["monitoring:vehicle"](around:${R},${lat},${lng});
   node["enforcement"="maxspeed"](around:${R},${lat},${lng});
   node["enforcement"="speed"](around:${R},${lat},${lng});
-  node["amenity"="police"](around:${R},${lat},${lng});
+  node["man_made"="monitoring_station"]["monitoring:vehicle"](around:${R},${lat},${lng});
   node["device"="speed_camera"](around:${R},${lat},${lng});
   node["highway"="enforcement"](around:${R},${lat},${lng});
   node["traffic_calming"="camera"](around:${R},${lat},${lng});
+  node["amenity"="police"](around:${R},${lat},${lng});
+  node["surveillance:type"="camera"]["surveillance"="public"](around:${R},${lat},${lng});
+  node["camera:type"="speed"](around:${R},${lat},${lng});
 );
 out body;`;
     const res=await fetch('https://overpass-api.de/api/interpreter',
-      {method:'POST', body:'data='+encodeURIComponent(q),
+      {method:'POST',body:'data='+encodeURIComponent(q),
        headers:{'Content-Type':'application/x-www-form-urlencoded'}});
     if(!res.ok) return;
     const data=await res.json();
-    state.nearbySpeedCameras=(data.elements||[]).map(el=>({
-      id: el.id,
-      lat: el.lat, lng: el.lon,
-      maxspeed: el.tags?.maxspeed?parseLimit(el.tags.maxspeed):null,
-      type: el.tags?.amenity==='police'?'police':'camera'
+    S.nearbyCams=(data.elements||[]).map(el=>({
+      id:el.id, lat:el.lat, lng:el.lon,
+      maxspeed:el.tags?.maxspeed?parseLimit(el.tags.maxspeed):null,
+      type:el.tags?.amenity==='police'?'police':'camera'
     }));
+
+    // Reset alerted IDs on fresh fetch so returning cameras re-alert
+    // (keep only IDs still in the new result set)
+    const newIds=new Set(S.nearbyCams.map(c=>c.id));
+    for(const id of S.alertedCamIds){ if(!newIds.has(id)) S.alertedCamIds.delete(id); }
   }catch(e){}
 }
 
-/* ════════════════════════════════════════════════════════════
-   CAMERA PROXIMITY — checks every GPS fix, no cooldown per-camera
-════════════════════════════════════════════════════════════ */
-function checkCameraProximity(lat,lng){
-  let closestDist=Infinity, closestCam=null;
-
-  for(const cam of state.nearbySpeedCameras){
-    const d=haversine(lat,lng,cam.lat,cam.lng)*1000;
-    if(d<closestDist){ closestDist=d; closestCam=cam; }
+/* ════════════════════════════════════════════════
+   CAMERA PROXIMITY — called every GPS fix
+════════════════════════════════════════════════ */
+function checkCams(lat,lng){
+  let minDist=Infinity, closest=null;
+  for(const c of S.nearbyCams){
+    const d=haversine(lat,lng,c.lat,c.lng)*1000;
+    if(d<minDist){ minDist=d; closest=c; }
   }
 
-  if(closestCam && closestDist<=CAM_DIST){
-    state.nearCamera=true;
-    const camId=closestCam.id;
-    const isPolice=closestCam.type==='police';
+  const inRange=closest&&minDist<=CAM_ALERT_DIST;
+  const wasNear=S.nearCamera;
+  S.nearCamera=inRange;
 
-    // Alert once per camera per approach (cleared when >CAM_DIST*1.5 away)
-    if(!state.cameraAlertedIds.has(camId)){
-      state.cameraAlertedIds.add(camId);
-      state.camAlerts++;
-      state.cameraLog.push({time:fmtTime(Date.now()),lat,lng,road:state.roadName,
-        dist:Math.round(closestDist),type:closestCam.type});
-      document.getElementById('camDisplay').textContent=state.camAlerts;
+  if(inRange){
+    const isPolice=closest.type==='police';
+    const id=closest.id;
+
+    // Alert once per camera per approach
+    if(!S.alertedCamIds.has(id)){
+      S.alertedCamIds.add(id);
+      S.camAlerts++;
+      S.cameraLog.push({time:fmtTime(Date.now()),lat,lng,road:S.roadName,dist:Math.round(minDist),type:closest.type});
+      document.getElementById('camDisplay').textContent=S.camAlerts;
 
       if(isPolice){
-        policeBeep();
-        showAlert('police',`🚔 POLICE RADAR ${Math.round(closestDist)}m — Speed Check!`);
+        playPolice();
+        showIcon('cam','police','🚔',`Radar ${Math.round(minDist)}m`,8000);
       } else {
-        camBeep();
-        if(state.speed>(state.speedLimit||50)){
-          showAlert('cam',`📷 SPEED CAM ${Math.round(closestDist)}m — SLOW DOWN NOW!`);
+        playCamBeep();
+        const overLimit=S.speed>(S.speedLimit||50);
+        if(overLimit){
+          showIcon('cam','cam','📷',`CAM ${Math.round(minDist)}m — SLOW DOWN`,8000);
           setAlarm(true);
         } else {
-          showAlert('cam',`📷 Speed camera ${Math.round(closestDist)}m ahead`);
+          showIcon('cam','cam','📷',`Camera ${Math.round(minDist)}m`,6000);
         }
       }
     }
 
-    // Continuous alarm if still over limit near camera
-    if(!isPolice && state.speed>(state.speedLimit||50)-5){
-      setAlarm(true);
-    } else if(!state.speedExceeded){
-      setAlarm(false);
-    }
+    // Continuous alarm: near camera AND not slowed enough
+    if(!isPolice&&S.speed>(S.speedLimit||50)-8) setAlarm(true);
+    else if(!S.speedExceeded) setAlarm(false);
 
   } else {
-    state.nearCamera=false;
-    // Clear alerted IDs when sufficiently past cameras
-    if(closestDist>CAM_DIST*1.5){
-      state.cameraAlertedIds.clear();
-    }
-    if(!state.speedExceeded) setAlarm(false);
+    // Clear camera alert icon when out of range
+    if(wasNear){ clearIcon('cam'); if(!S.speedExceeded) setAlarm(false); }
+    // Clear alerted IDs when well away (so they re-alert on next approach)
+    if(minDist>CAM_ALERT_DIST*2) S.alertedCamIds.clear();
   }
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    STOP DETECTION
-════════════════════════════════════════════════════════════ */
-function handleStopDetection(){
+════════════════════════════════════════════════ */
+function handleStop(){
   const el=document.getElementById('stopTimer');
-  if(state.speed<1){
-    if(!state.stopTime) state.stopTime=Date.now();
-    state.stopDuration=(Date.now()-state.stopTime)/1000;
+  if(S.speed<1){
+    if(!S.stopTime) S.stopTime=Date.now();
+    S.stopDuration=(Date.now()-S.stopTime)/1000;
     el.style.display='block';
-    const m=Math.floor(state.stopDuration/60), s=Math.floor(state.stopDuration%60);
+    const m=Math.floor(S.stopDuration/60),s=Math.floor(S.stopDuration%60);
     document.getElementById('stopTimerVal').textContent=`${m}:${s.toString().padStart(2,'0')}`;
-    if(state.stopDuration>=600){ endRide(); }
+    if(S.stopDuration>=600) endRide();
   } else {
-    state.stopTime=null; state.stopDuration=0; el.style.display='none';
+    S.stopTime=null; S.stopDuration=0; el.style.display='none';
   }
 }
 
-/* ════════════════════════════════════════════════════════════
-   VIOLATION LOGIC
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════
+   VIOLATION
+════════════════════════════════════════════════ */
 function handleViolation(lat,lng){
-  const limit=state.speedLimit||REGIONS[region].defaultLimit;
-  const exc=state.speed>limit;
-  const margin=state.speed-limit;
-
+  const limit=S.speedLimit||REGIONS[region].defaultLimit;
+  const exc=S.speed>limit, margin=S.speed-limit;
   if(exc){
-    if(!state.exceedStart) state.exceedStart=Date.now();
-    if(Date.now()-state.exceedStart>1500){
-      if(!state.speedExceeded){
-        state.speedExceeded=true;
-        state.violations++;
-        if(state.history.length>0) state.history[state.history.length-1].exc=(state.history[state.history.length-1].exc||0)+1;
-        // Record violation with location
-        state.violationLog.push({
-          time:fmtTime(Date.now()), lat, lng,
-          speed:Math.round(state.speed), limit,
-          road:state.roadName, postcode:state.endPostcode
-        });
-        showAlert('speed',`⚠ OVER LIMIT: ${Math.round(state.speed)} / ${limit} km/h (+${Math.round(margin)})`);
-        setAlarm(true);
+    if(!S.exceedStart) S.exceedStart=Date.now();
+    if(Date.now()-S.exceedStart>1500){
+      if(!S.speedExceeded){
+        S.speedExceeded=true; S.violations++;
+        if(S.history.length>0) S.history[S.history.length-1].exc=(S.history[S.history.length-1].exc||0)+1;
+        S.violationLog.push({time:fmtTime(Date.now()),lat,lng,speed:Math.round(S.speed),limit,road:S.roadName,postcode:S.endPC});
+        playSpdBeep();
+        if(margin>20){
+          showIcon('speed','speed','⚠',`${Math.round(S.speed)} / ${limit} km/h`,8000);
+          setAlarm(true);
+        } else {
+          showIcon('speed','warn','⚡',`Over: ${Math.round(S.speed)} / ${limit}`,6000);
+        }
       }
-      setSpeedBeep(margin>20);
+      setSpdBeep(margin>20);
     }
   } else {
-    state.exceedStart=null; state.speedExceeded=false;
-    setSpeedBeep(false);
-    if(!state.nearCamera) setAlarm(false);
+    S.exceedStart=null; S.speedExceeded=false;
+    setSpdBeep(false); clearIcon('speed');
+    if(!S.nearCamera) setAlarm(false);
   }
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    TRIP TIMER
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 function startTripTimer(){
   tripTimerId=setInterval(()=>{
     if(!rideActive) return;
-    const e=Math.floor((Date.now()-state.startTime)/1000);
+    const e=Math.floor((Date.now()-S.startTime)/1000);
     document.getElementById('tripTime').textContent=
       `${Math.floor(e/60).toString().padStart(2,'0')}:${(e%60).toString().padStart(2,'0')}`;
-    document.getElementById('tripDist').textContent=state.distance.toFixed(2);
+    document.getElementById('tripDist').textContent=S.distance.toFixed(2);
   },1000);
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    CANVAS
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 let canvas,ctx,cW,cH;
 function initCanvas(){
-  canvas=document.getElementById('speedCanvas');
-  ctx=canvas.getContext('2d');
-  resizeCanvas();
-  window.addEventListener('resize',resizeCanvas);
+  canvas=document.getElementById('speedCanvas'); ctx=canvas.getContext('2d');
+  resizeCanvas(); window.addEventListener('resize',resizeCanvas);
 }
 function resizeCanvas(){
   if(!canvas) return;
-  const dpr=window.devicePixelRatio||1;
-  canvas.width=canvas.offsetWidth*dpr; canvas.height=canvas.offsetHeight*dpr;
+  const d=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*d; canvas.height=canvas.offsetHeight*d;
   cW=canvas.width; cH=canvas.height;
 }
-
 function gameLoop(){ if(!rideActive) return; draw(); rafId=requestAnimationFrame(gameLoop); }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    DRAW
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 function draw(){
   if(!ctx) return;
   ctx.clearRect(0,0,cW,cH);
-  const limit=state.speedLimit||REGIONS[region].defaultLimit;
-  const margin=state.speed-limit;
+  const limit=S.speedLimit||50, margin=S.speed-limit;
   const color=margin>20?'#ff2d2d':margin>0?'#ff6b00':'#00d4ff';
-  const cx=cW/2, cy=cH*0.455;
-  const r=Math.min(cW*0.41,cH*0.41);
+  const cx=cW/2, cy=cH*.45, r=Math.min(cW*.40,cH*.42);
   drawArc(cx,cy,r,color,limit);
   drawDigits(cx,cy,r,color);
   drawLimitBadge(cx,cy,r,limit);
-  if(state.nearCamera) drawCamBadge(cx,cy,r);
-  if(state.speed<1&&state.lat!==null) drawStopped(cx,cy,r);
+  if(S.nearCamera) drawCamBadge(cx,cy,r);
+  if(S.speed<1&&S.lat!==null) drawStopped(cx,cy,r);
   drawGraph();
 }
 
 function drawArc(cx,cy,r,color,limit){
-  const dpr=window.devicePixelRatio||1;
-  const sa=Math.PI*0.75, ea=Math.PI*2.25, rng=ea-sa;
-  const maxK=160;
-  const sf=Math.min(state.speed/maxK,1), lf=Math.min(limit/maxK,1);
+  const d=window.devicePixelRatio||1, sa=Math.PI*.75, ea=Math.PI*2.25, rng=ea-sa, mx=160;
+  const sf=Math.min(S.speed/mx,1), lf=Math.min(limit/mx,1);
   const sA=sa+sf*rng, lA=sa+lf*rng;
   ctx.lineCap='round';
   ctx.beginPath(); ctx.arc(cx,cy,r,sa,ea); ctx.strokeStyle='#1c1f28'; ctx.lineWidth=r*.082; ctx.stroke();
   ctx.beginPath(); ctx.arc(cx,cy,r,sa,lA); ctx.strokeStyle='#00e676'; ctx.lineWidth=r*.058; ctx.stroke();
   if(sA>lA){ ctx.beginPath(); ctx.arc(cx,cy,r,lA,sA); ctx.strokeStyle=color; ctx.lineWidth=r*.058; ctx.stroke(); }
   for(let i=0;i<=16;i++){
-    const a=sa+(i/16)*rng, maj=i%2===0;
-    const l=maj?r*.10:r*.055, r1=r+r*.055, r2=r1-l;
+    const a=sa+(i/16)*rng, maj=i%2===0, l=maj?r*.10:r*.055, r1=r+r*.055, r2=r1-l;
     ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);
     ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);
-    ctx.strokeStyle='#353945'; ctx.lineWidth=(maj?2:1)*dpr; ctx.stroke();
-    if(maj){
-      ctx.font=`${r*.09}px Orbitron,monospace`; ctx.fillStyle='#44485a';
+    ctx.strokeStyle='#353945'; ctx.lineWidth=(maj?2:1)*d; ctx.stroke();
+    if(maj){ ctx.font=`${r*.088}px Orbitron,monospace`; ctx.fillStyle='#44485a';
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(Math.round((i/16)*maxK),cx+Math.cos(a)*(r1+r*.09),cy+Math.sin(a)*(r1+r*.09));
-    }
+      ctx.fillText(Math.round((i/16)*mx),cx+Math.cos(a)*(r1+r*.09),cy+Math.sin(a)*(r1+r*.09)); }
   }
   const nx=cx+Math.cos(sA)*(r*.74), ny=cy+Math.sin(sA)*(r*.74);
-  ctx.shadowColor=color; ctx.shadowBlur=18*dpr;
+  ctx.shadowColor=color; ctx.shadowBlur=18*d;
   ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(nx,ny);
-  ctx.strokeStyle=color; ctx.lineWidth=3*dpr; ctx.stroke(); ctx.shadowBlur=0;
+  ctx.strokeStyle=color; ctx.lineWidth=3*d; ctx.stroke(); ctx.shadowBlur=0;
   ctx.beginPath(); ctx.arc(cx,cy,r*.065,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
   ctx.beginPath(); ctx.arc(cx,cy,r*.030,0,Math.PI*2); ctx.fillStyle='#0a0c10'; ctx.fill();
 }
 
 function drawDigits(cx,cy,r,color){
-  const dpr=window.devicePixelRatio||1;
-  ctx.font=`900 ${r*.55}px Orbitron,monospace`; ctx.fillStyle=color;
+  const d=window.devicePixelRatio||1;
+  ctx.font=`900 ${r*.54}px Orbitron,monospace`; ctx.fillStyle=color;
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.shadowColor=color; ctx.shadowBlur=26*dpr;
-  ctx.fillText(Math.round(state.speed),cx,cy+r*.07); ctx.shadowBlur=0;
-  ctx.font=`600 ${r*.125}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
-  ctx.fillText('km/h',cx,cy+r*.40);
-  if(state.accuracy!==null){
-    ctx.font=`500 ${r*.085}px Rajdhani,sans-serif`;
-    ctx.fillStyle=state.accuracy<15?'#00e67660':'#ff6b0060';
-    ctx.fillText(`GPS ±${state.accuracy}m`,cx,cy+r*.54);
+  ctx.shadowColor=color; ctx.shadowBlur=26*d;
+  ctx.fillText(Math.round(S.speed),cx,cy+r*.07); ctx.shadowBlur=0;
+  ctx.font=`600 ${r*.12}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
+  ctx.fillText('km/h',cx,cy+r*.39);
+  if(S.accuracy!==null){
+    ctx.font=`500 ${r*.08}px Rajdhani,sans-serif`;
+    ctx.fillStyle=S.accuracy<15?'#00e67660':'#ff6b0060';
+    ctx.fillText(`GPS ±${S.accuracy}m`,cx,cy+r*.52);
   }
 }
 
 function drawLimitBadge(cx,cy,r,limit){
-  const bx=cx-r*.94, by=cy+r*.05, br=r*.21;
+  const bx=cx-r*.92, by=cy+r*.04, br=r*.20;
   ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2);
   ctx.fillStyle='#1a1d24'; ctx.fill();
   ctx.strokeStyle='#ff2d2d'; ctx.lineWidth=3*(window.devicePixelRatio||1); ctx.stroke();
-  ctx.font=`900 ${r*.155}px Orbitron,monospace`; ctx.fillStyle='#fff';
+  ctx.font=`900 ${r*.15}px Orbitron,monospace`; ctx.fillStyle='#fff';
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(limit,bx,by-r*.03);
-  ctx.font=`600 ${r*.08}px Rajdhani,sans-serif`; ctx.fillStyle='#ff2d2d';
+  ctx.font=`600 ${r*.075}px Rajdhani,sans-serif`; ctx.fillStyle='#ff2d2d';
   ctx.fillText('LIMIT',bx,by+r*.115);
 }
 
 function drawCamBadge(cx,cy,r){
-  const bx=cx+r*.94, by=cy+r*.05, bw=r*.37, bh=r*.31;
+  const bx=cx+r*.92, by=cy+r*.04, bw=r*.36, bh=r*.30;
   const flash=Math.sin(Date.now()/200)>0;
   ctx.fillStyle=flash?'#ffd70030':'#ffd70010'; ctx.strokeStyle='#ffd700';
   ctx.lineWidth=2*(window.devicePixelRatio||1);
-  rRect(bx-bw/2,by-bh/2,bw,bh,7); ctx.fill(); ctx.stroke();
-  ctx.font=`${r*.16}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('📷',bx,by-r*.03);
-  ctx.font=`700 ${r*.08}px Rajdhani,sans-serif`; ctx.fillStyle='#ffd700';
+  rr(bx-bw/2,by-bh/2,bw,bh,7); ctx.fill(); ctx.stroke();
+  ctx.font=`${r*.15}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('📷',bx,by-r*.025);
+  ctx.font=`700 ${r*.075}px Rajdhani,sans-serif`; ctx.fillStyle='#ffd700';
   ctx.fillText('CAMERA',bx,by+r*.11);
 }
 
 function drawStopped(cx,cy,r){
-  ctx.font=`700 ${r*.11}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('STOPPED',cx,cy-r*.50);
+  ctx.font=`700 ${r*.10}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('STOPPED',cx,cy-r*.48);
 }
 
 function drawGraph(){
-  const pts=state.speedHistory; if(pts.length<2) return;
-  const dpr=window.devicePixelRatio||1;
-  const gh=cH*.125, gw=cW*.85, gx=(cW-gw)/2, gy=cH-gh-cH*.03;
-  const maxV=Math.max(160,...pts), limit=state.speedLimit||50;
-  ctx.fillStyle='#12151c99'; rRect(gx,gy,gw,gh,8); ctx.fill();
+  const pts=S.speedHistory; if(pts.length<2) return;
+  const d=window.devicePixelRatio||1, gh=cH*.12, gw=cW*.84;
+  const gx=(cW-gw)/2, gy=cH-gh-cH*.025, maxV=Math.max(160,...pts), limit=S.speedLimit||50;
+  ctx.fillStyle='#12151c99'; rr(gx,gy,gw,gh,8); ctx.fill();
   ctx.beginPath();
   pts.forEach((v,i)=>{ const px=gx+(i/(pts.length-1))*gw, py=gy+gh-(v/maxV)*gh; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
   ctx.lineTo(gx+gw,gy+gh); ctx.lineTo(gx,gy+gh); ctx.closePath();
-  ctx.fillStyle='#00d4ff12'; ctx.fill();
+  ctx.fillStyle='#00d4ff10'; ctx.fill();
   ctx.beginPath();
   pts.forEach((v,i)=>{ const px=gx+(i/(pts.length-1))*gw, py=gy+gh-(v/maxV)*gh; i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
-  ctx.strokeStyle='#00d4ff70'; ctx.lineWidth=1.5*dpr; ctx.stroke();
+  ctx.strokeStyle='#00d4ff70'; ctx.lineWidth=1.5*d; ctx.stroke();
   const lpy=gy+gh-(limit/maxV)*gh;
-  ctx.beginPath(); ctx.setLineDash([5,4]);
-  ctx.moveTo(gx,lpy); ctx.lineTo(gx+gw,lpy);
-  ctx.strokeStyle='#ff2d2d55'; ctx.lineWidth=1*dpr; ctx.stroke(); ctx.setLineDash([]);
-  ctx.font=`${8.5*dpr}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
+  ctx.beginPath(); ctx.setLineDash([5,4]); ctx.moveTo(gx,lpy); ctx.lineTo(gx+gw,lpy);
+  ctx.strokeStyle='#ff2d2d55'; ctx.lineWidth=1*d; ctx.stroke(); ctx.setLineDash([]);
+  ctx.font=`${8*d}px Rajdhani,sans-serif`; ctx.fillStyle='#5a6070';
   ctx.textAlign='left'; ctx.textBaseline='top'; ctx.fillText('SPEED HISTORY',gx+5,gy+4);
 }
 
-function rRect(x,y,w,h,rad){
-  if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x,y,w,h,rad); return; }
+function rr(x,y,w,h,rad){
+  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,w,h,rad);return;}
   ctx.beginPath(); ctx.moveTo(x+rad,y);
   ctx.lineTo(x+w-rad,y); ctx.quadraticCurveTo(x+w,y,x+w,y+rad);
   ctx.lineTo(x+w,y+h-rad); ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
@@ -1023,226 +1066,315 @@ function rRect(x,y,w,h,rad){
   ctx.lineTo(x,y+rad); ctx.quadraticCurveTo(x,y,x+rad,y); ctx.closePath();
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    END RIDE
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 function endRide(){
   if(!rideActive) return;
   rideActive=false;
   cancelAnimationFrame(rafId); clearInterval(tripTimerId);
-  setSpeedBeep(false); setAlarm(false); releaseWakeLock();
+  setSpdBeep(false); setAlarm(false); stopAudioHeartbeat(); releaseWakeLock();
   if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null; }
 
-  const elapsed=Math.floor((Date.now()-state.startTime)/1000);
-  const mm=Math.floor(elapsed/60).toString().padStart(2,'0');
-  const ss=(elapsed%60).toString().padStart(2,'0');
-  const avg=state.avgSpeedCount>0?Math.round(state.avgSpeedSum/state.avgSpeedCount):0;
+  const el=Math.floor((Date.now()-S.startTime)/1000);
+  const mm=Math.floor(el/60).toString().padStart(2,'0'), ss=(el%60).toString().padStart(2,'0');
+  const avg=S.avgSpeedCount>0?Math.round(S.avgSpeedSum/S.avgSpeedCount):0;
 
-  // Build trip record
   const trip={
-    id: Date.now(),
-    date: new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'}),
-    time: new Date(state.startTime).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}),
-    region,
-    duration:`${mm}:${ss}`,
-    distance: parseFloat(state.distance.toFixed(2)),
-    maxSpeed: Math.round(state.maxSpeed),
-    avgSpeed: avg,
-    violations: state.violations,
-    camAlerts: state.camAlerts,
-    startAddress: state.startAddress||'Unknown',
-    endAddress: state.endAddress||'Unknown',
-    startPostcode: state.startPostcode,
-    endPostcode: state.endPostcode,
-    speedLog: state.speedLog.slice(-500), // keep last 500 for detail view
-    violationLog: state.violationLog,
-    cameraLog: state.cameraLog,
-    history: state.history
+    id:Date.now(), date:new Date().toLocaleDateString('en-SG',{day:'2-digit',month:'short',year:'numeric'}),
+    time:new Date(S.startTime).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'}),
+    region, duration:`${mm}:${ss}`, distance:parseFloat(S.distance.toFixed(2)),
+    maxSpeed:Math.round(S.maxSpeed), avgSpeed:avg,
+    violations:S.violations, camAlerts:S.camAlerts,
+    startAddress:S.startAddr||'Unknown', endAddress:S.endAddr||'Unknown',
+    startPostcode:S.startPC, endPostcode:S.endPC,
+    speedLog:S.speedLog.slice(-600), violationLog:S.violationLog,
+    cameraLog:S.cameraLog, history:S.history
   };
   appendTrip(trip);
 
-  // Populate end screen
-  const routeText=`${state.startAddress||'Start'} → ${state.endAddress||'End'}`;
-  document.getElementById('esDist').textContent=state.distance.toFixed(2)+' km';
+  document.getElementById('esDist').textContent=S.distance.toFixed(2)+' km';
   document.getElementById('esTime').textContent=`${mm}:${ss}`;
-  document.getElementById('esMax').textContent=Math.round(state.maxSpeed)+' km/h';
+  document.getElementById('esMax').textContent=Math.round(S.maxSpeed)+' km/h';
   document.getElementById('esAvg').textContent=avg+' km/h';
-  document.getElementById('esViol').textContent=state.violations;
-  document.getElementById('esCam').textContent=state.camAlerts;
-  document.getElementById('esRoute').textContent=routeText;
+  document.getElementById('esViol').textContent=S.violations;
+  document.getElementById('esCam').textContent=S.camAlerts;
+  document.getElementById('esRoute').textContent=
+    `${S.startAddr||S.startPC||'Start'} → ${S.endAddr||S.endPC||'End'}`;
+  clearAllIcons();
   showScreen('endScreen');
 }
 
 function resetApp(){ updateTripCount(); showScreen('startScreen'); }
 
-/* ════════════════════════════════════════════════════════════
-   HISTORY SCREEN
-════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════
+   HISTORY LIST
+════════════════════════════════════════════════ */
 function openHistory(){ renderHistoryList(); showScreen('histScreen'); }
 
 function renderHistoryList(){
-  const trips=loadTrips().reverse();
+  const trips=loadTrips().slice().reverse();
   const el=document.getElementById('histList');
   if(!trips.length){
-    el.innerHTML='<div class="no-trips"><span style="font-size:28px">🚗</span><span>No trips recorded yet</span></div>';
+    el.innerHTML='<div class="no-trips"><span style="font-size:26px">🚗</span><span>No trips yet</span></div>';
     return;
   }
   el.innerHTML=trips.map((t,i)=>{
-    const vCol=t.violations>0?'style="color:var(--danger)"':'style="color:var(--success)"';
-    return `<div class="trip-card" onclick="openTripDetail(${t.id})">
-      <div class="trip-card-header">
-        <div class="trip-card-title">TRIP #${trips.length-i}</div>
-        <div class="trip-card-date">${t.date} ${t.time}</div>
+    const vc=t.violations>0?'style="color:var(--danger)"':'style="color:var(--success)"';
+    return `<div class="trip-card" onclick="openDetail(${t.id})">
+      <div class="tc-head">
+        <div class="tc-title">TRIP #${trips.length-i}</div>
+        <div class="tc-date">${t.date} ${t.time}</div>
       </div>
-      <div class="trip-card-stats">
-        <div class="tc-stat"><div class="tl">Dist</div><div class="tv">${t.distance}km</div></div>
-        <div class="tc-stat"><div class="tl">Max</div><div class="tv">${t.maxSpeed}km/h</div></div>
-        <div class="tc-stat"><div class="tl">Violations</div><div class="tv" ${vCol}>${t.violations}</div></div>
+      <div class="tc-stats">
+        <div class="tcs"><div class="tl">Dist</div><div class="tv">${t.distance}km</div></div>
+        <div class="tcs"><div class="tl">Max</div><div class="tv">${t.maxSpeed}km/h</div></div>
+        <div class="tcs"><div class="tl">Viol</div><div class="tv" ${vc}>${t.violations}</div></div>
       </div>
-      <div class="trip-route-line">
-        📍<b>${t.startAddress||t.startPostcode||'Unknown'}</b><br>
-        🏁<b>${t.endAddress||t.endPostcode||'Unknown'}</b>
-      </div>
+      <div class="tc-route">📍<b>${t.startAddress||t.startPostcode||'—'}</b><br>🏁<b>${t.endAddress||t.endPostcode||'—'}</b></div>
     </div>`;
   }).join('');
 }
 
-/* ════════════════════════════════════════════════════════════
-   TRIP DETAIL SCREEN
-════════════════════════════════════════════════════════════ */
-function openTripDetail(id){
-  const trips=loadTrips();
-  const t=trips.find(x=>x.id===id);
-  if(!t) return;
+/* ════════════════════════════════════════════════
+   TRIP DETAIL  (with Leaflet map + speed graph)
+════════════════════════════════════════════════ */
+let _leafletMap=null;
 
+function openDetail(id){
+  const trips=loadTrips();
+  const t=trips.find(x=>x.id===id); if(!t) return;
   document.getElementById('detailTitle').textContent=`${t.date} ${t.time}`;
   const body=document.getElementById('detailBody');
 
-  // Summary
+  // Summary grid
   body.innerHTML=`
-  <div class="detail-section">
+  <div class="dsec">
     <h3>Summary</h3>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-      ${[['Distance',t.distance+'km'],['Duration',t.duration],['Max Speed',t.maxSpeed+'km/h'],
-         ['Avg Speed',t.avgSpeed+'km/h'],['Violations',t.violations],['Cam Alerts',t.camAlerts]]
-        .map(([l,v])=>`<div class="tc-stat"><div class="tl">${l}</div><div class="tv">${v}</div></div>`).join('')}
-    </div>
-  </div>
-  <div class="detail-section">
-    <h3>Route</h3>
-    <div class="route-strip">
-      <div class="route-pin">📍 ${t.startPostcode||'Start'}</div>
-      <div class="route-arrow">────────►</div>
-      <div class="route-pin">🏁 ${t.endPostcode||'End'}</div>
-    </div>
-    <div style="margin-top:8px;font-size:12px;color:var(--muted);line-height:1.6">
-      From: <span style="color:var(--text)">${t.startAddress||'Unknown'}</span><br>
-      To: <span style="color:var(--text)">${t.endAddress||'Unknown'}</span>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+      ${[['Distance',t.distance+'km'],['Duration',t.duration],['Max',t.maxSpeed+'km/h'],
+         ['Avg',t.avgSpeed+'km/h'],['Viol.',t.violations],['Cams',t.camAlerts]]
+        .map(([l,v])=>`<div class="tcs"><div class="tl">${l}</div><div class="tv">${v}</div></div>`).join('')}
     </div>
   </div>`;
 
-  // Speed timeline (sample every Nth point for readability)
-  if(t.speedLog && t.speedLog.length>0){
-    const step=Math.max(1,Math.floor(t.speedLog.length/60));
+  // Route + OSM map
+  const hasGPS=t.speedLog&&t.speedLog.length>0&&t.speedLog[0].lat;
+  const osmLink=hasGPS?buildOSMLink(t.speedLog):'';
+
+  body.innerHTML+=`
+  <div class="dsec">
+    <h3>Route</h3>
+    <div class="route-strip">
+      <div class="route-pin">📍 ${t.startPostcode||'Start'}</div>
+      <div class="route-arrow">────►</div>
+      <div class="route-pin">🏁 ${t.endPostcode||'End'}</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6">
+      From: <span style="color:var(--text)">${t.startAddress||'Unknown'}</span><br>
+      To: <span style="color:var(--text)">${t.endAddress||'Unknown'}</span>
+    </div>
+    ${osmLink?`<a class="osm-link" href="${osmLink}" target="_blank" rel="noopener">🗺 Open Full Route in OpenStreetMap</a>`:''}
+    ${hasGPS?`<div id="mapContainer"><div id="routeMap"></div>
+      <div class="map-legend">
+        <div class="ml"><div class="mld" style="background:#00d4ff"></div>Safe</div>
+        <div class="ml"><div class="mld" style="background:#ff6b00"></div>Over</div>
+        <div class="ml"><div class="mld" style="background:#ff2d2d"></div>+20</div>
+      </div>
+    </div>`:''}
+  </div>`;
+
+  // Speed graph (colour-coded canvas)
+  if(t.speedLog&&t.speedLog.length>1){
+    body.innerHTML+=`
+    <div class="dsec">
+      <h3>Speed Graph <span style="font-size:9px;color:var(--muted)">— red line = limit</span></h3>
+      <div class="graph-wrap"><canvas id="detGraph"></canvas></div>
+    </div>`;
+  }
+
+  // Speed timeline
+  if(t.speedLog&&t.speedLog.length>0){
+    const step=Math.max(1,Math.floor(t.speedLog.length/80));
     const rows=t.speedLog.filter((_,i)=>i%step===0).map(e=>{
-      const m=e.spd-e.limit;
-      const cls=m>20?'over':m>0?'warn':'ok';
-      const sc=m>20?'tl-spd-over':m>0?'tl-spd-warn':'tl-spd-ok';
-      const ts=new Date(e.t).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      const m=e.spd-e.limit, cls=m>20?'over':m>0?'wrn':'ok', sc=m>20?'over':m>0?'wrn':'ok';
+      const ts=new Date(e.t).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
       return `<div class="tl-row ${cls}">
-        <span class="tl-time">${ts.slice(0,5)}</span>
-        <span class="tl-speed ${sc}">${e.spd}km/h</span>
-        <span class="tl-road">${e.road||'—'}</span>
-        <span style="font-size:10px;color:var(--muted)">${e.limit}lim</span>
+        <span class="tl-t">${ts}</span>
+        <span class="tl-s ${sc}">${e.spd}</span>
+        <span class="tl-r">${e.road||'—'}</span>
+        <span style="font-size:9px;color:var(--muted)">${e.limit}lim</span>
       </div>`;
     }).join('');
-    body.innerHTML+=`<div class="detail-section"><h3>Speed Timeline (color-coded)</h3>
-      <div style="margin-bottom:6px;font-size:10px;color:var(--muted)">
-        <span style="color:var(--success)">■</span> Safe &nbsp;
-        <span style="color:var(--warn)">■</span> Over limit &nbsp;
-        <span style="color:var(--danger)">■</span> +20 over limit
-      </div>
-      <div class="speed-timeline" style="max-height:220px;overflow-y:auto">${rows}</div>
+    body.innerHTML+=`<div class="dsec">
+      <h3>Speed Timeline
+        <span style="margin-left:8px;font-size:9px">
+          <span style="color:var(--success)">■</span>Safe
+          <span style="color:var(--warn);margin-left:4px">■</span>Over
+          <span style="color:var(--danger);margin-left:4px">■</span>+20
+        </span>
+      </h3>
+      <div class="speed-tl">${rows}</div>
     </div>`;
-
-    // Mini graph
-    body.innerHTML+=`<div class="detail-section"><h3>Speed Graph</h3>
-      <canvas class="graph-canvas" id="detailGraph"></canvas></div>`;
-    requestAnimationFrame(()=>renderDetailGraph(t.speedLog));
   }
 
   // Violations
-  if(t.violationLog && t.violationLog.length>0){
-    const items=t.violationLog.map(v=>`
-      <div class="viol-item">
-        <div class="vi-loc">${v.road||'Unknown Road'}</div>
-        <div class="vi-detail">${v.time} · ${v.speed} km/h in ${v.limit} zone (+${v.speed-v.limit})</div>
-        ${v.postcode?`<div class="vi-pin">📍 ${v.postcode}</div>`:''}
-        ${v.lat?`<div class="vi-pin" style="color:var(--muted)">${v.lat.toFixed(5)}, ${v.lng.toFixed(5)}</div>`:''}
+  if(t.violationLog&&t.violationLog.length>0){
+    const items=t.violationLog.map((v,i)=>
+      `<div class="vi">
+        <div class="vr">${v.road||'Unknown Road'}</div>
+        <div class="vd">${v.time} · ${v.speed} km/h in ${v.limit} zone (+${v.speed-v.limit})</div>
+        ${v.postcode?`<div class="vp">📍 ${v.postcode}</div>`:''}
+        ${v.lat?`<div class="vmap" onclick="openViolMap(${v.lat},${v.lng})">📌 Show on map</div>`:''}
       </div>`).join('');
-    body.innerHTML+=`<div class="detail-section"><h3>Violations (${t.violationLog.length})</h3>
-      <div class="viol-list">${items}</div></div>`;
+    body.innerHTML+=`<div class="dsec"><h3>Violations (${t.violationLog.length})</h3><div class="viol-list">${items}</div></div>`;
   }
 
   // Camera alerts
-  if(t.cameraLog && t.cameraLog.length>0){
-    const items=t.cameraLog.map(c=>`
-      <div class="viol-item">
-        <div class="vi-loc" style="color:var(--cam)">${c.type==='police'?'🚔 Police Radar':'📷 Speed Camera'}</div>
-        <div class="vi-detail">${c.time} · ${c.road||'—'} · ${c.dist}m away</div>
+  if(t.cameraLog&&t.cameraLog.length>0){
+    const items=t.cameraLog.map(c=>
+      `<div class="vi">
+        <div class="vr" style="color:var(--cam)">${c.type==='police'?'🚔 Police Radar':'📷 Speed Camera'}</div>
+        <div class="vd">${c.time} · ${c.road||'—'} · ${c.dist}m away</div>
       </div>`).join('');
-    body.innerHTML+=`<div class="detail-section"><h3>Camera Alerts (${t.cameraLog.length})</h3>
-      <div class="viol-list">${items}</div></div>`;
+    body.innerHTML+=`<div class="dsec"><h3>Camera Alerts (${t.cameraLog.length})</h3><div class="viol-list">${items}</div></div>`;
   }
 
   showScreen('detailScreen');
+
+  // Init map after DOM render
+  requestAnimationFrame(()=>{
+    if(hasGPS) initRouteMap(t.speedLog, t.violationLog||[], t.cameraLog||[]);
+    if(t.speedLog&&t.speedLog.length>1) renderDetailGraph(t.speedLog);
+  });
 }
 
-function renderDetailGraph(log){
-  const c=document.getElementById('detailGraph'); if(!c) return;
-  const dpr=window.devicePixelRatio||1;
-  c.width=c.offsetWidth*dpr; c.height=c.offsetHeight*dpr;
-  const gx=c.getContext('2d');
-  const W=c.width, H=c.height;
-  const maxV=Math.max(80,...log.map(e=>e.spd));
-  const step=Math.max(1,Math.floor(log.length/W));
-  const pts=log.filter((_,i)=>i%step===0);
-  gx.fillStyle='#1a1d24'; gx.fillRect(0,0,W,H);
+/* ════════════════════════════════════════════════
+   LEAFLET ROUTE MAP
+════════════════════════════════════════════════ */
+function initRouteMap(log, viols, cams){
+  const el=document.getElementById('routeMap'); if(!el) return;
+  if(_leafletMap){ _leafletMap.remove(); _leafletMap=null; }
 
-  // Colored segments
-  pts.forEach((e,i)=>{
-    if(i===0) return;
-    const x1=(  (i-1)/(pts.length-1))*W, x2=(i/(pts.length-1))*W;
-    const y1=H-(pts[i-1].spd/maxV)*H, y2=H-(e.spd/maxV)*H;
-    const m=e.spd-e.limit;
-    gx.beginPath(); gx.moveTo(x1,y1); gx.lineTo(x2,y2);
-    gx.strokeStyle=m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';
-    gx.lineWidth=2*dpr; gx.stroke();
+  const validPts=log.filter(e=>e.lat&&e.lng);
+  if(!validPts.length) return;
+
+  _leafletMap=L.map('routeMap',{
+    zoomControl:true, attributionControl:false,
+    dragging:true, touchZoom:true
   });
 
-  // Limit line
-  if(log.length>0){
-    const lim=log[Math.floor(log.length/2)].limit;
-    const ly=H-(lim/maxV)*H;
-    gx.beginPath(); gx.setLineDash([4,3]);
-    gx.moveTo(0,ly); gx.lineTo(W,ly);
-    gx.strokeStyle='#ff2d2d66'; gx.lineWidth=1*dpr; gx.stroke();
-    gx.setLineDash([]);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19, attribution:'© OSM'
+  }).addTo(_leafletMap);
+
+  // Colour-coded polyline segments
+  const step=Math.max(1,Math.floor(validPts.length/300));
+  const sampled=validPts.filter((_,i)=>i%step===0);
+
+  for(let i=1;i<sampled.length;i++){
+    const a=sampled[i-1], b=sampled[i];
+    const m=a.spd-(a.limit||50);
+    const col=m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';
+    L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{color:col,weight:4,opacity:.85}).addTo(_leafletMap);
   }
+
+  // Start/end markers
+  const first=validPts[0], last=validPts[validPts.length-1];
+  const mkIcon=(emoji,col)=>L.divIcon({
+    html:`<div style="background:${col};border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px #0008">${emoji}</div>`,
+    iconSize:[24,24], iconAnchor:[12,12], className:''
+  });
+  L.marker([first.lat,first.lng],{icon:mkIcon('📍','#00d4ff')})
+    .bindPopup(`<b>Start</b>`).addTo(_leafletMap);
+  L.marker([last.lat,last.lng],{icon:mkIcon('🏁','#00e676')})
+    .bindPopup(`<b>End</b>`).addTo(_leafletMap);
+
+  // Violation markers
+  viols.forEach(v=>{
+    if(!v.lat) return;
+    L.marker([v.lat,v.lng],{icon:mkIcon('⚠','#ff2d2d')})
+      .bindPopup(`<b>Violation</b><br>${v.speed}km/h in ${v.limit} zone<br>${v.time}`)
+      .addTo(_leafletMap);
+  });
+
+  // Camera markers
+  cams.forEach(c=>{
+    if(!c.lat) return;
+    L.marker([c.lat,c.lng],{icon:mkIcon('📷','#ffd700')})
+      .bindPopup(`<b>Camera</b><br>${c.road||'—'}<br>${c.time}`)
+      .addTo(_leafletMap);
+  });
+
+  // Fit map to route
+  const bounds=L.latLngBounds(validPts.map(p=>[p.lat,p.lng]));
+  _leafletMap.fitBounds(bounds,{padding:[20,20]});
 }
 
-/* ════════════════════════════════════════════════════════════
+function buildOSMLink(log){
+  const pts=log.filter(e=>e.lat&&e.lng);
+  if(!pts.length) return '';
+  const mid=pts[Math.floor(pts.length/2)];
+  return `https://www.openstreetmap.org/?mlat=${mid.lat}&mlon=${mid.lng}#map=14/${mid.lat}/${mid.lng}`;
+}
+
+function openViolMap(lat,lng){
+  window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=17/${lat}/${lng}`,'_blank');
+}
+
+/* ════════════════════════════════════════════════
+   DETAIL GRAPH — colour-coded speed line
+════════════════════════════════════════════════ */
+function renderDetailGraph(log){
+  const c=document.getElementById('detGraph'); if(!c) return;
+  const d=window.devicePixelRatio||1;
+  c.width=c.offsetWidth*d; c.height=c.offsetHeight*d;
+  const g=c.getContext('2d'), W=c.width, H=c.height;
+  const maxV=Math.max(80,...log.map(e=>e.spd));
+  const step=Math.max(1,Math.floor(log.length/(W/d)));
+  const pts=log.filter((_,i)=>i%step===0);
+  g.fillStyle='#1a1d24'; g.fillRect(0,0,W,H);
+  // Background fill
+  g.beginPath();
+  pts.forEach((e,i)=>{ const px=(i/(pts.length-1))*W, py=H-(e.spd/maxV)*H; i===0?g.moveTo(px,py):g.lineTo(px,py); });
+  g.lineTo(W,H); g.lineTo(0,H); g.closePath();
+  g.fillStyle='#00d4ff0a'; g.fill();
+  // Colour segments
+  pts.forEach((e,i)=>{
+    if(i===0) return;
+    const x1=((i-1)/(pts.length-1))*W, x2=(i/(pts.length-1))*W;
+    const y1=H-(pts[i-1].spd/maxV)*H, y2=H-(e.spd/maxV)*H;
+    const m=e.spd-(e.limit||50);
+    g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2);
+    g.strokeStyle=m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';
+    g.lineWidth=2.5*d; g.stroke();
+  });
+  // Limit dashed line (use median limit)
+  const mLim=pts[Math.floor(pts.length/2)]?.limit||50;
+  const ly=H-(mLim/maxV)*H;
+  g.beginPath(); g.setLineDash([4,3]);
+  g.moveTo(0,ly); g.lineTo(W,ly);
+  g.strokeStyle='#ff2d2d80'; g.lineWidth=1.5*d; g.stroke(); g.setLineDash([]);
+  // Labels
+  g.font=`${10*d}px Rajdhani,sans-serif`; g.fillStyle='#5a6070';
+  g.textAlign='left'; g.textBaseline='top';
+  g.fillText(`0 km/h`,4,H-12*d);
+  g.textBaseline='alphabetic';
+  g.fillText(`${Math.round(maxV)} km/h`,4,12*d);
+  g.fillStyle='#ff2d2d80'; g.textBaseline='middle';
+  g.fillText(`${mLim} limit`,W/2,ly+1);
+}
+
+/* ════════════════════════════════════════════════
    IMPORT / EXPORT
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 function downloadHistory(){
-  const trips=loadTrips();
-  const blob=new Blob([JSON.stringify(trips,null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(loadTrips(),null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`speedsense_trips_${new Date().toISOString().slice(0,10)}.json`;
+  a.download=`speedsense_${new Date().toISOString().slice(0,10)}.json`;
   a.click(); URL.revokeObjectURL(a.href);
 }
-
 function importHistory(evt){
   const file=evt.target.files[0]; if(!file) return;
   const fr=new FileReader();
@@ -1250,52 +1382,34 @@ function importHistory(evt){
     try{
       const data=JSON.parse(e.target.result);
       if(!Array.isArray(data)) throw new Error('Invalid format');
-      const existing=loadTrips();
-      const existIds=new Set(existing.map(t=>t.id));
-      const merged=[...existing,...data.filter(t=>!existIds.has(t.id))];
-      merged.sort((a,b)=>a.id-b.id);
-      saveTrips(merged);
-      updateTripCount();
+      const ex=loadTrips(), ids=new Set(ex.map(t=>t.id));
+      const merged=[...ex,...data.filter(t=>!ids.has(t.id))].sort((a,b)=>a.id-b.id);
+      saveTrips(merged); updateTripCount();
       alert(`Imported ${data.length} trips. Total: ${merged.length}`);
       if(document.getElementById('histScreen').classList.contains('active')) renderHistoryList();
-    }catch(ex){ alert('Import failed: '+ex.message); }
+    }catch(e2){ alert('Import failed: '+e2.message); }
   };
-  fr.readAsText(file);
-  evt.target.value='';
+  fr.readAsText(file); evt.target.value='';
 }
-
 function clearAllHistory(){
-  if(!confirm('Delete ALL trip history? This cannot be undone.')) return;
-  saveTrips([]);
-  updateTripCount();
+  if(!confirm('Delete ALL trip history? Cannot be undone.')) return;
+  saveTrips([]); updateTripCount();
   if(document.getElementById('histScreen').classList.contains('active')) renderHistoryList();
 }
 
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    UTILS
-════════════════════════════════════════════════════════════ */
-function haversine(lat1,lon1,lat2,lon2){
-  const R=6371,dL=(lat2-lat1)*Math.PI/180,dG=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dL/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dG/2)**2;
+════════════════════════════════════════════════ */
+function haversine(la1,lo1,la2,lo2){
+  const R=6371,dL=(la2-la1)*Math.PI/180,dG=(lo2-lo1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dG/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+function fmtTime(ts){ return new Date(ts).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 
-function fmtTime(ts){
-  return new Date(ts).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-
-/* ════════════════════════════════════════════════════════════
-   AUDIO UNLOCK — must happen on first user gesture
-   Multiple events cover iOS/Android edge cases
-════════════════════════════════════════════════════════════ */
-const _unlock=()=>{ unlockAudio(); };
-['touchstart','touchend','mousedown','keydown','click'].forEach(ev=>
-  document.addEventListener(ev,_unlock,{once:true,passive:true})
-);
-
-/* ════════════════════════════════════════════════════════════
+/* ════════════════════════════════════════════════
    INIT
-════════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════ */
 updateTripCount();
 </script>
 </body>
