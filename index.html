@@ -19,10 +19,10 @@
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
 html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);
-  font-family:'Rajdhani',sans-serif;-webkit-font-smoothing:antialiased;touch-action:manipulation}
+  font-family:'Rajdhani',sans-serif;font-size:15px;-webkit-font-smoothing:antialiased;touch-action:manipulation}
 canvas{display:block}
-#app{height:100vh;height:100dvh;width:100vw;display:flex;flex-direction:column;
-  overflow:hidden;position:relative;padding-top:var(--st);padding-bottom:var(--sb)}
+#app{position:fixed;inset:0;height:100%;width:100%;display:flex;flex-direction:column;
+  overflow:hidden;padding-top:var(--st);padding-bottom:var(--sb)}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;z-index:10;
   padding-top:var(--st);padding-bottom:var(--sb)}
 .screen.active{display:flex}
@@ -223,9 +223,9 @@ canvas{display:block}
 .osm-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--accent);
   text-decoration:none;padding:6px 12px;border:1px solid var(--accent);border-radius:6px;
   background:#00d4ff0a;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:600}
-#mapWrap{width:100%;height:230px;border-radius:8px;overflow:hidden;margin-top:8px;
-  border:1px solid var(--border);position:relative}
-#routeMap{width:100%;height:100%}
+#mapWrap{width:100%;height:260px;border-radius:8px;margin-top:8px;
+  border:1px solid var(--border);position:relative;overflow:hidden;display:block}
+#routeMap{position:absolute;inset:0;width:100%;height:100%}
 .mleg{position:absolute;bottom:6px;left:6px;background:#000000bb;border-radius:6px;
   padding:4px 8px;font-size:10px;z-index:999;display:flex;gap:7px;pointer-events:none}
 .ml{display:flex;align-items:center;gap:3px;color:#ccc}
@@ -298,6 +298,7 @@ canvas{display:block}
   </div>
   <div class="start-row">
     <button class="s-btn ac" onclick="openHistory()">📋 HISTORY <span id="tripBadge">0 trips</span></button>
+    <button class="s-btn ac" onclick="openUCamScreen()">📷 MY CAMERAS</button>
     <button class="s-btn ac" onclick="dlHistory()">⬇ Export</button>
     <label class="s-btn" style="cursor:pointer">⬆ Import
       <input type="file" accept=".json" style="display:none" onchange="importHistory(event)">
@@ -330,6 +331,7 @@ canvas{display:block}
   <div id="mainView">
     <canvas id="speedCanvas"></canvas>
     <div id="stopPill">Stopped: <span id="stopVal">0:00</span> / 10:00</div>
+    <button id="camReportBtn" onclick="reportUserCamera()" style="position:absolute;bottom:72px;right:12px;background:#ffd70018;border:1.5px solid #ffd700;color:#ffd700;font-size:12px;font-family:'Rajdhani',sans-serif;font-weight:700;padding:7px 13px;border-radius:22px;cursor:pointer;z-index:6;display:flex;align-items:center;gap:5px;box-shadow:0 2px 10px #0006;">📷 Report Camera</button>
   </div>
   <div id="btmPanel">
     <div class="sc"><div class="lb">Limit</div><div class="vl c" id="dLimit">—</div></div>
@@ -427,12 +429,12 @@ canvas{display:block}
       <div class="how-item">
         <div class="how-icon ca">📷</div>
         <div class="how-t"><b>Yellow 📷 — Speed Camera</b>
-          <p>Two-note descending chime (C6→G5). Calm and distinct. Plays once as you enter 250m radius of a camera.</p></div>
+          <p>Single long descending tone (~750ms). Plays immediately when you enter 250 m of a camera, then repeats every 5 seconds until you pass it.</p></div>
       </div>
       <div class="how-item">
         <div class="how-icon po">🚔</div>
         <div class="how-t"><b>Purple 🚔 — Police Radar</b>
-          <p>Three-note siren (A4→E5→C5). Detected from OSM police enforcement nodes near your position.</p></div>
+          <p>Three-note siren (A4→E5→C5). Detected from OSM police enforcement nodes. Repeats every 5 seconds while within range.</p></div>
       </div>
       <div class="how-item">
         <div class="how-icon wn">⚡</div>
@@ -442,13 +444,14 @@ canvas{display:block}
       <div class="how-item">
         <div class="how-icon dc">⚠</div>
         <div class="how-t"><b>Red ⚠ — 20+ Over Limit</b>
-          <p>Slow pulsed beep every 1.4s plus sawtooth alarm. Continues until speed drops. Most urgent alert.</p></div>
+          <p>Pulsed beep every 3 seconds (1–20 km/h over) or every 1 second (20+ km/h over). Sawtooth alarm warble runs continuously when 20+ over. All stop when speed drops below limit.</p></div>
       </div>
       <div class="sound-grid" style="margin-top:8px">
         <button class="sound-btn cam-s" onclick="testSound('cam')"><span>📷</span><span>Camera Chime</span></button>
         <button class="sound-btn spd-s" onclick="testSound('spd')"><span>⚠</span><span>Speed Alert</span></button>
         <button class="sound-btn pol-s" onclick="testSound('pol')"><span>🚔</span><span>Police Siren</span></button>
         <button class="sound-btn alm-s" onclick="testSound('alm')"><span>🔔</span><span>Alarm (3s)</span></button>
+        <button class="sound-btn spd-s" onclick="setSpdBeep('urgent');setTimeout(()=>setSpdBeep(false),3000)" style="border-color:#ff6b00;color:#ff6b00"><span>⚡</span><span>3s Urgent Beep</span></button>
       </div>
     </div>
 
@@ -471,6 +474,19 @@ canvas{display:block}
       </div>
     </div>
 
+
+    <div class="how-sec">
+      <h3><span>📷</span>REPORT A CAMERA</h3>
+      <div class="how-item"><div class="how-icon ca">📍</div><div class="how-t"><b>Tap "📷 Report Camera"</b>
+        <p>During any ride, tap the yellow "📷 Report Camera" button on the speedometer screen to save the exact GPS coordinates of a camera the app missed.</p></div></div>
+      <div class="how-item"><div class="how-icon ca">💾</div><div class="how-t"><b>Stored in IndexedDB</b>
+        <p>Your reported cameras are saved permanently in your browser's IndexedDB. They survive page refreshes and app restarts.</p></div></div>
+      <div class="how-item"><div class="how-icon ca">🔁</div><div class="how-t"><b>Active on next pass</b>
+        <p>The next time you drive within 250 m of a saved location, SpeedSense plays the camera chime — just like an OSM camera.</p></div></div>
+      <div class="how-item"><div class="how-icon ac">📋</div><div class="how-t"><b>Manage cameras</b>
+        <p>Tap MY CAMERAS on the home screen to view and delete your reported locations.</p></div></div>
+    </div>
+
     <div class="how-sec">
       <h3><span>📊</span>SPEED LIMITS (AUTO)</h3>
       <div class="how-item">
@@ -490,7 +506,7 @@ canvas{display:block}
       <div class="how-item">
         <div class="how-icon ac">💾</div>
         <div class="how-t"><b>Unlimited storage</b>
-          <p>All trips stored in your browser's localStorage. No server, no account. Export to JSON to back up across devices.</p></div>
+          <p>All trips stored in IndexedDB (primary) with localStorage backup. Data persists through page refreshes and browser restarts. Export to JSON to back up across devices.</p></div>
       </div>
       <div class="how-item">
         <div class="how-icon ac">📤</div>
@@ -526,6 +542,18 @@ canvas{display:block}
       </div>
     </div>
 
+  </div>
+</div>
+
+
+<!-- ══ USER CAMERAS ══ -->
+<div id="ucamScreen" class="screen" style="flex-direction:column">
+  <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <span style="font-family:'Orbitron',monospace;font-size:14px;color:var(--cam);font-weight:700;flex:1;letter-spacing:2px">MY CAMERAS</span>
+    <button class="tbtn" onclick="showScreen('startScreen')">← BACK</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px" id="ucamList">
+    <div style="color:var(--muted);text-align:center;margin-top:40px;font-size:14px">No cameras reported yet.<br>Tap "📷 Report Camera" while riding.</div>
   </div>
 </div>
 
@@ -633,11 +661,22 @@ function fallbackLimit(cc,rt){const c=CLIM[cc]||CLIM.DEFAULT;return c[R2K[rt]||'
 /* ══════════════════════════════════════════════════════
    STORAGE
 ══════════════════════════════════════════════════════ */
-const DB='speedsense_v5';
-function saveTrips(t){try{localStorage.setItem(DB,JSON.stringify(t));}catch(e){}}
-function loadTrips(){try{return JSON.parse(localStorage.getItem(DB)||'[]');}catch(e){return[];}}
-function appendTrip(t){const a=loadTrips();a.push(t);saveTrips(a);updateBadge();}
-function updateBadge(){const n=loadTrips().length;const el=document.getElementById('tripBadge');if(el)el.textContent=n+' trip'+(n===1?'':'s');}
+const LS_KEY='speedsense_v6';
+let _idb=null;
+function openIDB(){return new Promise((res,rej)=>{if(_idb){res(_idb);return;}const req=indexedDB.open('speedsense',3);req.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains('trips'))db.createObjectStore('trips',{keyPath:'id'});if(!db.objectStoreNames.contains('ucams'))db.createObjectStore('ucams',{keyPath:'id',autoIncrement:true});};req.onsuccess=e=>{_idb=e.target.result;res(_idb);};req.onerror=()=>rej(req.error);});}
+async function idbGetAll(store){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly'),r=tx.objectStore(store).getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbPut(store,obj){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).put(obj);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbDelete(store,key){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
+async function idbClear(store){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
+async function saveTrips(trips){try{localStorage.setItem(LS_KEY,JSON.stringify(trips));}catch(e){}for(const t of trips)await idbPut('trips',t).catch(()=>{});}
+async function loadTrips(){try{const rows=await idbGetAll('trips');if(rows&&rows.length>0){try{localStorage.setItem(LS_KEY,JSON.stringify(rows));}catch(e){}return rows.sort((a,b)=>a.id-b.id);}
+}catch(e){}try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}}
+async function appendTrip(t){await idbPut('trips',t).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]');a.push(t);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
+async function deleteTripById(id){await idbDelete('trips',id).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]').filter(t=>t.id!==id);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
+async function updateBadge(){const trips=await loadTrips();const el=document.getElementById('tripBadge');if(el)el.textContent=trips.length+' trip'+(trips.length===1?'':'s');}
+async function loadUCams(){try{return await idbGetAll('ucams');}catch(e){return[];}}
+async function addUCam(cam){await idbPut('ucams',cam).catch(()=>{});}
+async function delUCam(id){await idbDelete('ucams',id).catch(()=>{});}
 
 /* ══════════════════════════════════════════════════════
    SERVICE WORKER + BACKGROUND GPS
@@ -752,13 +791,20 @@ function mkBuf(freq,dur,wave,vol){
 }
 function buildBufs(){
   if(_buf)return;
-  try{_buf={
-    ca:mkBuf(1047,.20,'sin',.88),cb:mkBuf(784,.24,'sin',.82),
-    sa:mkBuf(660,.16,'sq',.78),sb:mkBuf(550,.16,'sq',.72),
-    sp:mkBuf(880,.13,'sq',.68),
-    aa:mkBuf(740,.11,'saw',.58),ab:mkBuf(620,.11,'saw',.52),
-    pa:mkBuf(440,.15,'tri',.74),pb:mkBuf(660,.15,'tri',.68),pc:mkBuf(550,.15,'tri',.58),
-  };}catch(e){_buf=null;}
+  try{
+    _buf={
+      /* Speed beep — short sharp blip */
+      sp: mkBuf(880,.12,'sq',.74),
+      /* Speed violation onset — double hit */
+      sa: mkBuf(660,.16,'sq',.82), sb: mkBuf(550,.16,'sq',.76),
+      /* Camera long beep — smooth sine descend, 750ms */
+      cl: mkBuf(1200,.75,'sin',.92),
+      /* Police long beep — tri wave, 750ms */
+      pl: mkBuf(660,.75,'tri',.90),
+      /* Alarm warble */
+      aa: mkBuf(740,.11,'saw',.60), ab: mkBuf(620,.11,'saw',.54),
+    };
+  }catch(e){_buf=null;}
 }
 function play(b,delay=0){
   if(!b)return;
@@ -771,24 +817,73 @@ function play(b,delay=0){
 function unlockAudio(){
   try{AC().resume().then(()=>{buildBufs();const b=AC().createBuffer(1,1,AC().sampleRate);const s=AC().createBufferSource();s.buffer=b;s.connect(AC().destination);s.start();});}catch(e){}
 }
-function startHB(){if(_hb)return;_hb=setInterval(()=>{try{const ctx=AC();if(ctx.state==='suspended'){ctx.resume().then(()=>{_buf=null;buildBufs();});}const b=ctx.createBuffer(1,1,ctx.sampleRate);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();}catch(e){}},25000);}
+function startHB(){
+  if(_hb)return;
+  _hb=setInterval(()=>{
+    try{const ctx=AC();if(ctx.state==='suspended'){ctx.resume().then(()=>{_buf=null;buildBufs();});}
+    const b=ctx.createBuffer(1,1,ctx.sampleRate);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();}catch(e){}
+  },25000);
+}
 function stopHB(){if(_hb){clearInterval(_hb);_hb=null;}}
-function camChime(){buildBufs();if(!_buf)return;play(_buf.ca,0);play(_buf.cb,.30);}
+
+/* Long-tone helpers for camera and police */
+function camChime(){buildBufs();if(!_buf)return;play(_buf.cl);}
 function spdBurst(){buildBufs();if(!_buf)return;play(_buf.sa,0);play(_buf.sb,.22);}
-function policeWail(){buildBufs();if(!_buf)return;play(_buf.pa,0);play(_buf.pb,.22);play(_buf.pc,.44);}
-let _spi=null,_ali=null,_alis=0;
-function setSpdBeep(on){if(on&&!_spi){buildBufs();_spi=setInterval(()=>{if(_buf)play(_buf.sp);},1500);}else if(!on&&_spi){clearInterval(_spi);_spi=null;}}
-function setAlarm(on){if(on&&!_ali){buildBufs();_alis=0;_ali=setInterval(()=>{if(!_buf)return;_alis++;play(_alis%2?_buf.aa:_buf.ab);},550);}else if(!on&&_ali){clearInterval(_ali);_ali=null;}}
+function policeWail(){buildBufs();if(!_buf)return;play(_buf.pl);}
+let _spi=null,_ali=null,_cami=null,_alis=0,_spiMode='';
+
+/*
+  setSpdBeep('normal') → short beep every 3 s  (1–20 km/h over limit)
+  setSpdBeep('urgent') → short beep every 1 s  (>20 km/h over limit)
+  setSpdBeep(false)    → stop all speed beeps
+*/
+function setSpdBeep(mode){
+  if(mode&&_spi&&_spiMode===mode)return;      // already running this mode
+  if(_spi){clearInterval(_spi);_spi=null;_spiMode='';}
+  if(!mode)return;
+  buildBufs();if(!_buf)return;
+  _spiMode=mode;
+  play(_buf.sp);  // immediate first beep
+  _spi=setInterval(()=>{if(_buf)play(_buf.sp);},mode==='urgent'?1000:3000);
+}
+
+/* Long camera chime every 5 s */
+function setCamBeep(on){
+  if(on&&!_cami){buildBufs();camChime();_cami=setInterval(()=>{if(_buf)camChime();},5000);}
+  else if(!on&&_cami){clearInterval(_cami);_cami=null;}
+}
+
+/* Long police beep every 5 s */
+function setPolicBeep(on){
+  if(on&&!_cami){buildBufs();policeWail();_cami=setInterval(()=>{if(_buf)policeWail();},5000);}
+  else if(!on&&_cami){clearInterval(_cami);_cami=null;}
+}
+
+function setAlarm(on){
+  if(on&&!_ali){buildBufs();_alis=0;_ali=setInterval(()=>{if(!_buf)return;_alis++;play(_alis%2?_buf.aa:_buf.ab);},550);}
+  else if(!on&&_ali){clearInterval(_ali);_ali=null;}
+}
 
 ['touchstart','touchend','pointerdown','mousedown','click','keydown'].forEach(e=>
   document.addEventListener(e,()=>{unlockAudio();startHB();},{once:true,passive:true}));
 
 function testSound(t){
-  unlockAudio();buildBufs();
-  if(t==='cam') camChime();
-  else if(t==='spd'){spdBurst();}
-  else if(t==='pol') policeWail();
-  else if(t==='alm'){setAlarm(true);setTimeout(()=>setAlarm(false),3000);}
+  unlockAudio();buildBufs();if(!_buf)return;
+  if(t==='cam'){
+    // Play cam long beep twice (like approaching a camera)
+    camChime();setTimeout(camChime,2500);
+  }else if(t==='spd'){
+    // Burst then 3s normal beep
+    spdBurst();
+    setTimeout(()=>{setSpdBeep('normal');setTimeout(()=>setSpdBeep(false),3500);},500);
+  }else if(t==='pol'){
+    // Police long beep twice
+    policeWail();setTimeout(policeWail,2500);
+  }else if(t==='alm'){
+    // Urgent 1s beep for 3s
+    setSpdBeep('urgent');setTimeout(()=>setSpdBeep(false),3000);
+    setAlarm(true);setTimeout(()=>setAlarm(false),3000);
+  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -830,7 +925,7 @@ function openDemo(){
     log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],
     road:'Demo Mode',country:'SG',acc:5,
     lat:1.3521,lng:103.8198,pLat:null,pLng:null,
-    nearCam:false,alertedIds:new Set(),cameras:[],
+    nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],
     exceeded:false,excStart:null,sumSpd:0,sumN:0,
     lastGeo:0,lastOvp:0,startPC:'118200',endPC:'318200',
     startAddr:'Orchard Road, 118200',endAddr:'Thomson Road, 318200'
@@ -865,18 +960,19 @@ function runDemoStep(){
   if(sc.cam&&!S.alertedIds.has('demo-cam')){
     S.alertedIds.add('demo-cam'); S.camCnt++;
     document.getElementById('dCams').textContent=S.camCnt;
-    camChime();
+    setCamBeep(true);
     showIcon('cam','cam','📷',`Camera 180m ahead`,7000);
     S.camLog.push({time:fmtT(Date.now()),lat:S.lat,lng:S.lng,road:S.road,dist:180,type:'camera'});
   }
   if(sc.police&&!S.alertedIds.has('demo-pol')){
     S.alertedIds.add('demo-pol'); S.camCnt++;
     document.getElementById('dCams').textContent=S.camCnt;
-    policeWail();
+    setPolicBeep(true);
     showIcon('cam','police','🚔',`Radar 220m ahead`,7000);
     S.camLog.push({time:fmtT(Date.now()),lat:S.lat,lng:S.lng,road:S.road,dist:220,type:'police'});
   }
-  if(!sc.cam&&!sc.police) S.alertedIds.delete('demo-cam');
+  if(!sc.cam){setCamBeep(false);S.alertedIds.delete('demo-cam');}
+  if(!sc.police){setPolicBeep(false);}
 
   // Violation handling
   if(mg>20){
@@ -889,10 +985,10 @@ function runDemoStep(){
       setAlarm(true);
       document.getElementById('dViol').textContent=S.viol;
     }
-    setSpdBeep(true);
+    setSpdBeep('urgent');
   } else if(mg>0){
     if(!S.exceeded){S.exceeded=true;spdBurst();showIcon('spd','warn','⚡',`${Math.round(S.speed)}/${S.spdLimit}`,5000);}
-    setSpdBeep(false); setAlarm(false);
+    setSpdBeep('normal'); setAlarm(false);
   } else {
     S.exceeded=false;setSpdBeep(false);clearIcon('spd');
     if(!sc.cam)setAlarm(false);
@@ -903,11 +999,24 @@ function runDemoStep(){
 }
 
 function endDemo(){
-  demoActive=false; clearTimeout(demoTmr);
-  setSpdBeep(false); setAlarm(false);
+  // Stop all activity — do NOT call endRide() (that saves and goes to endScreen)
+  demoActive=false;
+  clearTimeout(demoTmr);
+  // Stop all sounds
+  setSpdBeep(false);
+  setCamBeep(false);
+  setPolicBeep(false);
+  setAlarm(false);
+  // Stop render loop
+  cancelAnimationFrame(rafId); rafId=null;
+  clearInterval(tripTmr); tripTmr=null;
+  // Release wake lock
+  stopHB(); relWake(); stopBGPing();
+  // Clean up UI
   document.getElementById('demoBadge').style.display='none';
-  // end like a real ride
-  endRide();
+  clearAllIcons();
+  // Go straight home — never endRide, never save
+  showScreen('startScreen');
 }
 
 /* ══════════════════════════════════════════════════════
@@ -939,7 +1048,7 @@ const S={
   log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],
   road:'Locating…',country:'',acc:null,
   lat:null,lng:null,pLat:null,pLng:null,
-  nearCam:false,alertedIds:new Set(),cameras:[],
+  nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],
   exceeded:false,excStart:null,sumSpd:0,sumN:0,
   lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:''
 };
@@ -971,7 +1080,7 @@ function confirmEnd(){
   document.getElementById('ovY').className='bc by r';
   document.getElementById('overlay').classList.add('on');
 }
-function doConfirm(){closeOverlay();if(pendingAct==='start')startRide();else if(pendingAct==='end'){if(demoActive)endDemo();else endRide();}pendingAct=null;}
+function doConfirm(){closeOverlay();if(pendingAct==='start'){if(demoActive){endDemo();}startRide();}else if(pendingAct==='end'){if(demoActive){endDemo();}else{endRide();}}pendingAct=null;}
 function closeOverlay(){document.getElementById('overlay').classList.remove('on');}
 
 /* ══════════════════════════════════════════════════════
@@ -984,11 +1093,12 @@ function startRide(){
     dist:0,t0:Date.now(),stopT:null,stopDur:0,
     log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],
     road:'Locating…',country:'',acc:null,lat:null,lng:null,pLat:null,pLng:null,
-    nearCam:false,alertedIds:new Set(),cameras:[],
+    nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],
     exceeded:false,excStart:null,sumSpd:0,sumN:0,
     lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:''
   });
   rideActive=true; clearAllIcons();
+  loadUCams().then(cams=>{ S.userCams=cams; });
   document.getElementById('demoBadge').style.display='none';
   showScreen('rideScreen');
   initCanvas(); startTripTimer(); rafId=requestAnimationFrame(drawLoop);
@@ -1004,12 +1114,19 @@ function startGPS(){
   watchId=navigator.geolocation.watchPosition(onGPS,onGPSErr,
     {enableHighAccuracy:true,maximumAge:1000,timeout:25000});
 }
+
+/* Kalman filter + 4.5% calibration offset for GPS speed accuracy */
+const SPD_CAL=1.045;
+let _kV=0,_kP=1;
+function kalmanSpeed(raw){const Q=0.08,R=1.5;_kP+=Q;const K=_kP/(_kP+R);_kV+=K*(raw-_kV);_kP=(1-K)*_kP;return Math.max(0,_kV);}
+
 function onGPS(pos){
   if(!rideActive||demoActive)return;
   document.getElementById('gpsDot').className='gps-dot fix';
   const{latitude:la,longitude:lo,speed:spd,accuracy:acc}=pos.coords;
   S.pLat=S.lat;S.pLng=S.lng;S.lat=la;S.lng=lo;S.acc=Math.round(acc);
-  S.speed=Math.max(0,(spd!=null&&spd>=0)?spd*3.6:0);
+  const rawKmh=(spd!=null&&spd>=0)?spd*3.6*SPD_CAL:0;
+  S.speed=kalmanSpeed(Math.max(0,rawKmh));
   if(S.speed>S.maxSpd)S.maxSpd=S.speed;
   if(S.speed>2){S.sumSpd+=S.speed;S.sumN++;}
   if(S.pLat!==null)S.dist+=hav(S.pLat,S.pLng,la,lo);
@@ -1098,8 +1215,9 @@ async function fetchCams(la,lo){
    CAMERA PROXIMITY
 ══════════════════════════════════════════════════════ */
 function checkCams(la,lo){
+  const allCams=[...S.cameras,...(S.userCams||[]).map(c=>({id:'u'+c.id,lat:c.lat,lng:c.lng,type:'camera'}))];
   let minD=Infinity,best=null;
-  for(const c of S.cameras){const d=hav(la,lo,c.lat,c.lng)*1000;if(d<minD){minD=d;best=c;}}
+  for(const c of allCams){const d=hav(la,lo,c.lat,c.lng)*1000;if(d<minD){minD=d;best=c;}}
   const inR=best&&minD<=250,was=S.nearCam;S.nearCam=inR;
   if(inR){
     if(!S.alertedIds.has(best.id)){
@@ -1107,10 +1225,10 @@ function checkCams(la,lo){
       S.camLog.push({time:fmtT(Date.now()),lat:la,lng:lo,road:S.road,dist:Math.round(minD),type:best.type});
       document.getElementById('dCams').textContent=S.camCnt;
       if(best.type==='police'){
-        policeWail();showIcon('cam','police','🚔',`Radar ${Math.round(minD)}m`,8000);
+        setPolicBeep(true);showIcon('cam','police','🚔',`Radar ${Math.round(minD)}m`,8000);
         if(_notifGranted)sendSWAlert('CAM_ALERT',`Police radar ${Math.round(minD)}m — ${S.road}`);
       } else {
-        camChime();
+        setCamBeep(true);
         const ov=S.speed>(S.spdLimit||50);
         showIcon('cam','cam','📷',ov?`CAM ${Math.round(minD)}m — SLOW!`:`Camera ${Math.round(minD)}m`,7000);
         if(ov){setAlarm(true);if(_notifGranted)sendSWAlert('CAM_ALERT',`Camera ${Math.round(minD)}m — you are over the limit!`);}
@@ -1119,7 +1237,7 @@ function checkCams(la,lo){
     if(best.type!=='police'&&S.speed>(S.spdLimit||50)-8)setAlarm(true);
     else if(!S.exceeded)setAlarm(false);
   } else {
-    if(was){clearIcon('cam');if(!S.exceeded)setAlarm(false);}
+    if(was){clearIcon('cam');setCamBeep(false);setPolicBeep(false);if(!S.exceeded)setAlarm(false);}
     if(minD>500)S.alertedIds.clear();
   }
 }
@@ -1150,10 +1268,10 @@ function handleViol(la,lo){
         showIcon('spd',mg>20?'speed':'warn',mg>20?'⚠':'⚡',`${Math.round(S.speed)}/${lim} km/h (+${Math.round(mg)})`,8000);
         if(mg>20){setAlarm(true);if(_notifGranted)sendSWAlert('SPEED_ALERT',`${Math.round(S.speed)}km/h in ${lim} zone on ${S.road}`,Math.round(mg));}
       }
-      setSpdBeep(mg>20);
+      setSpdBeep(mg>20?'urgent':'normal');
     }
   } else {
-    S.excStart=null;S.exceeded=false;setSpdBeep(false);clearIcon('spd');
+    S.excStart=null;S.exceeded=false;setSpdBeep(false);_spiMode='';clearIcon('spd');
     if(!S.nearCam)setAlarm(false);
   }
 }
@@ -1259,11 +1377,35 @@ function rrect(c,x,y,w,h,rad){
 /* ══════════════════════════════════════════════════════
    END RIDE
 ══════════════════════════════════════════════════════ */
+
+/* User camera reporting */
+async function reportUserCamera(){
+  if(!S.lat||!S.lng){showIcon('ucam','info','📍','GPS not ready',3000);return;}
+  const cam={id:Date.now(),lat:S.lat,lng:S.lng,road:S.road||'Unknown',
+    country:S.country||'',ts:fmtT(Date.now()),note:'User reported'};
+  await addUCam(cam);
+  S.userCams=await loadUCams();
+  camChime();showIcon('ucam','cam','📷',`Camera saved: ${S.road||'this location'}`,5000);
+}
+
+async function openUCamScreen(){await renderUCamList();showScreen('ucamScreen');}
+async function renderUCamList(){
+  const cams=await loadUCams();
+  const el=document.getElementById('ucamList');if(!el)return;
+  if(!cams.length){el.innerHTML='<div style="color:var(--muted);text-align:center;margin-top:40px;font-size:14px">No cameras reported yet.<br>Tap "📷 Report Camera" while riding.</div>';return;}
+  el.innerHTML=cams.slice().reverse().map(c=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+    <div style="flex:1;font-size:12px"><b style="color:var(--cam);font-size:13px">${c.road||'Unknown Road'}</b><br>
+    <span style="color:var(--muted)">${c.ts} · ${c.country||'?'} · ${c.lat?.toFixed(5)},${c.lng?.toFixed(5)}</span></div>
+    <button onclick="delUCamAndRefresh(${c.id})" style="background:transparent;border:1px solid var(--danger);color:var(--danger);font-size:11px;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700">🗑</button>
+  </div>`).join('');
+}
+async function delUCamAndRefresh(id){await delUCam(id);await renderUCamList();}
+
 function endRide(){
   if(!rideActive&&!demoActive)return;
   rideActive=false;demoActive=false;clearTimeout(demoTmr);
   cancelAnimationFrame(rafId);clearInterval(tripTmr);
-  setSpdBeep(false);setAlarm(false);stopHB();relWake();stopBGPing();
+  setSpdBeep(false);_spiMode='';setCamBeep(false);setPolicBeep(false);setAlarm(false);stopHB();relWake();stopBGPing();
   if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
   const el=Math.floor((Date.now()-S.t0)/1000);
   const mm=Math.floor(el/60).toString().padStart(2,'0'),ss=(el%60).toString().padStart(2,'0');
@@ -1295,8 +1437,8 @@ function resetApp(){updateBadge();showScreen('startScreen');}
    HISTORY
 ══════════════════════════════════════════════════════ */
 function openHistory(){renderHistList();showScreen('histScreen');}
-function renderHistList(){
-  const trips=loadTrips().slice().reverse();
+async function renderHistList(){
+  const trips=(await loadTrips()).slice().reverse();
   const el=document.getElementById('histList');
   if(!trips.length){el.innerHTML='<div class="no-trips"><span style="font-size:26px">🚗</span><span>No trips yet</span></div>';return;}
   el.innerHTML=trips.map((t,i)=>{
@@ -1321,9 +1463,9 @@ function renderHistList(){
     </div>`;
   }).join('');
 }
-function deleteTrip(id){
+async function deleteTrip(id){
   if(!confirm('Delete this trip?'))return;
-  saveTrips(loadTrips().filter(t=>t.id!==id));updateBadge();renderHistList();
+  await deleteTripById(id);await renderHistList();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1331,8 +1473,9 @@ function deleteTrip(id){
 ══════════════════════════════════════════════════════ */
 let _lmap=null;
 
-function openDetail(id){
-  const t=loadTrips().find(x=>x.id===id);if(!t)return;
+async function openDetail(id){
+  const trips=await loadTrips();
+  const t=trips.find(x=>x.id===id);if(!t)return;
   document.getElementById('detTitle').textContent=`${t.date} ${t.time}`;
   document.getElementById('detShareBtn').onclick=()=>shareTrip(id);
   const body=document.getElementById('detBody');
@@ -1379,14 +1522,15 @@ function openDetail(id){
     body.innerHTML+=`<div class="dsec"><h3>Camera Alerts (${t.camLog.length})</h3><div class="vlist">${t.camLog.map(c=>`<div class="vi"><div class="vr" style="color:var(--cam)">${c.type==='police'?'🚔 Police':'📷 Camera'}</div><div class="vd">${c.time} · ${c.road||'—'} · ${c.dist}m</div>${c.lat?`<div class="vm" onclick="openOSM(${c.lat},${c.lng})">📌 View on map</div>`:''}</div>`).join('')}</div></div>`;
   }
   showScreen('detScreen');
-  requestAnimationFrame(()=>{if(hasPts)initMap(t.spdLog,t.violLog||[],t.camLog||[]);if(t.spdLog&&t.spdLog.length>1)drawDetGraph(t.spdLog);});
+  setTimeout(()=>{if(hasPts)initMap(t.spdLog,t.violLog||[],t.camLog||[]);if(t.spdLog&&t.spdLog.length>1)drawDetGraph(t.spdLog);});
 }
 
 /* ══════════════════════════════════════════════════════
    SHARE TRIP — generates full self-contained HTML report
 ══════════════════════════════════════════════════════ */
-function shareTrip(id){
-  const t=loadTrips().find(x=>x.id===id);if(!t){alert('Trip not found');return;}
+async function shareTrip(id){
+  const trips=await loadTrips();
+  const t=trips.find(x=>x.id===id);if(!t){alert('Trip not found');return;}
   const fl=cflag(t.country);
   const maxV=Math.max(80,...(t.spdLog||[]).map(e=>e.s));
   // Build inline graph as data URI
@@ -1524,7 +1668,7 @@ function initMap(log,viols,cams){
   const el=document.getElementById('routeMap');if(!el)return;
   if(_lmap){_lmap.remove();_lmap=null;}
   const pts=log.filter(e=>e&&e.la&&e.lo);if(!pts.length)return;
-  _lmap=L.map('routeMap',{zoomControl:true,attributionControl:false});
+  _lmap=L.map('routeMap',{zoomControl:true,attributionControl:false,preferCanvas:true});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_lmap);
   const step=Math.max(1,Math.floor(pts.length/400)),samp=pts.filter((_,i)=>i%step===0);
   for(let i=1;i<samp.length;i++){const a=samp[i-1],b=samp[i],m=a.s-(a.l||50);L.polyline([[a.la,a.lo],[b.la,b.lo]],{color:m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff',weight:4,opacity:.88}).addTo(_lmap);}
@@ -1533,7 +1677,9 @@ function initMap(log,viols,cams){
   L.marker([pts[pts.length-1].la,pts[pts.length-1].lo],{icon:mk('🏁','#00e676')}).bindPopup('<b>End</b>').addTo(_lmap);
   viols.forEach(v=>{if(!v.lat)return;L.marker([v.lat,v.lng],{icon:mk('⚠','#ff2d2d')}).bindPopup(`<b>Violation</b><br>${v.spd}km/h in ${v.lim} zone<br>${v.time}`).addTo(_lmap);});
   cams.forEach(c=>{if(!c.lat)return;L.marker([c.lat,c.lng],{icon:mk(c.type==='police'?'🚔':'📷','#ffd700')}).bindPopup(`<b>${c.type==='police'?'Police':'Camera'}</b><br>${c.road||'—'}`).addTo(_lmap);});
-  _lmap.fitBounds(L.latLngBounds(pts.map(p=>[p.la,p.lo])),{padding:[16,16]});
+  const bounds=L.latLngBounds(pts.map(p=>[p.la,p.lo]));
+  _lmap.fitBounds(bounds,{padding:[20,20],maxZoom:16});
+  setTimeout(()=>{if(_lmap)_lmap.invalidateSize(true);},350);
 }
 function osmUrl(log){const pts=log.filter(e=>e&&e.la&&e.lo);if(!pts.length)return '';const m=pts[Math.floor(pts.length/2)];return `https://www.openstreetmap.org/?mlat=${m.la}&mlon=${m.lo}#map=14/${m.la}/${m.lo}`;}
 function openOSM(la,lo){window.open(`https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=17/${la}/${lo}`,'_blank');}
@@ -1558,13 +1704,13 @@ function drawDetGraph(log){
 /* ══════════════════════════════════════════════════════
    IMPORT / EXPORT
 ══════════════════════════════════════════════════════ */
-function dlHistory(){const blob=new Blob([JSON.stringify(loadTrips(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`speedsense_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
+async function dlHistory(){const blob=new Blob([JSON.stringify(await loadTrips(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`speedsense_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
 function importHistory(evt){
   const f=evt.target.files[0];if(!f)return;
   const fr=new FileReader();fr.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error('Not an array');const ex=loadTrips(),ids=new Set(ex.map(t=>t.id));const merged=[...ex,...data.filter(t=>!ids.has(t.id))].sort((a,b)=>a.id-b.id);saveTrips(merged);updateBadge();alert(`Imported ${data.length} trips. Total: ${merged.length}`);if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}catch(e2){alert('Import failed: '+e2.message);}};
   fr.readAsText(f);evt.target.value='';
 }
-function clearHistory(){if(!confirm('Delete ALL trip history? Cannot be undone.'))return;saveTrips([]);updateBadge();if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}
+async function clearHistory(){if(!confirm('Delete ALL trip history? Cannot be undone.'))return;await idbClear('trips').catch(()=>{});try{localStorage.removeItem(LS_KEY);}catch(e){}updateBadge();if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}
 
 /* ══════════════════════════════════════════════════════
    UTILS
@@ -1578,6 +1724,11 @@ function cflag(cc){if(!cc||cc.length!==2)return '🌍';const pts=[...cc].map(c=>
 ══════════════════════════════════════════════════════ */
 updateBadge();
 initSW();
+
+// Request fullscreen on first tap
+let _fsReq=false;
+document.addEventListener('click',()=>{if(_fsReq)return;_fsReq=true;try{const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen().catch(()=>{});else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}catch(e){}},{passive:true,once:true});
+
 </script>
 </body>
 </html>
