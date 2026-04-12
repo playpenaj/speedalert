@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -28,119 +29,119 @@ canvas{display:block}
 .screen.active{display:flex}
 
 /* ══ START ══ */
-#startScreen{background:var(--bg);align-items:center;justify-content:center;
-  gap:14px;padding:24px 20px;overflow-y:auto}
-.logo{font-family:'Orbitron',monospace;font-size:clamp(22px,6vw,34px);
-  font-weight:900;letter-spacing:4px;color:var(--accent);text-align:center}
-.logo span{color:var(--warn);font-size:clamp(9px,2.5vw,12px);display:block;
-  letter-spacing:6px;font-weight:400;margin-top:4px}
-.globe-badge{background:var(--card);border:1px solid var(--border);border-radius:20px;
-  padding:5px 14px;font-size:12px;color:var(--accent);display:flex;align-items:center;gap:5px}
-.info-text{color:var(--muted);font-size:13px;text-align:center;line-height:1.65}
-.info-text b{color:var(--text)}
-.start-btn{background:#00d4ff15;border:1.5px solid var(--accent);color:var(--accent);
-  font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:2px;
-  padding:14px 46px;border-radius:50px;cursor:pointer;transition:all .2s;-webkit-appearance:none}
+#startScreen{background:var(–bg);align-items:center;justify-content:center;
+gap:14px;padding:24px 20px;overflow-y:auto}
+.logo{font-family:‘Orbitron’,monospace;font-size:clamp(22px,6vw,34px);
+font-weight:900;letter-spacing:4px;color:var(–accent);text-align:center}
+.logo span{color:var(–warn);font-size:clamp(9px,2.5vw,12px);display:block;
+letter-spacing:6px;font-weight:400;margin-top:4px}
+.globe-badge{background:var(–card);border:1px solid var(–border);border-radius:20px;
+padding:5px 14px;font-size:12px;color:var(–accent);display:flex;align-items:center;gap:5px}
+.info-text{color:var(–muted);font-size:13px;text-align:center;line-height:1.65}
+.info-text b{color:var(–text)}
+.start-btn{background:#00d4ff15;border:1.5px solid var(–accent);color:var(–accent);
+font-family:‘Orbitron’,monospace;font-size:15px;font-weight:700;letter-spacing:2px;
+padding:14px 46px;border-radius:50px;cursor:pointer;transition:all .2s;-webkit-appearance:none}
 .start-btn:active{transform:scale(.97);background:#00d4ff22}
 .start-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
-.s-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
-  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;
-  border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-appearance:none}
-.s-btn:active{background:var(--card)}
-.s-btn.ac{border-color:var(--accent);color:var(--accent)}
-.s-btn.wn{border-color:var(--warn);color:var(--warn)}
-.s-btn.dc{border-color:var(--danger);color:var(--danger)}
-#tripBadge{font-size:10px;background:var(--card);border:1px solid var(--border);
-  padding:2px 7px;border-radius:9px;color:var(--muted)}
+.s-btn{background:transparent;border:1px solid var(–border);color:var(–muted);
+font-family:‘Rajdhani’,sans-serif;font-size:12px;font-weight:600;padding:7px 14px;
+border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-appearance:none}
+.s-btn:active{background:var(–card)}
+.s-btn.ac{border-color:var(–accent);color:var(–accent)}
+.s-btn.wn{border-color:var(–warn);color:var(–warn)}
+.s-btn.dc{border-color:var(–danger);color:var(–danger)}
+#tripBadge{font-size:10px;background:var(–card);border:1px solid var(–border);
+padding:2px 7px;border-radius:9px;color:var(–muted)}
 .bg-info{font-size:11px;background:#00e67608;border:1px solid #00e67630;
-  border-radius:8px;padding:6px 12px;color:#00e676;text-align:center;max-width:320px;line-height:1.5}
+border-radius:8px;padding:6px 12px;color:#00e676;text-align:center;max-width:320px;line-height:1.5}
 
 /* ══ RIDE ══ */
-#rideScreen{background:var(--bg)}
-#topBar{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+#rideScreen{background:var(–bg)}
+#topBar{background:var(–surface);border-bottom:1px solid var(–border);
+padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
 #topBar .L{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;min-width:0}
 #topBar .R{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.gps-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
-.gps-dot.fix{background:var(--success);animation:bl 2s infinite}
-.gps-dot.search{background:var(--warn);animation:bl .55s infinite}
+.gps-dot{width:8px;height:8px;border-radius:50%;background:var(–muted);flex-shrink:0}
+.gps-dot.fix{background:var(–success);animation:bl 2s infinite}
+.gps-dot.search{background:var(–warn);animation:bl .55s infinite}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.15}}
-.ts{font-size:11px;color:var(--muted);white-space:nowrap}
-.ts b{color:var(--text);font-weight:700}
+.ts{font-size:11px;color:var(–muted);white-space:nowrap}
+.ts b{color:var(–text);font-weight:700}
 .badge{font-size:10px;padding:2px 5px;border-radius:4px;
-  background:var(--card);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
-.badge.good{border-color:var(--success);color:var(--success)}
-.badge.poor{border-color:var(--warn);color:var(--warn)}
+background:var(–card);border:1px solid var(–border);color:var(–muted);white-space:nowrap}
+.badge.good{border-color:var(–success);color:var(–success)}
+.badge.poor{border-color:var(–warn);color:var(–warn)}
 .badge.wake{background:#00e67611;border-color:#00e67640;color:#00e676}
-.badge.wake.off{background:#ff6b0011;border-color:#ff6b0040;color:var(--warn)}
-.badge.bg-on{background:#a855f720;border-color:var(--police);color:var(--police)}
-.badge.demo{background:#ffd70020;border-color:var(--cam);color:var(--cam)}
-.tbtn{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;
-  font-family:'Rajdhani',sans-serif;font-weight:700;padding:4px 8px;border-radius:5px;
-  cursor:pointer;white-space:nowrap;-webkit-appearance:none}
-.tbtn:active{background:var(--card)}
-.tbtn.end{border-color:var(--danger);color:var(--danger)}
+.badge.wake.off{background:#ff6b0011;border-color:#ff6b0040;color:var(–warn)}
+.badge.bg-on{background:#a855f720;border-color:var(–police);color:var(–police)}
+.badge.demo{background:#ffd70020;border-color:var(–cam);color:var(–cam)}
+.tbtn{background:transparent;border:1px solid var(–border);color:var(–muted);font-size:11px;
+font-family:‘Rajdhani’,sans-serif;font-weight:700;padding:4px 8px;border-radius:5px;
+cursor:pointer;white-space:nowrap;-webkit-appearance:none}
+.tbtn:active{background:var(–card)}
+.tbtn.end{border-color:var(–danger);color:var(–danger)}
 
 /* Alert icons */
 #alertIcons{position:absolute;top:0;left:0;right:0;display:flex;gap:5px;
-  padding:5px 8px;pointer-events:none;z-index:8;flex-wrap:wrap}
+padding:5px 8px;pointer-events:none;z-index:8;flex-wrap:wrap}
 .aicon{display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:18px;
-  font-size:11px;font-weight:700;animation:pop .18s ease;pointer-events:auto;
-  transition:opacity .35s;flex-shrink:0}
+font-size:11px;font-weight:700;animation:pop .18s ease;pointer-events:auto;
+transition:opacity .35s;flex-shrink:0}
 .aicon.gone{opacity:0;pointer-events:none}
 @keyframes pop{from{transform:scale(.65);opacity:0}to{transform:scale(1);opacity:1}}
-.aicon.cam   {background:#ffd70020;border:1.5px solid var(--cam);   color:var(--cam)}
-.aicon.speed {background:#ff2d2d20;border:1.5px solid var(--danger);color:var(--danger)}
-.aicon.warn  {background:#ff6b0018;border:1.5px solid var(--warn);  color:var(--warn)}
-.aicon.police{background:#a855f718;border:1.5px solid var(--police);color:var(--police)}
-.aicon.info  {background:#00d4ff12;border:1.5px solid var(--accent);color:var(--accent)}
+.aicon.cam   {background:#ffd70020;border:1.5px solid var(–cam);   color:var(–cam)}
+.aicon.speed {background:#ff2d2d20;border:1.5px solid var(–danger);color:var(–danger)}
+.aicon.warn  {background:#ff6b0018;border:1.5px solid var(–warn);  color:var(–warn)}
+.aicon.police{background:#a855f718;border:1.5px solid var(–police);color:var(–police)}
+.aicon.info  {background:#00d4ff12;border:1.5px solid var(–accent);color:var(–accent)}
 
 #mainView{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 #speedCanvas{flex:1;display:block;width:100%;touch-action:none}
 #stopPill{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
-  background:#ffd70018;border:1px solid var(--cam);color:var(--cam);font-size:11px;
-  padding:3px 14px;border-radius:14px;display:none;z-index:5;white-space:nowrap;font-weight:600}
+background:#ffd70018;border:1px solid var(–cam);color:var(–cam);font-size:11px;
+padding:3px 14px;border-radius:14px;display:none;z-index:5;white-space:nowrap;font-weight:600}
 
-#btmPanel{background:var(--surface);border-top:1px solid var(--border);
-  padding:7px 9px;display:flex;gap:5px;align-items:center;flex-shrink:0}
-.sc{flex:1;background:var(--card);border:1px solid var(--border);border-radius:9px;
-  padding:5px 4px;text-align:center;min-width:0}
+#btmPanel{background:var(–surface);border-top:1px solid var(–border);
+padding:7px 9px;display:flex;gap:5px;align-items:center;flex-shrink:0}
+.sc{flex:1;background:var(–card);border:1px solid var(–border);border-radius:9px;
+padding:5px 4px;text-align:center;min-width:0}
 .sc.tap{cursor:pointer}
-.sc .lb{font-size:9px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;line-height:1}
-.sc .vl{font-family:'Orbitron',monospace;font-size:clamp(12px,2.8vw,18px);
-  font-weight:700;color:var(--text);line-height:1.2}
-.vl.w{color:var(--warn)}.vl.d{color:var(--danger)}.vl.c{color:var(--cam)}.vl.g{color:var(--success)}
+.sc .lb{font-size:9px;color:var(–muted);letter-spacing:.6px;text-transform:uppercase;line-height:1}
+.sc .vl{font-family:‘Orbitron’,monospace;font-size:clamp(12px,2.8vw,18px);
+font-weight:700;color:var(–text);line-height:1.2}
+.vl.w{color:var(–warn)}.vl.d{color:var(–danger)}.vl.c{color:var(–cam)}.vl.g{color:var(–success)}
 
 /* ══ END ══ */
-#endScreen{background:var(--bg);align-items:center;justify-content:center;
-  gap:14px;padding:20px;overflow-y:auto}
-#endGrid{background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:16px;width:100%;max-width:360px;display:grid;grid-template-columns:1fr 1fr;gap:11px}
+#endScreen{background:var(–bg);align-items:center;justify-content:center;
+gap:14px;padding:20px;overflow-y:auto}
+#endGrid{background:var(–card);border:1px solid var(–border);border-radius:14px;
+padding:16px;width:100%;max-width:360px;display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .es{text-align:center}
-.es .el{font-size:10px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase}
-.es .ev{font-family:'Orbitron',monospace;font-size:clamp(14px,4vw,20px);
-  font-weight:700;color:var(--text);margin-top:2px}
-.end-route{background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:10px 12px;width:100%;max-width:360px;font-size:12px}
-.end-route .rl{color:var(--muted);font-size:10px;letter-spacing:.7px;text-transform:uppercase;margin-bottom:4px}
-.end-route .rv{color:var(--text);font-weight:600;line-height:1.5}
+.es .el{font-size:10px;color:var(–muted);letter-spacing:.7px;text-transform:uppercase}
+.es .ev{font-family:‘Orbitron’,monospace;font-size:clamp(14px,4vw,20px);
+font-weight:700;color:var(–text);margin-top:2px}
+.end-route{background:var(–card);border:1px solid var(–border);border-radius:10px;
+padding:10px 12px;width:100%;max-width:360px;font-size:12px}
+.end-route .rl{color:var(–muted);font-size:10px;letter-spacing:.7px;text-transform:uppercase;margin-bottom:4px}
+.end-route .rv{color:var(–text);font-weight:600;line-height:1.5}
 
 /* ══ HOW-TO ══ */
-#howtoScreen{background:var(--bg);flex-direction:column}
-#howtoHdr{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-#howtoHdr h2{font-family:'Orbitron',monospace;font-size:13px;color:var(--accent);
-  letter-spacing:2px;font-weight:700;flex:1}
+#howtoScreen{background:var(–bg);flex-direction:column}
+#howtoHdr{background:var(–surface);border-bottom:1px solid var(–border);
+padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#howtoHdr h2{font-family:‘Orbitron’,monospace;font-size:13px;color:var(–accent);
+letter-spacing:2px;font-weight:700;flex:1}
 #howtoBody{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px}
 #howtoBody::-webkit-scrollbar{width:3px}
-#howtoBody::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.how-sec{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
-.how-sec h3{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);
-  letter-spacing:1.5px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+#howtoBody::-webkit-scrollbar-thumb{background:var(–border);border-radius:2px}
+.how-sec{background:var(–card);border:1px solid var(–border);border-radius:12px;padding:14px}
+.how-sec h3{font-family:‘Orbitron’,monospace;font-size:11px;color:var(–accent);
+letter-spacing:1.5px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .how-sec h3 span{font-size:18px}
 .how-item{display:flex;gap:10px;margin-bottom:9px;align-items:flex-start}
 .how-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
-  justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
+justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
 .how-icon.ac{background:#00d4ff15;border:1px solid #00d4ff40}
 .how-icon.wn{background:#ff6b0015;border:1px solid #ff6b0040}
 .how-icon.dc{background:#ff2d2d15;border:1px solid #ff2d2d40}
@@ -148,130 +149,130 @@ canvas{display:block}
 .how-icon.po{background:#a855f715;border:1px solid #a855f740}
 .how-icon.gr{background:#00e67615;border:1px solid #00e67640}
 .how-t{flex:1}
-.how-t b{color:var(--text);font-size:13px;font-weight:700;display:block;margin-bottom:2px}
-.how-t p{color:var(--muted);font-size:12px;line-height:1.55}
+.how-t b{color:var(–text);font-size:13px;font-weight:700;display:block;margin-bottom:2px}
+.how-t p{color:var(–muted);font-size:12px;line-height:1.55}
 .tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.tech-card{background:var(--surface);border-radius:8px;padding:10px;border:1px solid var(--border)}
-.tech-card .tname{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px}
-.tech-card .tdesc{font-size:10px;color:var(--muted);line-height:1.45}
-.demo-btn{background:#ffd70015;border:1.5px solid var(--cam);color:var(--cam);
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:1px;
-  padding:12px 28px;border-radius:30px;cursor:pointer;width:100%;-webkit-appearance:none}
+.tech-card{background:var(–surface);border-radius:8px;padding:10px;border:1px solid var(–border)}
+.tech-card .tname{font-size:11px;font-weight:700;color:var(–accent);margin-bottom:3px}
+.tech-card .tdesc{font-size:10px;color:var(–muted);line-height:1.45}
+.demo-btn{background:#ffd70015;border:1.5px solid var(–cam);color:var(–cam);
+font-family:‘Orbitron’,monospace;font-size:13px;font-weight:700;letter-spacing:1px;
+padding:12px 28px;border-radius:30px;cursor:pointer;width:100%;-webkit-appearance:none}
 .demo-btn:active{background:#ffd70025}
 .sound-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sound-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;
-  padding:10px 8px;cursor:pointer;text-align:center;-webkit-appearance:none;
-  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;
-  display:flex;flex-direction:column;align-items:center;gap:4px}
+.sound-btn{background:var(–surface);border:1px solid var(–border);border-radius:8px;
+padding:10px 8px;cursor:pointer;text-align:center;-webkit-appearance:none;
+font-family:‘Rajdhani’,sans-serif;font-size:12px;font-weight:700;
+display:flex;flex-direction:column;align-items:center;gap:4px}
 .sound-btn span:first-child{font-size:22px}
-.sound-btn.cam-s{border-color:var(--cam);color:var(--cam)}
-.sound-btn.spd-s{border-color:var(--danger);color:var(--danger)}
-.sound-btn.pol-s{border-color:var(--police);color:var(--police)}
-.sound-btn.alm-s{border-color:var(--warn);color:var(--warn)}
+.sound-btn.cam-s{border-color:var(–cam);color:var(–cam)}
+.sound-btn.spd-s{border-color:var(–danger);color:var(–danger)}
+.sound-btn.pol-s{border-color:var(–police);color:var(–police)}
+.sound-btn.alm-s{border-color:var(–warn);color:var(–warn)}
 .sound-btn:active{opacity:.7}
 
 /* ══ HISTORY ══ */
-#histScreen{background:var(--bg);flex-direction:column}
-#histHdr{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:9px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0}
-#histHdr h2{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;
-  color:var(--accent);letter-spacing:2px;flex:1}
+#histScreen{background:var(–bg);flex-direction:column}
+#histHdr{background:var(–surface);border-bottom:1px solid var(–border);
+padding:9px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0}
+#histHdr h2{font-family:‘Orbitron’,monospace;font-size:13px;font-weight:700;
+color:var(–accent);letter-spacing:2px;flex:1}
 #histList{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
 #histList::-webkit-scrollbar{width:3px}
-#histList::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.tcard{background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:12px;cursor:pointer;transition:border-color .12s}
-.tcard:active{border-color:var(--accent)}
+#histList::-webkit-scrollbar-thumb{background:var(–border);border-radius:2px}
+.tcard{background:var(–card);border:1px solid var(–border);border-radius:12px;
+padding:12px;cursor:pointer;transition:border-color .12s}
+.tcard:active{border-color:var(–accent)}
 .tch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.tct{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);font-weight:700}
-.tcd{font-size:10px;color:var(--muted)}
+.tct{font-family:‘Orbitron’,monospace;font-size:11px;color:var(–accent);font-weight:700}
+.tcd{font-size:10px;color:var(–muted)}
 .tcg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px}
-.tcb{text-align:center;background:var(--surface);border-radius:5px;padding:3px}
-.tcb .tl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
-.tcb .tv{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--text)}
-.tcr{font-size:11px;color:var(--muted);line-height:1.5}
-.tcr b{color:var(--text)}
-.trip-actions{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
-.ta-btn{flex:1;background:transparent;border:1px solid var(--border);color:var(--muted);
-  font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;padding:5px 4px;
-  border-radius:6px;cursor:pointer;text-align:center;-webkit-appearance:none}
-.ta-btn:active{background:var(--card)}
-.ta-btn.share{border-color:var(--accent);color:var(--accent)}
+.tcb{text-align:center;background:var(–surface);border-radius:5px;padding:3px}
+.tcb .tl{font-size:8px;color:var(–muted);text-transform:uppercase;letter-spacing:.3px}
+.tcb .tv{font-family:‘Orbitron’,monospace;font-size:11px;font-weight:700;color:var(–text)}
+.tcr{font-size:11px;color:var(–muted);line-height:1.5}
+.tcr b{color:var(–text)}
+.trip-actions{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(–border)}
+.ta-btn{flex:1;background:transparent;border:1px solid var(–border);color:var(–muted);
+font-family:‘Rajdhani’,sans-serif;font-size:11px;font-weight:700;padding:5px 4px;
+border-radius:6px;cursor:pointer;text-align:center;-webkit-appearance:none}
+.ta-btn:active{background:var(–card)}
+.ta-btn.share{border-color:var(–accent);color:var(–accent)}
 .no-trips{display:flex;align-items:center;justify-content:center;height:100%;
-  color:var(--muted);font-size:14px;flex-direction:column;gap:8px}
+color:var(–muted);font-size:14px;flex-direction:column;gap:8px}
 
 /* ══ DETAIL ══ */
-#detScreen{background:var(--bg);flex-direction:column}
-#detHdr{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:9px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0}
-#detHdr h2{font-family:'Orbitron',monospace;font-size:12px;color:var(--accent);
-  letter-spacing:1px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#detScreen{background:var(–bg);flex-direction:column}
+#detHdr{background:var(–surface);border-bottom:1px solid var(–border);
+padding:9px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0}
+#detHdr h2{font-family:‘Orbitron’,monospace;font-size:12px;color:var(–accent);
+letter-spacing:1px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #detBody{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:10px}
 #detBody::-webkit-scrollbar{width:3px}
-#detBody::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.dsec{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px}
-.dsec h3{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;
-  margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+#detBody::-webkit-scrollbar-thumb{background:var(–border);border-radius:2px}
+.dsec{background:var(–card);border:1px solid var(–border);border-radius:10px;padding:12px}
+.dsec h3{font-size:10px;color:var(–muted);letter-spacing:1px;text-transform:uppercase;
+margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(–border)}
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.sstat{text-align:center;background:var(--surface);border-radius:5px;padding:5px 3px}
-.sstat .sl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-.sstat .sv{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--text)}
+.sstat{text-align:center;background:var(–surface);border-radius:5px;padding:5px 3px}
+.sstat .sl{font-size:9px;color:var(–muted);text-transform:uppercase;letter-spacing:.4px}
+.sstat .sv{font-family:‘Orbitron’,monospace;font-size:12px;font-weight:700;color:var(–text)}
 .rstrip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px}
-.rpin{font-size:12px;font-weight:700;color:var(--accent);background:var(--surface);
-  padding:4px 10px;border-radius:14px;border:1px solid var(--border)}
-.rarrow{color:var(--muted);font-size:11px;flex:1;text-align:center}
-.osm-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--accent);
-  text-decoration:none;padding:6px 12px;border:1px solid var(--accent);border-radius:6px;
-  background:#00d4ff0a;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:600}
+.rpin{font-size:12px;font-weight:700;color:var(–accent);background:var(–surface);
+padding:4px 10px;border-radius:14px;border:1px solid var(–border)}
+.rarrow{color:var(–muted);font-size:11px;flex:1;text-align:center}
+.osm-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(–accent);
+text-decoration:none;padding:6px 12px;border:1px solid var(–accent);border-radius:6px;
+background:#00d4ff0a;margin-top:8px;font-family:‘Rajdhani’,sans-serif;font-weight:600}
 #mapWrap{width:100%;height:260px;border-radius:8px;margin-top:8px;
-  border:1px solid var(--border);position:relative;overflow:hidden;display:block}
+border:1px solid var(–border);position:relative;overflow:hidden;display:block}
 #routeMap{position:absolute;inset:0;width:100%;height:100%}
 .mleg{position:absolute;bottom:6px;left:6px;background:#000000bb;border-radius:6px;
-  padding:4px 8px;font-size:10px;z-index:999;display:flex;gap:7px;pointer-events:none}
+padding:4px 8px;font-size:10px;z-index:999;display:flex;gap:7px;pointer-events:none}
 .ml{display:flex;align-items:center;gap:3px;color:#ccc}
 .mld{width:12px;height:3px;border-radius:1px}
-.gw{width:100%;height:100px;border-radius:6px;overflow:hidden;background:var(--surface);margin-top:8px}
+.gw{width:100%;height:100px;border-radius:6px;overflow:hidden;background:var(–surface);margin-top:8px}
 .gw canvas{width:100%;height:100%;display:block}
 .stl{display:flex;flex-direction:column;gap:3px;max-height:200px;overflow-y:auto}
 .stl::-webkit-scrollbar{width:3px}
 .tlr{display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 7px;border-radius:5px}
-.tlr.ov{background:#ff2d2d0e;border-left:2px solid var(--danger)}
-.tlr.wn{background:#ff6b000e;border-left:2px solid var(--warn)}
-.tlr.ok{background:#00e6760a;border-left:2px solid var(--success)}
-.tlt{color:var(--muted);font-size:10px;min-width:38px}
-.tls{font-family:'Orbitron',monospace;font-weight:700;font-size:11px;min-width:48px}
-.tls.ov{color:var(--danger)}.tls.wn{color:var(--warn)}.tls.ok{color:var(--success)}
-.tlro{color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tlr.ov{background:#ff2d2d0e;border-left:2px solid var(–danger)}
+.tlr.wn{background:#ff6b000e;border-left:2px solid var(–warn)}
+.tlr.ok{background:#00e6760a;border-left:2px solid var(–success)}
+.tlt{color:var(–muted);font-size:10px;min-width:38px}
+.tls{font-family:‘Orbitron’,monospace;font-weight:700;font-size:11px;min-width:48px}
+.tls.ov{color:var(–danger)}.tls.wn{color:var(–warn)}.tls.ok{color:var(–success)}
+.tlro{color:var(–muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vlist{display:flex;flex-direction:column;gap:6px}
-.vi{background:var(--surface);border-radius:6px;padding:7px 10px}
+.vi{background:var(–surface);border-radius:6px;padding:7px 10px}
 .vi .vr{font-weight:700;font-size:12px}
-.vi .vd{color:var(--muted);font-size:11px;margin-top:2px}
-.vi .vp{color:var(--warn);font-size:10px;margin-top:2px}
-.vi .vm{color:var(--accent);font-size:10px;margin-top:3px;cursor:pointer;text-decoration:underline}
+.vi .vd{color:var(–muted);font-size:11px;margin-top:2px}
+.vi .vp{color:var(–warn);font-size:10px;margin-top:2px}
+.vi .vm{color:var(–accent);font-size:10px;margin-top:3px;cursor:pointer;text-decoration:underline}
 
 /* ══ OVERLAY ══ */
 #overlay{position:absolute;inset:0;background:#000000e2;display:none;
-  align-items:center;justify-content:center;z-index:50;padding:24px}
+align-items:center;justify-content:center;z-index:50;padding:24px}
 #overlay.on{display:flex}
-.ovbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;
-  padding:24px 22px 20px;max-width:310px;width:100%;text-align:center}
-.ovbox h3{font-family:'Orbitron',monospace;font-size:13px;margin-bottom:8px;color:var(--text);letter-spacing:1px}
-.ovbox p{color:var(--muted);font-size:13px;margin-bottom:18px;line-height:1.6}
+.ovbox{background:var(–surface);border:1px solid var(–border);border-radius:14px;
+padding:24px 22px 20px;max-width:310px;width:100%;text-align:center}
+.ovbox h3{font-family:‘Orbitron’,monospace;font-size:13px;margin-bottom:8px;color:var(–text);letter-spacing:1px}
+.ovbox p{color:var(–muted);font-size:13px;margin-bottom:18px;line-height:1.6}
 .ovbtns{display:flex;gap:10px;justify-content:center}
-.bc{padding:10px 20px;border-radius:8px;cursor:pointer;font-family:'Rajdhani',sans-serif;
-  font-size:14px;font-weight:700;letter-spacing:1px;border:1.5px solid;-webkit-appearance:none}
-.by{background:#00d4ff0e;border-color:var(--accent);color:var(--accent)}
+.bc{padding:10px 20px;border-radius:8px;cursor:pointer;font-family:‘Rajdhani’,sans-serif;
+font-size:14px;font-weight:700;letter-spacing:1px;border:1.5px solid;-webkit-appearance:none}
+.by{background:#00d4ff0e;border-color:var(–accent);color:var(–accent)}
 .by:active{background:#00d4ff1c}
-.bn{background:#ff2d2d08;border-color:var(--danger);color:var(--danger)}
+.bn{background:#ff2d2d08;border-color:var(–danger);color:var(–danger)}
 .bn:active{background:#ff2d2d14}
-.by.r{background:#ff2d2d08;border-color:var(--danger);color:var(--danger)}
+.by.r{background:#ff2d2d08;border-color:var(–danger);color:var(–danger)}
 #gpsErr{position:absolute;inset:0;background:#000000cc;display:none;
-  align-items:center;justify-content:center;z-index:40;padding:24px}
+align-items:center;justify-content:center;z-index:40;padding:24px}
 #gpsErr.on{display:flex}
-.gerr{background:var(--surface);border:1px solid var(--danger);border-radius:12px;
-  padding:22px;max-width:290px;text-align:center}
-.gerr h3{color:var(--danger);font-family:'Orbitron',monospace;font-size:13px;margin-bottom:8px}
-.gerr p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:14px}
+.gerr{background:var(–surface);border:1px solid var(–danger);border-radius:12px;
+padding:22px;max-width:290px;text-align:center}
+.gerr h3{color:var(–danger);font-family:‘Orbitron’,monospace;font-size:13px;margin-bottom:8px}
+.gerr p{color:var(–muted);font-size:13px;line-height:1.5;margin-bottom:14px}
 
 /* Leaflet dark */
 .leaflet-container{background:#1a1d24!important}
@@ -281,11 +282,13 @@ canvas{display:block}
 .leaflet-control-zoom a{background:#1a1d24;color:#e8eaf0;border-color:#2a2e3a}
 .leaflet-bar{border-color:#2a2e3a!important;box-shadow:none!important}
 </style>
+
 </head>
 <body>
 <div id="app">
 
 <!-- ══ START ══ -->
+
 <div id="startScreen" class="screen active">
   <div class="logo">SPEEDSENSE<span>WORLDWIDE DRIVE ASSIST</span></div>
   <div class="globe-badge">🌍 Works anywhere in the world</div>
@@ -293,7 +296,7 @@ canvas{display:block}
   <div class="bg-info" id="bgStatus">🔋 Background GPS: tap START to enable</div>
   <button class="start-btn" onclick="confirmStart()">START RIDE</button>
   <div class="start-row">
-    <button class="s-btn wn" onclick="openDemo()">🎮 DEMO + SOUNDS</button>
+    <button class="s-btn wn" onclick="openDemo()">🎮 DEMO + SOUNDS (15 scenes)</button>
     <button class="s-btn ac" onclick="showScreen('howtoScreen')">📖 HOW TO USE</button>
   </div>
   <div class="start-row">
@@ -308,6 +311,7 @@ canvas{display:block}
 </div>
 
 <!-- ══ RIDE ══ -->
+
 <div id="rideScreen" class="screen">
   <div id="topBar">
     <div class="L">
@@ -346,6 +350,7 @@ canvas{display:block}
 </div>
 
 <!-- ══ END ══ -->
+
 <div id="endScreen" class="screen">
   <div class="logo">RIDE COMPLETE<span>SESSION SUMMARY</span></div>
   <div id="endGrid">
@@ -368,185 +373,188 @@ canvas{display:block}
 </div>
 
 <!-- ══ HOW TO ══ -->
+
 <div id="howtoScreen" class="screen">
   <div id="howtoHdr">
     <h2>HOW TO USE</h2>
-    <button class="s-btn wn" style="font-size:12px" onclick="openDemo()">🎮 DEMO</button>
+    <button class="s-btn wn" style="font-size:12px" onclick="openDemo()">🎮 DEMO (15 scenes)</button>
     <button class="tbtn" onclick="showScreen('startScreen')">← BACK</button>
   </div>
   <div id="howtoBody">
 
-    <div class="how-sec">
-      <h3><span>🚀</span>GETTING STARTED</h3>
-      <div class="how-item">
-        <div class="how-icon ac">📍</div>
-        <div class="how-t"><b>Mount your phone</b>
-          <p>Use a windshield or dashboard mount. Keep the screen visible while driving safely. Grant location permission when prompted.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">▶</div>
-        <div class="how-t"><b>Press START RIDE</b>
-          <p>Confirm the dialog. GPS activates, the speedometer appears, and speed limit detection begins immediately.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🛑</div>
-        <div class="how-t"><b>End your ride</b>
-          <p>Tap END in the top bar or the END tile at bottom right. The trip is saved automatically. Auto-ends after 10 min stationary.</p></div>
-      </div>
-    </div>
+```
+<div class="how-sec">
+  <h3><span>🚀</span>GETTING STARTED</h3>
+  <div class="how-item">
+    <div class="how-icon ac">📍</div>
+    <div class="how-t"><b>Mount your phone</b>
+      <p>Use a windshield or dashboard mount. Keep the screen visible while driving safely. Grant location permission when prompted.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon ac">▶</div>
+    <div class="how-t"><b>Press START RIDE</b>
+      <p>Confirm the dialog. GPS activates, the speedometer appears, and speed limit detection begins immediately.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon ac">🛑</div>
+    <div class="how-t"><b>End your ride</b>
+      <p>Tap END in the top bar or the END tile at bottom right. The trip is saved automatically. Auto-ends after 10 min stationary.</p></div>
+  </div>
+</div>
 
-    <div class="how-sec">
-      <h3><span>🎯</span>SPEEDOMETER DISPLAY</h3>
-      <div class="how-item">
-        <div class="how-icon gr">🟢</div>
-        <div class="how-t"><b>Green arc = safe zone</b>
-          <p>The arc from 0 to the speed limit turns green. Your speed is safely within the limit.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon wn">🟠</div>
-        <div class="how-t"><b>Orange = over limit</b>
-          <p>Needle turns orange when you exceed the speed limit. A ⚡ alert icon appears. Reduce speed immediately.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon dc">🔴</div>
-        <div class="how-t"><b>Red = 20+ over limit</b>
-          <p>Critical zone. Pulsed beep sounds, ⚠ alert appears, and the alarm activates. You are significantly over the limit.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🔵</div>
-        <div class="how-t"><b>Speed limit badge (left)</b>
-          <p>The red-circle badge on the left of the dial shows the current road's speed limit — updates automatically as you change roads.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ca">📷</div>
-        <div class="how-t"><b>Camera badge (right)</b>
-          <p>Appears when a speed camera is within 250m. Flashes to draw attention. Alarm sounds if you are over the limit near the camera.</p></div>
-      </div>
-    </div>
+<div class="how-sec">
+  <h3><span>🎯</span>SPEEDOMETER DISPLAY</h3>
+  <div class="how-item">
+    <div class="how-icon gr">🟢</div>
+    <div class="how-t"><b>Green arc = safe zone</b>
+      <p>The arc from 0 to the speed limit turns green. Your speed is safely within the limit.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon wn">🟠</div>
+    <div class="how-t"><b>Orange = over limit</b>
+      <p>Needle turns orange when you exceed the speed limit. A ⚡ alert icon appears. Reduce speed immediately.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon dc">🔴</div>
+    <div class="how-t"><b>Red = 20+ over limit</b>
+      <p>Critical zone. Pulsed beep sounds, ⚠ alert appears, and the alarm activates. You are significantly over the limit.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon ac">🔵</div>
+    <div class="how-t"><b>Speed limit badge (left)</b>
+      <p>The red-circle badge on the left of the dial shows the current road's speed limit — updates automatically as you change roads.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon ca">📷</div>
+    <div class="how-t"><b>Camera badge (right)</b>
+      <p>Appears when a speed camera is within 250m. Flashes to draw attention. Alarm sounds if you are over the limit near the camera.</p></div>
+  </div>
+</div>
 
-    <div class="how-sec">
-      <h3><span>🔔</span>ALERT ICONS &amp; SOUNDS</h3>
-      <div class="how-item">
-        <div class="how-icon ca">📷</div>
-        <div class="how-t"><b>Yellow 📷 — Speed Camera</b>
-          <p>Single long descending tone (~750ms). Plays immediately when you enter 250 m of a camera, then repeats every 5 seconds until you pass it.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon po">🚔</div>
-        <div class="how-t"><b>Purple 🚔 — Police Radar</b>
-          <p>Three-note siren (A4→E5→C5). Detected from OSM police enforcement nodes. Repeats every 5 seconds while within range.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon wn">⚡</div>
-        <div class="how-t"><b>Orange ⚡ — Over Limit</b>
-          <p>Double square-wave burst. Fires once when you exceed the limit for 1.5 seconds. Does not repeat unless cleared.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon dc">⚠</div>
-        <div class="how-t"><b>Red ⚠ — 20+ Over Limit</b>
-          <p>Pulsed beep every 3 seconds (1–20 km/h over) or every 1 second (20+ km/h over). Sawtooth alarm warble runs continuously when 20+ over. All stop when speed drops below limit.</p></div>
-      </div>
-      <div class="sound-grid" style="margin-top:8px">
-        <button class="sound-btn cam-s" onclick="testSound('cam')"><span>📷</span><span>Camera Chime</span></button>
-        <button class="sound-btn spd-s" onclick="testSound('spd')"><span>⚠</span><span>Speed Alert</span></button>
-        <button class="sound-btn pol-s" onclick="testSound('pol')"><span>🚔</span><span>Police Siren</span></button>
-        <button class="sound-btn alm-s" onclick="testSound('alm')"><span>🔔</span><span>Alarm (3s)</span></button>
-        <button class="sound-btn spd-s" onclick="setSpdBeep('urgent');setTimeout(()=>setSpdBeep(false),3000)" style="border-color:#ff6b00;color:#ff6b00"><span>⚡</span><span>3s Urgent Beep</span></button>
-      </div>
-    </div>
+<div class="how-sec">
+  <h3><span>🔔</span>ALERT ICONS &amp; SOUNDS</h3>
+  <div class="how-item">
+    <div class="how-icon ca">📷</div>
+    <div class="how-t"><b>Yellow 📷 — Speed Camera</b>
+      <p>Single long descending tone (~750ms). Plays immediately when you enter 250 m of a camera, then repeats every 5 seconds until you pass it.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon po">🚔</div>
+    <div class="how-t"><b>Purple 🚔 — Police Radar</b>
+      <p>Three-note siren (A4→E5→C5). Detected from OSM police enforcement nodes. Repeats every 5 seconds while within range.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon wn">⚡</div>
+    <div class="how-t"><b>Orange ⚡ — Over Limit</b>
+      <p>Double square-wave burst. Fires once when you exceed the limit for 1.5 seconds. Does not repeat unless cleared.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon dc">⚠</div>
+    <div class="how-t"><b>Red ⚠ — 20+ Over Limit</b>
+      <p>Pulsed beep every 3 seconds (1–20 km/h over) or every 1 second (20+ km/h over). Sawtooth alarm warble runs continuously when 20+ over. All stop when speed drops below limit.</p></div>
+  </div>
+  <div class="sound-grid" style="margin-top:8px">
+    <button class="sound-btn cam-s" onclick="testSound('cam')"><span>📷</span><span>Camera Chime</span></button>
+    <button class="sound-btn spd-s" onclick="testSound('spd')"><span>⚠</span><span>Speed Alert</span></button>
+    <button class="sound-btn pol-s" onclick="testSound('pol')"><span>🚔</span><span>Police Siren</span></button>
+    <button class="sound-btn alm-s" onclick="testSound('alm')"><span>🔔</span><span>Alarm (3s)</span></button>
+    <button class="sound-btn spd-s" onclick="setSpdBeep('urgent');setTimeout(()=>setSpdBeep(false),3000)" style="border-color:#ff6b00;color:#ff6b00"><span>⚡</span><span>3s Urgent Beep</span></button>
+  </div>
+</div>
 
-    <div class="how-sec">
-      <h3><span>🌐</span>BACKGROUND TRACKING</h3>
-      <div class="how-item">
-        <div class="how-icon ac">🔋</div>
-        <div class="how-t"><b>Screen-off GPS</b>
-          <p>SpeedSense uses a Service Worker + keep-alive ping to continue monitoring even when your screen turns off. GPS tracking, violation logging, and camera alerts all continue in the background.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🔔</div>
-        <div class="how-t"><b>Background notifications</b>
-          <p>Allow notifications when prompted. Speed limit violations and camera alerts will show as phone notifications even with the screen off.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon wn">⚠</div>
-        <div class="how-t"><b>iOS limitation</b>
-          <p>iOS Safari limits background execution. For best results on iPhone, keep the app in the foreground or install as a Home Screen app via Share → Add to Home Screen.</p></div>
-      </div>
-    </div>
-
-
-    <div class="how-sec">
-      <h3><span>📷</span>REPORT A CAMERA</h3>
-      <div class="how-item"><div class="how-icon ca">📍</div><div class="how-t"><b>Tap "📷 Report Camera"</b>
-        <p>During any ride, tap the yellow "📷 Report Camera" button on the speedometer screen to save the exact GPS coordinates of a camera the app missed.</p></div></div>
-      <div class="how-item"><div class="how-icon ca">💾</div><div class="how-t"><b>Stored in IndexedDB</b>
-        <p>Your reported cameras are saved permanently in your browser's IndexedDB. They survive page refreshes and app restarts.</p></div></div>
-      <div class="how-item"><div class="how-icon ca">🔁</div><div class="how-t"><b>Active on next pass</b>
-        <p>The next time you drive within 250 m of a saved location, SpeedSense plays the camera chime — just like an OSM camera.</p></div></div>
-      <div class="how-item"><div class="how-icon ac">📋</div><div class="how-t"><b>Manage cameras</b>
-        <p>Tap MY CAMERAS on the home screen to view and delete your reported locations.</p></div></div>
-    </div>
-
-    <div class="how-sec">
-      <h3><span>📊</span>SPEED LIMITS (AUTO)</h3>
-      <div class="how-item">
-        <div class="how-icon ac">🗺</div>
-        <div class="how-t"><b>OpenStreetMap data</b>
-          <p>Speed limits are read from OSM road tags via Nominatim reverse geocoding every 7 seconds. Covers all mapped roads worldwide.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon gr">🌍</div>
-        <div class="how-t"><b>Country fallback</b>
-          <p>When OSM has no tag, SpeedSense uses a built-in database of 40+ country speed limits by road class (motorway, primary, residential, etc.).</p></div>
-      </div>
-    </div>
-
-    <div class="how-sec">
-      <h3><span>📋</span>TRIP HISTORY &amp; SHARING</h3>
-      <div class="how-item">
-        <div class="how-icon ac">💾</div>
-        <div class="how-t"><b>Unlimited storage</b>
-          <p>All trips stored in IndexedDB (primary) with localStorage backup. Data persists through page refreshes and browser restarts. Export to JSON to back up across devices.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">📤</div>
-        <div class="how-t"><b>Share a trip</b>
-          <p>Each trip can be shared as a self-contained HTML report page with map, speed graph, violations, and camera log — all embedded in one file.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🗺</div>
-        <div class="how-t"><b>Route map</b>
-          <p>Tap any trip to see the colour-coded route on an embedded OpenStreetMap. Blue = safe, orange = over limit, red = 20+ over.</p></div>
-      </div>
-    </div>
-
-    <div class="how-sec">
-      <h3><span>⚙️</span>TECHNOLOGY</h3>
-      <div class="tech-grid">
-        <div class="tech-card"><div class="tname">Web GPS API</div>
-          <div class="tdesc">navigator.geolocation.watchPosition with high accuracy mode. Real m/s speed from device sensors.</div></div>
-        <div class="tech-card"><div class="tname">Nominatim OSM</div>
-          <div class="tdesc">Free reverse geocoding from OpenStreetMap. Extracts road name, postcode, country, and maxspeed tags.</div></div>
-        <div class="tech-card"><div class="tname">Overpass API</div>
-          <div class="tdesc">Queries OSM for speed cameras, enforcement nodes, and police positions within dynamic radius of your location.</div></div>
-        <div class="tech-card"><div class="tname">Web Audio API</div>
-          <div class="tdesc">PCM buffer synthesis — no audio files needed. Heartbeat keeps iOS AudioContext alive during long drives.</div></div>
-        <div class="tech-card"><div class="tname">Screen Wake Lock</div>
-          <div class="tdesc">navigator.wakeLock.request('screen') keeps display on. Falls back to looping video on iOS.</div></div>
-        <div class="tech-card"><div class="tname">Service Worker</div>
-          <div class="tdesc">Background keep-alive ping. Push notifications for alerts when screen is off. Periodic GPS relay.</div></div>
-        <div class="tech-card"><div class="tname">Leaflet.js</div>
-          <div class="tdesc">Interactive OSM maps in trip detail. Colour-coded polylines, violation and camera markers.</div></div>
-        <div class="tech-card"><div class="tname">Canvas 2D</div>
-          <div class="tdesc">Speedometer arc, needle, live graph — all drawn at device pixel ratio for crisp retina rendering.</div></div>
-      </div>
-    </div>
-
+<div class="how-sec">
+  <h3><span>🌐</span>BACKGROUND TRACKING</h3>
+  <div class="how-item">
+    <div class="how-icon ac">🔋</div>
+    <div class="how-t"><b>Screen-off GPS</b>
+      <p>SpeedSense uses a Service Worker + keep-alive ping to continue monitoring even when your screen turns off. GPS tracking, violation logging, and camera alerts all continue in the background.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon ac">🔔</div>
+    <div class="how-t"><b>Background notifications</b>
+      <p>Allow notifications when prompted. Speed limit violations and camera alerts will show as phone notifications even with the screen off.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon wn">⚠</div>
+    <div class="how-t"><b>iOS limitation</b>
+      <p>iOS Safari limits background execution. For best results on iPhone, keep the app in the foreground or install as a Home Screen app via Share → Add to Home Screen.</p></div>
   </div>
 </div>
 
 
+<div class="how-sec">
+  <h3><span>📷</span>REPORT A CAMERA</h3>
+  <div class="how-item"><div class="how-icon ca">📍</div><div class="how-t"><b>Tap "📷 Report Camera"</b>
+    <p>During any ride, tap the yellow "📷 Report Camera" button on the speedometer screen to save the exact GPS coordinates of a camera the app missed.</p></div></div>
+  <div class="how-item"><div class="how-icon ca">💾</div><div class="how-t"><b>Stored in IndexedDB</b>
+    <p>Your reported cameras are saved permanently in your browser's IndexedDB. They survive page refreshes and app restarts.</p></div></div>
+  <div class="how-item"><div class="how-icon ca">🔁</div><div class="how-t"><b>Active on next pass</b>
+    <p>The next time you drive within 250 m of a saved location, SpeedSense plays the camera chime — just like an OSM camera.</p></div></div>
+  <div class="how-item"><div class="how-icon ac">📋</div><div class="how-t"><b>Manage cameras</b>
+    <p>Tap MY CAMERAS on the home screen to view and delete your reported locations.</p></div></div>
+</div>
+
+<div class="how-sec">
+  <h3><span>📊</span>SPEED LIMITS (AUTO)</h3>
+  <div class="how-item">
+    <div class="how-icon ac">🗺</div>
+    <div class="how-t"><b>OpenStreetMap data</b>
+      <p>Speed limits are read from OSM road tags via Nominatim reverse geocoding every 7 seconds. Covers all mapped roads worldwide.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon gr">🌍</div>
+    <div class="how-t"><b>Country fallback</b>
+      <p>When OSM has no tag, SpeedSense uses a built-in database of 40+ country speed limits by road class (motorway, primary, residential, etc.).</p></div>
+  </div>
+</div>
+
+<div class="how-sec">
+  <h3><span>📋</span>TRIP HISTORY &amp; SHARING</h3>
+  <div class="how-item">
+    <div class="how-icon ac">💾</div>
+    <div class="how-t"><b>Unlimited storage</b>
+      <p>All trips stored in IndexedDB (primary) with localStorage backup. Data persists through page refreshes and browser restarts. Export to JSON to back up across devices.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon ac">📤</div>
+    <div class="how-t"><b>Share a trip</b>
+      <p>Each trip can be shared as a self-contained HTML report page with map, speed graph, violations, and camera log — all embedded in one file.</p></div>
+  </div>
+  <div class="how-item">
+    <div class="how-icon ac">🗺</div>
+    <div class="how-t"><b>Route map</b>
+      <p>Tap any trip to see the colour-coded route on an embedded OpenStreetMap. Blue = safe, orange = over limit, red = 20+ over.</p></div>
+  </div>
+</div>
+
+<div class="how-sec">
+  <h3><span>⚙️</span>TECHNOLOGY</h3>
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tname">Web GPS API</div>
+      <div class="tdesc">navigator.geolocation.watchPosition with high accuracy mode. Real m/s speed from device sensors.</div></div>
+    <div class="tech-card"><div class="tname">Nominatim OSM</div>
+      <div class="tdesc">Free reverse geocoding from OpenStreetMap. Extracts road name, postcode, country, and maxspeed tags.</div></div>
+    <div class="tech-card"><div class="tname">Overpass API</div>
+      <div class="tdesc">Queries OSM for speed cameras, enforcement nodes, and police positions within dynamic radius of your location.</div></div>
+    <div class="tech-card"><div class="tname">Web Audio API</div>
+      <div class="tdesc">PCM buffer synthesis — no audio files needed. Heartbeat keeps iOS AudioContext alive during long drives.</div></div>
+    <div class="tech-card"><div class="tname">Screen Wake Lock</div>
+      <div class="tdesc">navigator.wakeLock.request('screen') keeps display on. Falls back to looping video on iOS.</div></div>
+    <div class="tech-card"><div class="tname">Service Worker</div>
+      <div class="tdesc">Background keep-alive ping. Push notifications for alerts when screen is off. Periodic GPS relay.</div></div>
+    <div class="tech-card"><div class="tname">Leaflet.js</div>
+      <div class="tdesc">Interactive OSM maps in trip detail. Colour-coded polylines, violation and camera markers.</div></div>
+    <div class="tech-card"><div class="tname">Canvas 2D</div>
+      <div class="tdesc">Speedometer arc, needle, live graph — all drawn at device pixel ratio for crisp retina rendering.</div></div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
 <!-- ══ USER CAMERAS ══ -->
+
 <div id="ucamScreen" class="screen" style="flex-direction:column">
   <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0">
     <span style="font-family:'Orbitron',monospace;font-size:14px;color:var(--cam);font-weight:700;flex:1;letter-spacing:2px">MY CAMERAS</span>
@@ -558,6 +566,7 @@ canvas{display:block}
 </div>
 
 <!-- ══ HISTORY ══ -->
+
 <div id="histScreen" class="screen">
   <div id="histHdr">
     <h2>TRIP HISTORY</h2>
@@ -568,6 +577,7 @@ canvas{display:block}
 </div>
 
 <!-- ══ DETAIL ══ -->
+
 <div id="detScreen" class="screen">
   <div id="detHdr">
     <h2 id="detTitle">TRIP DETAIL</h2>
@@ -578,6 +588,7 @@ canvas{display:block}
 </div>
 
 <!-- ══ CONFIRM ══ -->
+
 <div id="overlay">
   <div class="ovbox">
     <h3 id="ovT">Confirm</h3>
@@ -590,6 +601,7 @@ canvas{display:block}
 </div>
 
 <!-- ══ GPS ERROR ══ -->
+
 <div id="gpsErr">
   <div class="gerr">
     <h3>GPS Error</h3>
@@ -601,6 +613,7 @@ canvas{display:block}
 </div><!-- /app -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 'use strict';
 
@@ -900,122 +913,257 @@ function setWB(on){const b=document.getElementById('wakeBadge');if(!b)return;b.t
 document.addEventListener('visibilitychange',()=>{if(rideActive&&document.visibilityState==='visible')reqWake();});
 
 /* ══════════════════════════════════════════════════════
-   DEMO MODE
+   DEMO MODE — fully wired to all v6 sound settings
+   Each step shows a specific feature with correct sound behaviour:
+   • Camera:  long beep (setCamBeep) every 5 s while in range
+   • Police:  long beep (setPolicBeep) every 5 s while in range
+   • 1–20 over: spdBurst once + setSpdBeep('normal') every 3 s
+   • >20 over:  spdBurst once + setSpdBeep('urgent') every 1 s + setAlarm
+   • Back to safe: all sounds stop cleanly
+   END button or auto-finish → back to home, no trip saved
 ══════════════════════════════════════════════════════ */
 let demoActive=false,demoTmr=null,demoStep=0;
+
+/*
+  Each step:
+    spd  – displayed speed
+    lim  – speed limit shown in badge
+    road – road name in top bar
+    acc  – GPS accuracy shown (metres)
+    cam  – true = speed camera within 250m (long beep every 5s)
+    pol  – true = police radar within 250m (long beep every 5s)
+    dur  – ms before next step
+    note – shown as info icon (optional)
+*/
 const DEMO_SCRIPT=[
-  {spd:0,lim:50,road:'Demo Start',cam:false,police:false,dur:1500},
-  {spd:25,lim:50,road:'Orchard Road',cam:false,police:false,dur:1500},
-  {spd:48,lim:50,road:'Orchard Road',cam:false,police:false,dur:1500},
-  {spd:55,lim:50,road:'Orchard Road',cam:true,police:false,dur:2500},  // camera alert
-  {spd:45,lim:50,road:'Orchard Road',cam:false,police:false,dur:1500}, // slowed
-  {spd:65,lim:60,road:'ECP Expressway',cam:false,police:false,dur:2000},// mild overspeed
-  {spd:88,lim:60,road:'ECP Expressway',cam:false,police:false,dur:2500},// severe overspeed
-  {spd:60,lim:60,road:'ECP Expressway',cam:false,police:true,dur:2500}, // police
-  {spd:50,lim:50,road:'Thomson Road',cam:false,police:false,dur:1500},
-  {spd:0,lim:50,road:'Destination',cam:false,police:false,dur:1500},
+  // ── Scene 1: Start, GPS lock
+  {spd:0,  lim:50, road:'Orchard Rd, Singapore', acc:8,  cam:false,pol:false, dur:1800,
+   note:'🛰 GPS locked · Speed limit detected from OpenStreetMap'},
+
+  // ── Scene 2: Driving normally, under limit → green
+  {spd:32, lim:50, road:'Orchard Rd, Singapore', acc:6,  cam:false,pol:false, dur:1600,
+   note:null},
+
+  // ── Scene 3: Speed approaching limit → still green
+  {spd:48, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:false,pol:false, dur:1600,
+   note:null},
+
+  // ── Scene 4: CAMERA AHEAD — long beep fires, repeats every 5 s
+  {spd:52, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:true, pol:false, dur:5500,
+   note:'📷 Camera 180m — long beep every 5 s · Alarm if over limit'},
+
+  // ── Scene 5: Slowed for camera → alarm stops
+  {spd:44, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:false,pol:false, dur:1600,
+   note:'✅ Slowed down · Camera passed · Alarm off'},
+
+  // ── Scene 6: Road change → limit updates to 60
+  {spd:55, lim:60, road:'ECP Expressway',         acc:9,  cam:false,pol:false, dur:1600,
+   note:'🔽 Speed limit changed to 60 km/h'},
+
+  // ── Scene 7: 1–20 over limit → orange, burst + 3-second beep
+  {spd:72, lim:60, road:'ECP Expressway',         acc:8,  cam:false,pol:false, dur:4000,
+   note:'⚡ 12 km/h over · burst + beep every 3 s'},
+
+  // ── Scene 8: >20 over limit → red, burst + 1-second beep + alarm
+  {spd:90, lim:60, road:'ECP Expressway',         acc:7,  cam:false,pol:false, dur:4500,
+   note:'⚠ 30 km/h over · burst + beep every 1 s + alarm'},
+
+  // ── Scene 9: Slowing → urgent beep stops, reverts to 3-second
+  {spd:75, lim:60, road:'ECP Expressway',         acc:7,  cam:false,pol:false, dur:3500,
+   note:'⚡ Still 15 over · reverted to 3-second beep'},
+
+  // ── Scene 10: Back under limit → all speed sounds stop
+  {spd:58, lim:60, road:'ECP Expressway',         acc:6,  cam:false,pol:false, dur:1600,
+   note:'✅ Under limit · all beeps stopped'},
+
+  // ── Scene 11: POLICE RADAR — long tri-wave beep every 5 s
+  {spd:60, lim:60, road:'ECP Expressway',         acc:6,  cam:false,pol:true,  dur:5500,
+   note:'🚔 Police radar 220m — long beep every 5 s'},
+
+  // ── Scene 12: Police passed → silent
+  {spd:58, lim:60, road:'ECP Expressway',         acc:6,  cam:false,pol:false, dur:1600,
+   note:'✅ Radar passed'},
+
+  // ── Scene 13: Camera + over limit simultaneously → cam beep + alarm
+  {spd:68, lim:60, road:'Nicoll Highway',         acc:7,  cam:true, pol:false, dur:5000,
+   note:'📷 Camera + over limit · beep every 1 s + alarm + cam chime every 5 s'},
+
+  // ── Scene 14: Slowed for camera
+  {spd:55, lim:60, road:'Nicoll Highway',         acc:6,  cam:false,pol:false, dur:1600,
+   note:'✅ Slowed · all alerts cleared'},
+
+  // ── Scene 15: Stopped — stop timer visible
+  {spd:0,  lim:50, road:'Destination Reached',   acc:4,  cam:false,pol:false, dur:2000,
+   note:'🏁 Demo complete — tap END or wait to return home'},
 ];
 
 function openDemo(){
-  unlockAudio();startHB();buildBufs();
-  // Reset state for demo
+  unlockAudio(); startHB(); buildBufs();
+  // Full state reset
   Object.assign(S,{
-    speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,
-    dist:0,t0:Date.now(),stopT:null,stopDur:0,
-    log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],
-    road:'Demo Mode',country:'SG',acc:5,
-    lat:1.3521,lng:103.8198,pLat:null,pLng:null,
-    nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],
-    exceeded:false,excStart:null,sumSpd:0,sumN:0,
-    lastGeo:0,lastOvp:0,startPC:'118200',endPC:'318200',
-    startAddr:'Orchard Road, 118200',endAddr:'Thomson Road, 318200'
+    speed:0, spdLimit:50, roadType:'', maxSpd:0, viol:0, camCnt:0,
+    dist:0, t0:Date.now(), stopT:null, stopDur:0,
+    log:[], spdLog:[], violLog:[], camLog:[], spdHist:[],
+    road:'Demo Mode', country:'SG', acc:8,
+    lat:1.3521, lng:103.8198, pLat:null, pLng:null,
+    nearCam:false, alertedIds:new Set(), cameras:[], userCams:[],
+    exceeded:false, excStart:null, sumSpd:0, sumN:0,
+    lastGeo:0, lastOvp:0,
+    startPC:'238823', endPC:'179097',
+    startAddr:'Orchard Rd, 238823', endAddr:'ECP Expressway, 179097',
+    kV:0, kP:1
   });
-  demoActive=true; demoStep=0; clearAllIcons();
+  demoActive=true; demoStep=0;
+  clearAllIcons();
+  // UI setup
   showScreen('rideScreen');
   document.getElementById('demoBadge').style.display='';
   document.getElementById('gpsDot').className='gps-dot fix';
+  document.getElementById('tCountry').textContent='SG';
+  document.getElementById('wakeBadge').textContent='ON';
+  document.getElementById('wakeBadge').className='badge wake';
+  // Start render + timer
   initCanvas(); startTripTimer(); rafId=requestAnimationFrame(drawLoop);
   reqWake(); startHB();
   runDemoStep();
 }
 
 function runDemoStep(){
-  if(!demoActive||demoStep>=DEMO_SCRIPT.length){endDemo();return;}
+  if(!demoActive){ return; }
+  if(demoStep>=DEMO_SCRIPT.length){ endDemo(); return; }
+
   const sc=DEMO_SCRIPT[demoStep++];
-  S.speed=sc.spd; S.spdLimit=sc.lim; S.road=sc.road;
-  S.spdHist.push(S.speed); if(S.spdHist.length>500)S.spdHist.shift();
-  S.spdLog.push({t:Date.now(),s:Math.round(S.speed),l:S.spdLimit,
-    la:S.lat+(demoStep*.001),lo:S.lng+(demoStep*.001),r:S.road});
-  S.dist+=S.speed*sc.dur/3600000;
-  S.nearCam=sc.cam;
-  if(S.speed>S.maxSpd)S.maxSpd=S.speed;
-  if(S.speed>2){S.sumSpd+=S.speed;S.sumN++;}
-  document.getElementById('dLimit').textContent=S.spdLimit;
-  document.getElementById('dSpeed').textContent=Math.round(S.speed);
-  document.getElementById('dMax').textContent=Math.round(S.maxSpd);
-  const mg=S.speed-S.spdLimit;
-  const dspd=document.getElementById('dSpeed');
-  dspd.className='vl'+(mg>20?' d':mg>0?' w':' g');
+  const stepLat=S.lat+(demoStep*.0010);
+  const stepLng=S.lng+(demoStep*.0014);
 
-  if(sc.cam&&!S.alertedIds.has('demo-cam')){
-    S.alertedIds.add('demo-cam'); S.camCnt++;
-    document.getElementById('dCams').textContent=S.camCnt;
-    setCamBeep(true);
-    showIcon('cam','cam','📷',`Camera 180m ahead`,7000);
-    S.camLog.push({time:fmtT(Date.now()),lat:S.lat,lng:S.lng,road:S.road,dist:180,type:'camera'});
-  }
-  if(sc.police&&!S.alertedIds.has('demo-pol')){
-    S.alertedIds.add('demo-pol'); S.camCnt++;
-    document.getElementById('dCams').textContent=S.camCnt;
-    setPolicBeep(true);
-    showIcon('cam','police','🚔',`Radar 220m ahead`,7000);
-    S.camLog.push({time:fmtT(Date.now()),lat:S.lat,lng:S.lng,road:S.road,dist:220,type:'police'});
-  }
-  if(!sc.cam){setCamBeep(false);S.alertedIds.delete('demo-cam');}
-  if(!sc.police){setPolicBeep(false);}
+  // Update state
+  S.speed    = sc.spd;
+  S.spdLimit = sc.lim;
+  S.road     = sc.road;
+  S.acc      = sc.acc;
+  S.nearCam  = sc.cam || sc.pol;
+  S.lat      = stepLat;
+  S.lng      = stepLng;
 
-  // Violation handling
-  if(mg>20){
+  // Track stats
+  if(S.speed>S.maxSpd) S.maxSpd=S.speed;
+  if(S.speed>2){ S.sumSpd+=S.speed; S.sumN++; }
+  S.dist += S.speed*sc.dur/3600000;
+
+  // Speed log
+  S.spdHist.push(S.speed);
+  if(S.spdHist.length>500) S.spdHist.shift();
+  S.spdLog.push({t:Date.now(), s:Math.round(S.speed), l:S.spdLimit,
+    la:stepLat, lo:stepLng, r:S.road});
+
+  // Update DOM stats
+  document.getElementById('dLimit').textContent = S.spdLimit;
+  document.getElementById('dSpeed').textContent = Math.round(S.speed);
+  document.getElementById('dMax').textContent   = Math.round(S.maxSpd);
+  document.getElementById('dViol').textContent  = S.viol;
+  document.getElementById('dCams').textContent  = S.camCnt;
+  document.getElementById('tAcc').textContent   = `±${S.acc}m`;
+  document.getElementById('tRoad').textContent  = S.road;
+  const mg = S.speed - S.spdLimit;
+  document.getElementById('dSpeed').className   = 'vl'+(mg>20?' d':mg>0?' w':' g');
+
+  // ── CAMERA ALERT ──
+  if(sc.cam){
+    if(!S.alertedIds.has('dcam')){
+      S.alertedIds.add('dcam');
+      S.camCnt++;
+      document.getElementById('dCams').textContent=S.camCnt;
+      S.camLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,
+        road:S.road,dist:180,type:'camera'});
+      // Long camera beep starts, repeats every 5 s
+      setCamBeep(true);
+      showIcon('cam','cam','📷','Camera 180m ahead',8000);
+      // If already over limit at camera → alarm
+      if(S.speed>(S.spdLimit||50)) setAlarm(true);
+    }
+  } else {
+    setCamBeep(false);
+    S.alertedIds.delete('dcam');
+  }
+
+  // ── POLICE ALERT ──
+  if(sc.pol){
+    if(!S.alertedIds.has('dpol')){
+      S.alertedIds.add('dpol');
+      S.camCnt++;
+      document.getElementById('dCams').textContent=S.camCnt;
+      S.camLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,
+        road:S.road,dist:220,type:'police'});
+      // Long police beep starts, repeats every 5 s
+      setPolicBeep(true);
+      showIcon('cam','police','🚔','Radar 220m ahead',8000);
+    }
+  } else {
+    setPolicBeep(false);
+    S.alertedIds.delete('dpol');
+  }
+
+  // ── SPEED VIOLATION ──
+  if(mg > 20){
+    // Severe: >20 over → burst once on entry, then urgent 1-second beep + alarm
     if(!S.exceeded){
-      S.exceeded=true;S.viol++;
-      S.violLog.push({time:fmtT(Date.now()),lat:S.lat+demoStep*.001,lng:S.lng+demoStep*.001,
+      S.exceeded=true; S.viol++;
+      S.violLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,
         spd:Math.round(S.speed),lim:S.spdLimit,road:S.road,pc:S.endPC});
       spdBurst();
-      showIcon('spd','speed','⚠',`${Math.round(S.speed)}/${S.spdLimit} km/h`,6000);
-      setAlarm(true);
+      showIcon('spd','speed','⚠',`${Math.round(S.speed)}/${S.spdLimit} km/h (+${Math.round(mg)})`,7000);
       document.getElementById('dViol').textContent=S.viol;
     }
-    setSpdBeep('urgent');
-  } else if(mg>0){
-    if(!S.exceeded){S.exceeded=true;spdBurst();showIcon('spd','warn','⚡',`${Math.round(S.speed)}/${S.spdLimit}`,5000);}
-    setSpdBeep('normal'); setAlarm(false);
+    setSpdBeep('urgent');   // 1-second beep
+    setAlarm(true);         // continuous warble
+
+  } else if(mg > 0){
+    // Mild: 1–20 over → burst once on entry, then normal 3-second beep
+    if(!S.exceeded){
+      S.exceeded=true;
+      spdBurst();
+      showIcon('spd','warn','⚡',`${Math.round(S.speed)}/${S.spdLimit} km/h (+${Math.round(mg)})`,6000);
+    }
+    setSpdBeep('normal');   // 3-second beep
+    setAlarm(false);        // no alarm for mild overspeed
+
   } else {
-    S.exceeded=false;setSpdBeep(false);clearIcon('spd');
-    if(!sc.cam)setAlarm(false);
+    // Safe: clear all speed alerts
+    S.exceeded=false;
+    S.excStart=null;
+    setSpdBeep(false);
+    clearIcon('spd');
+    // Only kill alarm if also not near a camera over limit
+    if(!sc.cam || S.speed<=(S.spdLimit||50)) setAlarm(false);
   }
 
-  if(!sc.cam)setAlarm(S.exceeded&&mg>20);
-  demoTmr=setTimeout(runDemoStep,sc.dur);
+  // ── INFO NOTE ──
+  if(sc.note){
+    showIcon('note','info','ℹ',sc.note,sc.dur-200);
+  }
+
+  demoTmr=setTimeout(runDemoStep, sc.dur);
 }
 
 function endDemo(){
-  // Stop all activity — do NOT call endRide() (that saves and goes to endScreen)
+  // Stop everything — do NOT call endRide() — no trip saved, go straight home
   demoActive=false;
   clearTimeout(demoTmr);
-  // Stop all sounds
-  setSpdBeep(false);
+  // All sounds off
+  setSpdBeep(false); _spiMode='';
   setCamBeep(false);
   setPolicBeep(false);
   setAlarm(false);
-  // Stop render loop
+  // Stop render + timer
   cancelAnimationFrame(rafId); rafId=null;
   clearInterval(tripTmr); tripTmr=null;
-  // Release wake lock
+  // Release wake + BG
   stopHB(); relWake(); stopBGPing();
-  // Clean up UI
+  // Clean UI
   document.getElementById('demoBadge').style.display='none';
+  document.getElementById('stopPill').style.display='none';
   clearAllIcons();
-  // Go straight home — never endRide, never save
+  // Home
   showScreen('startScreen');
 }
 
@@ -1080,7 +1228,17 @@ function confirmEnd(){
   document.getElementById('ovY').className='bc by r';
   document.getElementById('overlay').classList.add('on');
 }
-function doConfirm(){closeOverlay();if(pendingAct==='start'){if(demoActive){endDemo();}startRide();}else if(pendingAct==='end'){if(demoActive){endDemo();}else{endRide();}}pendingAct=null;}
+function doConfirm(){
+  closeOverlay();
+  const act=pendingAct; pendingAct=null;
+  if(act==='start'){
+    if(demoActive) endDemo();
+    startRide();
+  } else if(act==='end'){
+    if(demoActive) endDemo();
+    else endRide();
+  }
+}
 function closeOverlay(){document.getElementById('overlay').classList.remove('on');}
 
 /* ══════════════════════════════════════════════════════
@@ -1590,6 +1748,7 @@ table td{padding:4px 6px;border-bottom:1px solid #1a1d2440}
 a{color:#00d4ff}
 .footer{text-align:center;font-size:11px;color:#2a2e3a;margin-top:24px;padding-top:12px;border-top:1px solid #1a1d24}
 </style></head><body>
+
 <h1>SPEEDSENSE</h1>
 <h2>TRIP REPORT</h2>
 <div>
@@ -1650,84 +1809,84 @@ ${camRows?`<div class="sec">
 <div class="footer">Generated by SpeedSense · ${new Date().toLocaleString()} · speedsense.app</div>
 </body></html>`;
 
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  // Try Web Share API first (mobile)
-  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([html],'speedsense_trip.html',{type:'text/html'})]})){
-    navigator.share({title:`SpeedSense Trip — ${t.date}`,files:[new File([html],'speedsense_trip.html',{type:'text/html'})]}).catch(()=>{});
-  } else {
-    const a=document.createElement('a');a.href=url;a.download=`speedsense_trip_${t.date.replace(/\s/g,'_')}.html`;a.click();
-  }
-  setTimeout(()=>URL.revokeObjectURL(url),5000);
+const blob=new Blob([html],{type:‘text/html’});
+const url=URL.createObjectURL(blob);
+// Try Web Share API first (mobile)
+if(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([html],‘speedsense_trip.html’,{type:‘text/html’})]})){
+navigator.share({title:`SpeedSense Trip — ${t.date}`,files:[new File([html],‘speedsense_trip.html’,{type:‘text/html’})]}).catch(()=>{});
+} else {
+const a=document.createElement(‘a’);a.href=url;a.download=`speedsense_trip_${t.date.replace(/\s/g,'_')}.html`;a.click();
+}
+setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 
 /* ══════════════════════════════════════════════════════
-   LEAFLET MAP
+LEAFLET MAP
 ══════════════════════════════════════════════════════ */
 function initMap(log,viols,cams){
-  const el=document.getElementById('routeMap');if(!el)return;
-  if(_lmap){_lmap.remove();_lmap=null;}
-  const pts=log.filter(e=>e&&e.la&&e.lo);if(!pts.length)return;
-  _lmap=L.map('routeMap',{zoomControl:true,attributionControl:false,preferCanvas:true});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_lmap);
-  const step=Math.max(1,Math.floor(pts.length/400)),samp=pts.filter((_,i)=>i%step===0);
-  for(let i=1;i<samp.length;i++){const a=samp[i-1],b=samp[i],m=a.s-(a.l||50);L.polyline([[a.la,a.lo],[b.la,b.lo]],{color:m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff',weight:4,opacity:.88}).addTo(_lmap);}
-  const mk=(em,bg)=>L.divIcon({html:`<div style="background:${bg};border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 1px 5px #0009">${em}</div>`,iconSize:[22,22],iconAnchor:[11,11],className:''});
-  L.marker([pts[0].la,pts[0].lo],{icon:mk('📍','#00d4ff')}).bindPopup('<b>Start</b>').addTo(_lmap);
-  L.marker([pts[pts.length-1].la,pts[pts.length-1].lo],{icon:mk('🏁','#00e676')}).bindPopup('<b>End</b>').addTo(_lmap);
-  viols.forEach(v=>{if(!v.lat)return;L.marker([v.lat,v.lng],{icon:mk('⚠','#ff2d2d')}).bindPopup(`<b>Violation</b><br>${v.spd}km/h in ${v.lim} zone<br>${v.time}`).addTo(_lmap);});
-  cams.forEach(c=>{if(!c.lat)return;L.marker([c.lat,c.lng],{icon:mk(c.type==='police'?'🚔':'📷','#ffd700')}).bindPopup(`<b>${c.type==='police'?'Police':'Camera'}</b><br>${c.road||'—'}`).addTo(_lmap);});
-  const bounds=L.latLngBounds(pts.map(p=>[p.la,p.lo]));
-  _lmap.fitBounds(bounds,{padding:[20,20],maxZoom:16});
-  setTimeout(()=>{if(_lmap)_lmap.invalidateSize(true);},350);
+const el=document.getElementById(‘routeMap’);if(!el)return;
+if(_lmap){_lmap.remove();_lmap=null;}
+const pts=log.filter(e=>e&&e.la&&e.lo);if(!pts.length)return;
+_lmap=L.map(‘routeMap’,{zoomControl:true,attributionControl:false,preferCanvas:true});
+L.tileLayer(‘https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png’,{maxZoom:19}).addTo(*lmap);
+const step=Math.max(1,Math.floor(pts.length/400)),samp=pts.filter((*,i)=>i%step===0);
+for(let i=1;i<samp.length;i++){const a=samp[i-1],b=samp[i],m=a.s-(a.l||50);L.polyline([[a.la,a.lo],[b.la,b.lo]],{color:m>20?’#ff2d2d’:m>0?’#ff6b00’:’#00d4ff’,weight:4,opacity:.88}).addTo(_lmap);}
+const mk=(em,bg)=>L.divIcon({html:`<div style="background:${bg};border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 1px 5px #0009">${em}</div>`,iconSize:[22,22],iconAnchor:[11,11],className:’’});
+L.marker([pts[0].la,pts[0].lo],{icon:mk(‘📍’,’#00d4ff’)}).bindPopup(’<b>Start</b>’).addTo(_lmap);
+L.marker([pts[pts.length-1].la,pts[pts.length-1].lo],{icon:mk(‘🏁’,’#00e676’)}).bindPopup(’<b>End</b>’).addTo(_lmap);
+viols.forEach(v=>{if(!v.lat)return;L.marker([v.lat,v.lng],{icon:mk(‘⚠’,’#ff2d2d’)}).bindPopup(`<b>Violation</b><br>${v.spd}km/h in ${v.lim} zone<br>${v.time}`).addTo(_lmap);});
+cams.forEach(c=>{if(!c.lat)return;L.marker([c.lat,c.lng],{icon:mk(c.type===‘police’?‘🚔’:‘📷’,’#ffd700’)}).bindPopup(`<b>${c.type==='police'?'Police':'Camera'}</b><br>${c.road||'—'}`).addTo(_lmap);});
+const bounds=L.latLngBounds(pts.map(p=>[p.la,p.lo]));
+_lmap.fitBounds(bounds,{padding:[20,20],maxZoom:16});
+setTimeout(()=>{if(_lmap)_lmap.invalidateSize(true);},350);
 }
-function osmUrl(log){const pts=log.filter(e=>e&&e.la&&e.lo);if(!pts.length)return '';const m=pts[Math.floor(pts.length/2)];return `https://www.openstreetmap.org/?mlat=${m.la}&mlon=${m.lo}#map=14/${m.la}/${m.lo}`;}
-function openOSM(la,lo){window.open(`https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=17/${la}/${lo}`,'_blank');}
+function osmUrl(log){const pts=log.filter(e=>e&&e.la&&e.lo);if(!pts.length)return ‘’;const m=pts[Math.floor(pts.length/2)];return `https://www.openstreetmap.org/?mlat=${m.la}&mlon=${m.lo}#map=14/${m.la}/${m.lo}`;}
+function openOSM(la,lo){window.open(`https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=17/${la}/${lo}`,’_blank’);}
 
 function drawDetGraph(log){
-  const c=document.getElementById('detG');if(!c)return;
-  const d=window.devicePixelRatio||1;c.width=c.offsetWidth*d;c.height=c.offsetHeight*d;
-  const g=c.getContext('2d'),W=c.width,H=c.height;
-  const maxV=Math.max(80,...log.map(e=>e.s));
-  const step=Math.max(1,Math.floor(log.length/(W/d)));
-  const pts=log.filter((_,i)=>i%step===0);
-  g.fillStyle='#1a1d24';g.fillRect(0,0,W,H);
-  g.beginPath();pts.forEach((e,i)=>{const px=(i/(pts.length-1))*W,py=H-(e.s/maxV)*H;i===0?g.moveTo(px,py):g.lineTo(px,py);});
-  g.lineTo(W,H);g.lineTo(0,H);g.closePath();g.fillStyle='#00d4ff08';g.fill();
-  pts.forEach((e,i)=>{if(!i)return;const x1=((i-1)/(pts.length-1))*W,x2=(i/(pts.length-1))*W,y1=H-(pts[i-1].s/maxV)*H,y2=H-(e.s/maxV)*H,m=e.s-(e.l||50);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokeStyle=m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';g.lineWidth=2.5*d;g.stroke();});
-  const mLim=pts[Math.floor(pts.length/2)]?.l||50,ly=H-(mLim/maxV)*H;
-  g.beginPath();g.setLineDash([4,3]);g.moveTo(0,ly);g.lineTo(W,ly);g.strokeStyle='#ff2d2d80';g.lineWidth=1.5*d;g.stroke();g.setLineDash([]);
-  g.font=`${9*d}px Rajdhani,sans-serif`;g.fillStyle='#5a6070';g.textAlign='left';g.textBaseline='top';g.fillText('0',4,H-11*d);g.textBaseline='alphabetic';g.fillText(`${Math.round(maxV)} km/h`,4,11*d);
-  g.fillStyle='#ff2d2d70';g.textBaseline='middle';g.fillText(`${mLim} limit`,W-55*d,ly-7);
+const c=document.getElementById(‘detG’);if(!c)return;
+const d=window.devicePixelRatio||1;c.width=c.offsetWidth*d;c.height=c.offsetHeight*d;
+const g=c.getContext(‘2d’),W=c.width,H=c.height;
+const maxV=Math.max(80,…log.map(e=>e.s));
+const step=Math.max(1,Math.floor(log.length/(W/d)));
+const pts=log.filter((_,i)=>i%step===0);
+g.fillStyle=’#1a1d24’;g.fillRect(0,0,W,H);
+g.beginPath();pts.forEach((e,i)=>{const px=(i/(pts.length-1))*W,py=H-(e.s/maxV)*H;i===0?g.moveTo(px,py):g.lineTo(px,py);});
+g.lineTo(W,H);g.lineTo(0,H);g.closePath();g.fillStyle=’#00d4ff08’;g.fill();
+pts.forEach((e,i)=>{if(!i)return;const x1=((i-1)/(pts.length-1))*W,x2=(i/(pts.length-1))*W,y1=H-(pts[i-1].s/maxV)*H,y2=H-(e.s/maxV)*H,m=e.s-(e.l||50);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokeStyle=m>20?’#ff2d2d’:m>0?’#ff6b00’:’#00d4ff’;g.lineWidth=2.5*d;g.stroke();});
+const mLim=pts[Math.floor(pts.length/2)]?.l||50,ly=H-(mLim/maxV)*H;
+g.beginPath();g.setLineDash([4,3]);g.moveTo(0,ly);g.lineTo(W,ly);g.strokeStyle=’#ff2d2d80’;g.lineWidth=1.5*d;g.stroke();g.setLineDash([]);
+g.font=`${9*d}px Rajdhani,sans-serif`;g.fillStyle=’#5a6070’;g.textAlign=‘left’;g.textBaseline=‘top’;g.fillText(‘0’,4,H-11*d);g.textBaseline=‘alphabetic’;g.fillText(`${Math.round(maxV)} km/h`,4,11*d);
+g.fillStyle=’#ff2d2d70’;g.textBaseline=‘middle’;g.fillText(`${mLim} limit`,W-55*d,ly-7);
 }
 
 /* ══════════════════════════════════════════════════════
-   IMPORT / EXPORT
+IMPORT / EXPORT
 ══════════════════════════════════════════════════════ */
-async function dlHistory(){const blob=new Blob([JSON.stringify(await loadTrips(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`speedsense_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
+async function dlHistory(){const blob=new Blob([JSON.stringify(await loadTrips(),null,2)],{type:‘application/json’});const a=document.createElement(‘a’);a.href=URL.createObjectURL(blob);a.download=`speedsense_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
 function importHistory(evt){
-  const f=evt.target.files[0];if(!f)return;
-  const fr=new FileReader();fr.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error('Not an array');const ex=loadTrips(),ids=new Set(ex.map(t=>t.id));const merged=[...ex,...data.filter(t=>!ids.has(t.id))].sort((a,b)=>a.id-b.id);saveTrips(merged);updateBadge();alert(`Imported ${data.length} trips. Total: ${merged.length}`);if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}catch(e2){alert('Import failed: '+e2.message);}};
-  fr.readAsText(f);evt.target.value='';
+const f=evt.target.files[0];if(!f)return;
+const fr=new FileReader();fr.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error(‘Not an array’);const ex=loadTrips(),ids=new Set(ex.map(t=>t.id));const merged=[…ex,…data.filter(t=>!ids.has(t.id))].sort((a,b)=>a.id-b.id);saveTrips(merged);updateBadge();alert(`Imported ${data.length} trips. Total: ${merged.length}`);if(document.getElementById(‘histScreen’).classList.contains(‘active’))renderHistList();}catch(e2){alert(‘Import failed: ‘+e2.message);}};
+fr.readAsText(f);evt.target.value=’’;
 }
-async function clearHistory(){if(!confirm('Delete ALL trip history? Cannot be undone.'))return;await idbClear('trips').catch(()=>{});try{localStorage.removeItem(LS_KEY);}catch(e){}updateBadge();if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}
+async function clearHistory(){if(!confirm(‘Delete ALL trip history? Cannot be undone.’))return;await idbClear(‘trips’).catch(()=>{});try{localStorage.removeItem(LS_KEY);}catch(e){}updateBadge();if(document.getElementById(‘histScreen’).classList.contains(‘active’))renderHistList();}
 
 /* ══════════════════════════════════════════════════════
-   UTILS
+UTILS
 ══════════════════════════════════════════════════════ */
 function hav(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dG/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
-function fmtT(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-function cflag(cc){if(!cc||cc.length!==2)return '🌍';const pts=[...cc].map(c=>c.codePointAt(0)+0x1F1A5);return String.fromCodePoint(...pts);}
+function fmtT(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:‘2-digit’,minute:‘2-digit’,second:‘2-digit’});}
+function cflag(cc){if(!cc||cc.length!==2)return ‘🌍’;const pts=[…cc].map(c=>c.codePointAt(0)+0x1F1A5);return String.fromCodePoint(…pts);}
 
 /* ══════════════════════════════════════════════════════
-   INIT
+INIT
 ══════════════════════════════════════════════════════ */
 updateBadge();
 initSW();
 
 // Request fullscreen on first tap
 let _fsReq=false;
-document.addEventListener('click',()=>{if(_fsReq)return;_fsReq=true;try{const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen().catch(()=>{});else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}catch(e){}},{passive:true,once:true});
+document.addEventListener(‘click’,()=>{if(_fsReq)return;_fsReq=true;try{const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen().catch(()=>{});else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}catch(e){}},{passive:true,once:true});
 
 </script>
 </body>
