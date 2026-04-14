@@ -80,7 +80,7 @@ background:var(–card);border:1px solid var(–border);color:var(–muted);whit
 font-family:‘Rajdhani’,sans-serif;font-weight:700;padding:4px 8px;border-radius:5px;
 cursor:pointer;white-space:nowrap;-webkit-appearance:none}
 .tbtn:active{background:var(–card)}
-.tbtn.end{border-color:var(–danger);color:var(–danger)}
+.tbtn.end{border-color:var(–danger);color:var(–danger);padding:8px 18px;font-size:14px;border-width:1.5px;font-weight:800;letter-spacing:1px}
 
 /* Alert icons */
 #alertIcons{position:absolute;top:0;left:0;right:0;display:flex;gap:5px;
@@ -96,7 +96,7 @@ transition:opacity .35s;flex-shrink:0}
 .aicon.police{background:#a855f718;border:1.5px solid var(–police);color:var(–police)}
 .aicon.info  {background:#00d4ff12;border:1.5px solid var(–accent);color:var(–accent)}
 
-#mainView{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#mainView{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;min-height:0}
 #speedCanvas{flex:1;display:block;width:100%;touch-action:none}
 #stopPill{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
 background:#ffd70018;border:1px solid var(–cam);color:var(–cam);font-size:11px;
@@ -343,8 +343,8 @@ padding:22px;max-width:290px;text-align:center}
     <div class="sc"><div class="lb">Max</div><div class="vl" id="dMax">0</div></div>
     <div class="sc"><div class="lb">Viol</div><div class="vl d" id="dViol">0</div></div>
     <div class="sc"><div class="lb">Cams</div><div class="vl c" id="dCams">0</div></div>
-    <div class="sc tap" onclick="confirmEnd()" style="border-color:#ff2d2d40">
-      <div class="lb">Tap</div><div class="vl d">END</div>
+    <div class="sc tap" onclick="confirmEnd()" style="border-color:var(--danger);border-width:1.5px;background:#ff2d2d12">
+      <div class="lb" style="color:var(--danger)">END</div><div class="vl d" style="font-size:clamp(16px,4vw,22px)">●</div>
     </div>
   </div>
 </div>
@@ -821,21 +821,52 @@ function buildBufs(){
 }
 function play(b,delay=0){
   if(!b)return;
-  try{
-    const ctx=AC();if(ctx.state!=='running')ctx.resume();
-    const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=1;
-    src.buffer=b;src.connect(g);g.connect(ctx.destination);src.start(ctx.currentTime+delay);
-  }catch(e){}
+  const ctx=AC();
+  const doPlay=()=>{
+    try{
+      if(!b)return;
+      const src=ctx.createBufferSource();
+      const g=ctx.createGain();
+      // Small attack ramp prevents click artifacts
+      g.gain.setValueAtTime(0,ctx.currentTime+delay);
+      g.gain.linearRampToValueAtTime(1,ctx.currentTime+delay+0.005);
+      src.buffer=b;src.connect(g);g.connect(ctx.destination);
+      src.start(ctx.currentTime+delay);
+    }catch(e){}
+  };
+  if(ctx.state==='running'){doPlay();}
+  else{ctx.resume().then(doPlay).catch(()=>{});}
 }
 function unlockAudio(){
-  try{AC().resume().then(()=>{buildBufs();const b=AC().createBuffer(1,1,AC().sampleRate);const s=AC().createBufferSource();s.buffer=b;s.connect(AC().destination);s.start();});}catch(e){}
+  try{
+    const ctx=AC();
+    const resume=()=>{
+      _buf=null; buildBufs();
+      // Play a 0-gain buffer to fully unlock on iOS
+      try{
+        const b=ctx.createBuffer(1,1,ctx.sampleRate);
+        const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();
+      }catch(e){}
+    };
+    if(ctx.state==='suspended') ctx.resume().then(resume).catch(()=>{});
+    else resume();
+  }catch(e){}
 }
 function startHB(){
   if(_hb)return;
   _hb=setInterval(()=>{
-    try{const ctx=AC();if(ctx.state==='suspended'){ctx.resume().then(()=>{_buf=null;buildBufs();});}
-    const b=ctx.createBuffer(1,1,ctx.sampleRate);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();}catch(e){}
-  },25000);
+    try{
+      const ctx=AC();
+      if(ctx.state==='suspended'){
+        ctx.resume().then(()=>{_buf=null;buildBufs();});
+        return;
+      }
+      if(!_buf) buildBufs();
+      // Keep iOS audio session alive with a silent buffer every 15s
+      const b=ctx.createBuffer(1,1,ctx.sampleRate);
+      const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();
+    }catch(e){_buf=null;} // force rebuild on next play
+  },15000);
 }
 function stopHB(){if(_hb){clearInterval(_hb);_hb=null;}}
 
@@ -877,8 +908,13 @@ function setAlarm(on){
   else if(!on&&_ali){clearInterval(_ali);_ali=null;}
 }
 
-['touchstart','touchend','pointerdown','mousedown','click','keydown'].forEach(e=>
-  document.addEventListener(e,()=>{unlockAudio();startHB();},{once:true,passive:true}));
+// Unlock audio on first gesture (once per event type)
+['touchstart','pointerdown','mousedown'].forEach(ev=>
+  document.addEventListener(ev,()=>{unlockAudio();startHB();},{once:true,passive:true}));
+// Also unlock on visibility change (returning from lock screen)
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible') unlockAudio();
+});
 
 function testSound(t){
   unlockAudio();buildBufs();if(!_buf)return;
@@ -1270,7 +1306,7 @@ function startGPS(){
   if(!navigator.geolocation){showGPSErr('Geolocation not supported.');return;}
   document.getElementById('gpsDot').className='gps-dot search';
   watchId=navigator.geolocation.watchPosition(onGPS,onGPSErr,
-    {enableHighAccuracy:true,maximumAge:1000,timeout:25000});
+    {enableHighAccuracy:true,maximumAge:500,timeout:25000});
 }
 
 /* Kalman filter + 4.5% calibration offset for GPS speed accuracy */
@@ -1283,8 +1319,10 @@ function onGPS(pos){
   document.getElementById('gpsDot').className='gps-dot fix';
   const{latitude:la,longitude:lo,speed:spd,accuracy:acc}=pos.coords;
   S.pLat=S.lat;S.pLng=S.lng;S.lat=la;S.lng=lo;S.acc=Math.round(acc);
+  // If GPS reports exactly 0 or null speed → immediate zero (no smoothing)
   const rawKmh=(spd!=null&&spd>=0)?spd*3.6*SPD_CAL:0;
-  S.speed=kalmanSpeed(Math.max(0,rawKmh));
+  if(rawKmh===0){ S.speed=0; _kV=0; _kP=1; }       // instant stop
+  else S.speed=kalmanSpeed(rawKmh);                  // smooth only when moving
   if(S.speed>S.maxSpd)S.maxSpd=S.speed;
   if(S.speed>2){S.sumSpd+=S.speed;S.sumN++;}
   if(S.pLat!==null)S.dist+=hav(S.pLat,S.pLng,la,lo);
@@ -1395,8 +1433,14 @@ function checkCams(la,lo){
     if(best.type!=='police'&&S.speed>(S.spdLimit||50)-8)setAlarm(true);
     else if(!S.exceeded)setAlarm(false);
   } else {
-    if(was){clearIcon('cam');setCamBeep(false);setPolicBeep(false);if(!S.exceeded)setAlarm(false);}
-    if(minD>500)S.alertedIds.clear();
+    // Camera out of range — stop alert sounds and icons IMMEDIATELY
+    if(was){
+      clearIcon('cam');        // remove 📷 badge icon at once
+      setCamBeep(false);       // stop long camera beep
+      setPolicBeep(false);     // stop long police beep
+      S.alertedIds.clear();    // allow re-alert when approaching next camera
+      if(!S.exceeded) setAlarm(false);
+    }
   }
 }
 
@@ -1884,9 +1928,8 @@ INIT
 updateBadge();
 initSW();
 
-// Request fullscreen on first tap
-let _fsReq=false;
-document.addEventListener(‘click’,()=>{if(_fsReq)return;_fsReq=true;try{const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen().catch(()=>{});else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}catch(e){}},{passive:true,once:true});
+// Note: requestFullscreen removed — causes button event blocking on mobile.
+// The app is already visually full-screen via position:fixed; inset:0 CSS.
 
 </script>
 </body>
