@@ -300,9 +300,8 @@ canvas{display:block}
     <button class="s-btn ac" onclick="openHistory()">📋 HISTORY <span id="tripBadge">0 trips</span></button>
     <button class="s-btn ac" onclick="openUCamScreen()">📷 MY CAMERAS</button>
     <button class="s-btn ac" onclick="dlHistory()">⬇ Export</button>
-    <label class="s-btn" style="cursor:pointer">⬆ Import
-      <input type="file" accept=".json" style="display:none" onchange="importHistory(event)">
-    </label>
+    <button class="s-btn" onclick="document.getElementById('importFile').click()">⬆ Import</button>
+    <input id="importFile" type="file" accept=".json" style="position:fixed;top:-9999px;left:-9999px" onchange="importHistory(event)">
     <button class="s-btn dc" onclick="clearHistory()">🗑 Clear</button>
   </div>
 </div>
@@ -429,7 +428,7 @@ canvas{display:block}
       <div class="how-item">
         <div class="how-icon ca">📷</div>
         <div class="how-t"><b>Yellow 📷 — Speed Camera</b>
-          <p>Single long descending tone (~750ms). Plays immediately when you enter 250 m of a camera, then repeats every 5 seconds until you pass it.</p></div>
+          <p>Single long descending tone (~750ms). Plays immediately when you enter 250 m of a camera, then repeats every 3 seconds until you pass it. Stops the instant you exit the 250 m radius.</p></div>
       </div>
       <div class="how-item">
         <div class="how-icon po">🚔</div>
@@ -444,14 +443,14 @@ canvas{display:block}
       <div class="how-item">
         <div class="how-icon dc">⚠</div>
         <div class="how-t"><b>Red ⚠ — 20+ Over Limit</b>
-          <p>Pulsed beep every 3 seconds (1–20 km/h over) or every 1 second (20+ km/h over). Sawtooth alarm warble runs continuously when 20+ over. All stop when speed drops below limit.</p></div>
+          <p>Single beep every 5 seconds when 1–9 km/h over the limit. Single beep every 1 second when 10+ km/h over the limit, plus continuous alarm warble. All sounds stop the moment you drop below the limit.</p></div>
       </div>
       <div class="sound-grid" style="margin-top:8px">
         <button class="sound-btn cam-s" onclick="testSound('cam')"><span>📷</span><span>Camera Chime</span></button>
         <button class="sound-btn spd-s" onclick="testSound('spd')"><span>⚠</span><span>Speed Alert</span></button>
         <button class="sound-btn pol-s" onclick="testSound('pol')"><span>🚔</span><span>Police Siren</span></button>
         <button class="sound-btn alm-s" onclick="testSound('alm')"><span>🔔</span><span>Alarm (3s)</span></button>
-        <button class="sound-btn spd-s" onclick="setSpdBeep('urgent');setTimeout(()=>setSpdBeep(false),3000)" style="border-color:#ff6b00;color:#ff6b00"><span>⚡</span><span>3s Urgent Beep</span></button>
+        <button class="sound-btn spd-s" onclick="setSpdBeep('severe');setTimeout(()=>setSpdBeep(false),3000)" style="border-color:#ff6b00;color:#ff6b00"><span>⚡</span><span>3s Urgent Beep</span></button>
       </div>
     </div>
 
@@ -668,7 +667,20 @@ async function idbGetAll(store){const db=await openIDB();return new Promise((res
 async function idbPut(store,obj){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).put(obj);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
 async function idbDelete(store,key){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
 async function idbClear(store){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
-async function saveTrips(trips){try{localStorage.setItem(LS_KEY,JSON.stringify(trips));}catch(e){}for(const t of trips)await idbPut('trips',t).catch(()=>{});}
+async function saveTrips(trips){
+  // Write to localStorage
+  try{localStorage.setItem(LS_KEY,JSON.stringify(trips));}catch(e){}
+  // Write all to IDB (put overwrites by id key)
+  try{
+    const db=await openIDB();
+    await new Promise((res,rej)=>{
+      const tx=db.transaction('trips','readwrite');
+      tx.oncomplete=res; tx.onerror=()=>rej(tx.error);
+      tx.objectStore('trips').clear();          // clear old data first
+      trips.forEach(t=>tx.objectStore('trips').put(t));
+    });
+  }catch(e){}
+}
 async function loadTrips(){try{const rows=await idbGetAll('trips');if(rows&&rows.length>0){try{localStorage.setItem(LS_KEY,JSON.stringify(rows));}catch(e){}return rows.sort((a,b)=>a.id-b.id);}
 }catch(e){}try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}}
 async function appendTrip(t){await idbPut('trips',t).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]');a.push(t);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
@@ -864,30 +876,31 @@ function policeWail(){buildBufs();if(!_buf)return;play(_buf.pl);}
 let _spi=null,_ali=null,_cami=null,_alis=0,_spiMode='';
 
 /*
-  setSpdBeep('normal') → short beep every 3 s  (1–20 km/h over limit)
-  setSpdBeep('urgent') → short beep every 1 s  (>20 km/h over limit)
-  setSpdBeep(false)    → stop all speed beeps
+  setSpdBeep('mild')   → 1 short beep every 5 s  (1–10 km/h over limit)
+  setSpdBeep('severe') → 1 short beep every 1 s  (10+ km/h over limit)
+  setSpdBeep(false)    → stop
 */
 function setSpdBeep(mode){
-  if(mode&&_spi&&_spiMode===mode)return;      // already running this mode
+  if(mode&&_spi&&_spiMode===mode) return;   // already in this mode
   if(_spi){clearInterval(_spi);_spi=null;_spiMode='';}
-  if(!mode)return;
-  buildBufs();if(!_buf)return;
+  if(!mode) return;
+  buildBufs(); if(!_buf) return;
   _spiMode=mode;
   play(_buf.sp);  // immediate first beep
-  _spi=setInterval(()=>{if(_buf)play(_buf.sp);},mode==='urgent'?1000:3000);
+  const ms = mode==='severe' ? 1000 : 5000;
+  _spi=setInterval(()=>{ if(_buf) play(_buf.sp); }, ms);
 }
 
-/* Long camera chime every 5 s */
+/* Long camera beep every 3 s */
 function setCamBeep(on){
-  if(on&&!_cami){buildBufs();camChime();_cami=setInterval(()=>{if(_buf)camChime();},5000);}
-  else if(!on&&_cami){clearInterval(_cami);_cami=null;}
+  if(on&&!_cami){ buildBufs(); camChime(); _cami=setInterval(()=>{ if(_buf) camChime(); },3000); }
+  else if(!on&&_cami){ clearInterval(_cami); _cami=null; }
 }
 
-/* Long police beep every 5 s */
+/* Long police beep every 3 s */
 function setPolicBeep(on){
-  if(on&&!_cami){buildBufs();policeWail();_cami=setInterval(()=>{if(_buf)policeWail();},5000);}
-  else if(!on&&_cami){clearInterval(_cami);_cami=null;}
+  if(on&&!_cami){ buildBufs(); policeWail(); _cami=setInterval(()=>{ if(_buf) policeWail(); },3000); }
+  else if(!on&&_cami){ clearInterval(_cami); _cami=null; }
 }
 
 function setAlarm(on){
@@ -906,19 +919,16 @@ document.addEventListener('visibilitychange',()=>{
 function testSound(t){
   unlockAudio();buildBufs();if(!_buf)return;
   if(t==='cam'){
-    // Play cam long beep twice (like approaching a camera)
-    camChime();setTimeout(camChime,2500);
+    camChime(); setTimeout(camChime,3000);          // long beep × 2 @ 3 s
   }else if(t==='spd'){
-    // Burst then 3s normal beep
-    spdBurst();
-    setTimeout(()=>{setSpdBeep('normal');setTimeout(()=>setSpdBeep(false),3500);},500);
+    setSpdBeep('mild');                             // 5 s mild beep
+    setTimeout(()=>setSpdBeep(false),6000);
   }else if(t==='pol'){
-    // Police long beep twice
-    policeWail();setTimeout(policeWail,2500);
+    policeWail(); setTimeout(policeWail,3000);      // long beep × 2 @ 3 s
   }else if(t==='alm'){
-    // Urgent 1s beep for 3s
-    setSpdBeep('urgent');setTimeout(()=>setSpdBeep(false),3000);
-    setAlarm(true);setTimeout(()=>setAlarm(false),3000);
+    setSpdBeep('severe');                           // 1 s severe beep + alarm
+    setAlarm(true);
+    setTimeout(()=>{ setSpdBeep(false); setAlarm(false); },4000);
   }
 }
 
@@ -940,8 +950,8 @@ document.addEventListener('visibilitychange',()=>{if(rideActive&&document.visibi
    Each step shows a specific feature with correct sound behaviour:
    • Camera:  long beep (setCamBeep) every 5 s while in range
    • Police:  long beep (setPolicBeep) every 5 s while in range
-   • 1–20 over: spdBurst once + setSpdBeep('normal') every 3 s
-   • >20 over:  spdBurst once + setSpdBeep('urgent') every 1 s + setAlarm
+   • 1–9 over:   setSpdBeep('mild')   every 5 s, no alarm
+   • 10+ over:  setSpdBeep('severe')  every 1 s + setAlarm
    • Back to safe: all sounds stop cleanly
    END button or auto-finish → back to home, no trip saved
 ══════════════════════════════════════════════════════ */
@@ -985,15 +995,15 @@ const DEMO_SCRIPT=[
 
   // ── Scene 7: 1–20 over limit → orange, burst + 3-second beep
   {spd:72, lim:60, road:'ECP Expressway',         acc:8,  cam:false,pol:false, dur:4000,
-   note:'⚡ 12 km/h over · burst + beep every 3 s'},
+   note:'⚡ 12 km/h over · beep every 5 s'},
 
   // ── Scene 8: >20 over limit → red, burst + 1-second beep + alarm
   {spd:90, lim:60, road:'ECP Expressway',         acc:7,  cam:false,pol:false, dur:4500,
-   note:'⚠ 30 km/h over · burst + beep every 1 s + alarm'},
+   note:'⚠ 30 km/h over · beep every 1 s + alarm'},
 
   // ── Scene 9: Slowing → urgent beep stops, reverts to 3-second
   {spd:75, lim:60, road:'ECP Expressway',         acc:7,  cam:false,pol:false, dur:3500,
-   note:'⚡ Still 15 over · reverted to 3-second beep'},
+   note:'⚡ Still 15 over · beep every 1 s + alarm'},
 
   // ── Scene 10: Back under limit → all speed sounds stop
   {spd:58, lim:60, road:'ECP Expressway',         acc:6,  cam:false,pol:false, dur:1600,
@@ -1088,7 +1098,7 @@ function runDemoStep(){
   document.getElementById('tAcc').textContent   = `±${S.acc}m`;
   document.getElementById('tRoad').textContent  = S.road;
   const mg = S.speed - S.spdLimit;
-  document.getElementById('dSpeed').className   = 'vl'+(mg>20?' d':mg>0?' w':' g');
+  document.getElementById('dSpeed').className   = 'vl'+(mg>=10?' d':mg>0?' w':' g');
 
   // ── CAMERA ALERT ──
   if(sc.cam){
@@ -1127,27 +1137,25 @@ function runDemoStep(){
   }
 
   // ── SPEED VIOLATION ──
-  if(mg > 20){
-    // Severe: >20 over → burst once on entry, then urgent 1-second beep + alarm
+  if(mg >= 10){
+    // 10+ over → severe: 1-second beep + alarm
     if(!S.exceeded){
       S.exceeded=true; S.viol++;
       S.violLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,
         spd:Math.round(S.speed),lim:S.spdLimit,road:S.road,pc:S.endPC});
-      spdBurst();
       showIcon('spd','speed','⚠',`${Math.round(S.speed)}/${S.spdLimit} km/h (+${Math.round(mg)})`,7000);
       document.getElementById('dViol').textContent=S.viol;
     }
-    setSpdBeep('urgent');   // 1-second beep
+    setSpdBeep('severe');   // 1-second beep
     setAlarm(true);         // continuous warble
 
   } else if(mg > 0){
-    // Mild: 1–20 over → burst once on entry, then normal 3-second beep
+    // 1–9 over → mild 5-second beep, no alarm
     if(!S.exceeded){
       S.exceeded=true;
-      spdBurst();
       showIcon('spd','warn','⚡',`${Math.round(S.speed)}/${S.spdLimit} km/h (+${Math.round(mg)})`,6000);
     }
-    setSpdBeep('normal');   // 3-second beep
+    setSpdBeep('mild');     // 5-second beep
     setAlarm(false);        // no alarm for mild overspeed
 
   } else {
@@ -1445,23 +1453,39 @@ function handleStop(){
   } else {S.stopT=null;S.stopDur=0;el.style.display='none';}
 }
 function handleViol(la,lo){
-  const lim=S.spdLimit||50,exc=S.speed>lim,mg=S.speed-lim;
+  const lim=S.spdLimit||50, exc=S.speed>lim, mg=S.speed-lim;
   if(exc){
-    if(!S.excStart)S.excStart=Date.now();
+    if(!S.excStart) S.excStart=Date.now();
+    // 1.5s grace period before triggering
     if(Date.now()-S.excStart>1500){
       if(!S.exceeded){
-        S.exceeded=true;S.viol++;
-        if(S.log.length)S.log[S.log.length-1].exc=(S.log[S.log.length-1].exc||0)+1;
-        S.violLog.push({time:fmtT(Date.now()),lat:la,lng:lo,spd:Math.round(S.speed),lim,road:S.road,pc:S.endPC});
-        spdBurst();
-        showIcon('spd',mg>20?'speed':'warn',mg>20?'⚠':'⚡',`${Math.round(S.speed)}/${lim} km/h (+${Math.round(mg)})`,8000);
-        if(mg>20){setAlarm(true);if(_notifGranted)sendSWAlert('SPEED_ALERT',`${Math.round(S.speed)}km/h in ${lim} zone on ${S.road}`,Math.round(mg));}
+        S.exceeded=true; S.viol++;
+        if(S.log.length) S.log[S.log.length-1].exc=(S.log[S.log.length-1].exc||0)+1;
+        S.violLog.push({time:fmtT(Date.now()),lat:la,lng:lo,
+          spd:Math.round(S.speed),lim,road:S.road,pc:S.endPC});
+        showIcon('spd',mg>=10?'speed':'warn',mg>=10?'⚠':'⚡',
+          `${Math.round(S.speed)}/${lim} km/h (+${Math.round(mg)})`,8000);
+        if(mg>=10){
+          setAlarm(true);
+          if(_notifGranted) sendSWAlert('SPEED_ALERT',
+            `${Math.round(S.speed)}km/h in ${lim} zone on ${S.road}`);
+        }
       }
-      setSpdBeep(mg>20?'urgent':'normal');
+      // 0–10 over: mild beep every 5s, no alarm
+      // 10+ over:  severe beep every 1s + alarm
+      if(mg>=10){
+        setSpdBeep('severe');   // 1-second beep
+        setAlarm(true);
+      } else {
+        setSpdBeep('mild');     // 5-second beep
+        setAlarm(false);
+      }
     }
   } else {
-    S.excStart=null;S.exceeded=false;setSpdBeep(false);_spiMode='';clearIcon('spd');
-    if(!S.nearCam)setAlarm(false);
+    S.excStart=null; S.exceeded=false;
+    setSpdBeep(false); _spiMode='';
+    clearIcon('spd');
+    if(!S.nearCam) setAlarm(false);
   }
 }
 
@@ -1895,8 +1919,22 @@ function drawDetGraph(log){
 ══════════════════════════════════════════════════════ */
 async function dlHistory(){const blob=new Blob([JSON.stringify(await loadTrips(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`speedsense_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
 function importHistory(evt){
-  const f=evt.target.files[0];if(!f)return;
-  const fr=new FileReader();fr.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error('Not an array');const ex=loadTrips(),ids=new Set(ex.map(t=>t.id));const merged=[...ex,...data.filter(t=>!ids.has(t.id))].sort((a,b)=>a.id-b.id);saveTrips(merged);updateBadge();alert(`Imported ${data.length} trips. Total: ${merged.length}`);if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}catch(e2){alert('Import failed: '+e2.message);}};
+  const f=evt.target.files[0]; if(!f) return;
+  const fr=new FileReader();
+  fr.onload=async(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data)) throw new Error('Not a valid SpeedSense export');
+      const ex=await loadTrips();
+      const ids=new Set(ex.map(t=>t.id));
+      const newTrips=data.filter(t=>t&&t.id&&!ids.has(t.id));
+      const merged=[...ex,...newTrips].sort((a,b)=>a.id-b.id);
+      await saveTrips(merged);
+      await updateBadge();
+      alert(`✓ Imported ${newTrips.length} new trip${newTrips.length===1?'':'s'}. Total: ${merged.length} trips.`);
+      if(document.getElementById('histScreen').classList.contains('active')) renderHistList();
+    }catch(e2){alert('Import failed: '+e2.message);}
+  };
   fr.readAsText(f);evt.target.value='';
 }
 async function clearHistory(){if(!confirm('Delete ALL trip history? Cannot be undone.'))return;await idbClear('trips').catch(()=>{});try{localStorage.removeItem(LS_KEY);}catch(e){}updateBadge();if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}
