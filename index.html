@@ -29,7 +29,7 @@ canvas{display:block}
 
 /* ══ START ══ */
 #startScreen{background:var(--bg);align-items:center;justify-content:center;
-  gap:14px;padding:24px 20px;overflow-y:auto}
+  gap:12px;padding:20px;overflow-y:auto}
 .logo{font-family:'Orbitron',monospace;font-size:clamp(22px,6vw,34px);
   font-weight:900;letter-spacing:4px;color:var(--accent);text-align:center}
 .logo span{color:var(--warn);font-size:clamp(9px,2.5vw,12px);display:block;
@@ -37,7 +37,6 @@ canvas{display:block}
 .globe-badge{background:var(--card);border:1px solid var(--border);border-radius:20px;
   padding:5px 14px;font-size:12px;color:var(--accent);display:flex;align-items:center;gap:5px}
 .info-text{color:var(--muted);font-size:13px;text-align:center;line-height:1.65}
-.info-text b{color:var(--text)}
 .start-btn{background:#00d4ff15;border:1.5px solid var(--accent);color:var(--accent);
   font-family:'Orbitron',monospace;font-size:15px;font-weight:700;letter-spacing:2px;
   padding:14px 46px;border-radius:50px;cursor:pointer;transition:all .2s;-webkit-appearance:none}
@@ -58,8 +57,8 @@ canvas{display:block}
 /* ══ RIDE ══ */
 #rideScreen{background:var(--bg)}
 #topBar{background:var(--surface);border-bottom:1px solid var(--border);
-  padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
-#topBar .L{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;min-width:0}
+  padding:5px 8px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+#topBar .L{display:flex;align-items:center;gap:5px;flex:1;flex-wrap:wrap;min-width:0}
 #topBar .R{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .gps-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
 .gps-dot.fix{background:var(--success);animation:bl 2s infinite}
@@ -81,12 +80,12 @@ canvas{display:block}
 .tbtn:active{background:var(--card)}
 .tbtn.end{border-color:var(--danger);color:var(--danger);padding:8px 18px;font-size:14px;border-width:1.5px;font-weight:800;letter-spacing:1px}
 
-/* Alert icons */
-#alertIcons{position:absolute;top:0;left:0;right:0;display:flex;gap:5px;
-  padding:5px 8px;pointer-events:none;z-index:8;flex-wrap:wrap}
+/* Alert icons — stacked neatly, no overlap */
+#alertIcons{position:absolute;top:0;left:0;right:0;display:flex;flex-direction:column;gap:3px;
+  padding:4px 8px;pointer-events:none;z-index:8;max-width:100%}
 .aicon{display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:18px;
   font-size:11px;font-weight:700;animation:pop .18s ease;pointer-events:auto;
-  transition:opacity .35s;flex-shrink:0}
+  transition:opacity .35s;flex-shrink:0;align-self:flex-start}
 .aicon.gone{opacity:0;pointer-events:none}
 @keyframes pop{from{transform:scale(.65);opacity:0}to{transform:scale(1);opacity:1}}
 .aicon.cam   {background:#ffd70020;border:1.5px solid var(--cam);   color:var(--cam)}
@@ -102,7 +101,7 @@ canvas{display:block}
   padding:3px 14px;border-radius:14px;display:none;z-index:5;white-space:nowrap;font-weight:600}
 
 #btmPanel{background:var(--surface);border-top:1px solid var(--border);
-  padding:7px 9px;display:flex;gap:5px;align-items:center;flex-shrink:0}
+  padding:6px 8px;display:flex;gap:5px;align-items:center;flex-shrink:0}
 .sc{flex:1;background:var(--card);border:1px solid var(--border);border-radius:9px;
   padding:5px 4px;text-align:center;min-width:0}
 .sc.tap{cursor:pointer}
@@ -154,21 +153,9 @@ canvas{display:block}
 .tech-card{background:var(--surface);border-radius:8px;padding:10px;border:1px solid var(--border)}
 .tech-card .tname{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px}
 .tech-card .tdesc{font-size:10px;color:var(--muted);line-height:1.45}
-.demo-btn{background:#ffd70015;border:1.5px solid var(--cam);color:var(--cam);
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;letter-spacing:1px;
-  padding:12px 28px;border-radius:30px;cursor:pointer;width:100%;-webkit-appearance:none}
-.demo-btn:active{background:#ffd70025}
-.sound-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sound-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;
-  padding:10px 8px;cursor:pointer;text-align:center;-webkit-appearance:none;
-  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;
-  display:flex;flex-direction:column;align-items:center;gap:4px}
-.sound-btn span:first-child{font-size:22px}
-.sound-btn.cam-s{border-color:var(--cam);color:var(--cam)}
-.sound-btn.spd-s{border-color:var(--danger);color:var(--danger)}
-.sound-btn.pol-s{border-color:var(--police);color:var(--police)}
-.sound-btn.alm-s{border-color:var(--warn);color:var(--warn)}
-.sound-btn:active{opacity:.7}
+
+/* ══ USER CAMERAS ══ */
+#ucamScreen{flex-direction:column}
 
 /* ══ HISTORY ══ */
 #histScreen{background:var(--bg);flex-direction:column}
@@ -179,9 +166,7 @@ canvas{display:block}
 #histList{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
 #histList::-webkit-scrollbar{width:3px}
 #histList::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.tcard{background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:12px;cursor:pointer;transition:border-color .12s}
-.tcard:active{border-color:var(--accent)}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
 .tch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
 .tct{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);font-weight:700}
 .tcd{font-size:10px;color:var(--muted)}
@@ -223,7 +208,8 @@ canvas{display:block}
 .osm-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--accent);
   text-decoration:none;padding:6px 12px;border:1px solid var(--accent);border-radius:6px;
   background:#00d4ff0a;margin-top:8px;font-family:'Rajdhani',sans-serif;font-weight:600}
-#mapWrap{width:100%;height:260px;border-radius:8px;margin-top:8px;
+/* Bigger map window */
+#mapWrap{width:100%;height:380px;border-radius:8px;margin-top:8px;
   border:1px solid var(--border);position:relative;overflow:hidden;display:block}
 #routeMap{position:absolute;inset:0;width:100%;height:100%}
 .mleg{position:absolute;bottom:6px;left:6px;background:#000000bb;border-radius:6px;
@@ -273,6 +259,32 @@ canvas{display:block}
 .gerr h3{color:var(--danger);font-family:'Orbitron',monospace;font-size:13px;margin-bottom:8px}
 .gerr p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:14px}
 
+/* ══ CAMERA ACTION SHEET ══ */
+#camSheet{position:absolute;bottom:0;left:0;right:0;z-index:30;
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.22,.68,0,1.2);
+  padding:0 10px 10px;pointer-events:none}
+#camSheet.show{transform:translateY(0);pointer-events:auto}
+.cam-sheet-inner{background:#0e111880;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1.5px solid #ffd70050;border-radius:20px;padding:14px 14px 16px;
+  box-shadow:0 -8px 40px #ffd70018}
+.cam-sheet-title{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cam-sheet-title .icon{font-size:22px;animation:camPulse 1s infinite}
+@keyframes camPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.1)}}
+.cam-sheet-title .txt{flex:1}
+.cam-sheet-title .txt b{color:var(--cam);font-family:'Orbitron',monospace;font-size:13px;font-weight:700;display:block;letter-spacing:1px}
+.cam-sheet-title .txt span{color:var(--muted);font-size:11px}
+.cam-sheet-title .dist{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:var(--cam);min-width:52px;text-align:right}
+.cam-btns{display:grid;grid-template-columns:1fr;gap:10px}
+.cam-action-btn{border-radius:14px;padding:18px 8px;font-family:'Orbitron',monospace;
+  font-size:15px;font-weight:700;letter-spacing:.5px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;border-width:1.5px;
+  border-style:solid;-webkit-appearance:none;transition:opacity .15s;line-height:1.2}
+.cam-action-btn:active{opacity:.75}
+.cam-action-btn .emo{font-size:32px;line-height:1}
+.cam-action-btn.ignore{background:#ff2d2d12;border-color:var(--danger);color:var(--danger)}
+.cam-action-btn .sub{font-size:10px;color:var(--muted);font-family:'Rajdhani',sans-serif;
+  font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-top:1px}
+
 /* Leaflet dark */
 .leaflet-container{background:#1a1d24!important}
 .leaflet-tile{filter:brightness(.65) saturate(.5) hue-rotate(185deg)}
@@ -293,16 +305,18 @@ canvas{display:block}
   <div class="bg-info" id="bgStatus">🔋 Background GPS: tap START to enable</div>
   <button class="start-btn" onclick="confirmStart()">START RIDE</button>
   <div class="start-row">
-    <button class="s-btn wn" onclick="openDemo()">🎮 DEMO + SOUNDS (15 scenes)</button>
+    <button class="s-btn wn" onclick="openDemo()">🎮 DEMO</button>
     <button class="s-btn ac" onclick="showScreen('howtoScreen')">📖 HOW TO USE</button>
   </div>
   <div class="start-row">
     <button class="s-btn ac" onclick="openHistory()">📋 HISTORY <span id="tripBadge">0 trips</span></button>
     <button class="s-btn ac" onclick="openUCamScreen()">📷 MY CAMERAS</button>
-    <button class="s-btn ac" onclick="dlHistory()">⬇ Export</button>
+  </div>
+  <div class="start-row">
+    <button class="s-btn ac" onclick="dlAllData()">⬇ Export All</button>
     <button class="s-btn" onclick="document.getElementById('importFile').click()">⬆ Import</button>
-    <input id="importFile" type="file" accept=".json" style="position:fixed;top:-9999px;left:-9999px" onchange="importHistory(event)">
-    <button class="s-btn dc" onclick="clearHistory()">🗑 Clear</button>
+    <input id="importFile" type="file" accept=".json" style="position:fixed;top:-9999px;left:-9999px" onchange="importAllData(event)">
+    <button class="s-btn dc" onclick="clearHistory()">🗑 Clear Trips</button>
   </div>
 </div>
 
@@ -313,7 +327,7 @@ canvas{display:block}
       <div class="gps-dot search" id="gpsDot"></div>
       <div class="ts">TIME <b id="tTime">00:00</b></div>
       <div class="ts">DIST <b id="tDist">0.0</b>km</div>
-      <div class="ts" style="max-width:96px;overflow:hidden;text-overflow:ellipsis">
+      <div class="ts" style="max-width:90px;overflow:hidden;text-overflow:ellipsis">
         <b id="tRoad" style="font-weight:600;color:var(--muted)">Locating…</b>
       </div>
       <div class="badge" id="tAcc">±—m</div>
@@ -330,7 +344,28 @@ canvas{display:block}
   <div id="mainView">
     <canvas id="speedCanvas"></canvas>
     <div id="stopPill">Stopped: <span id="stopVal">0:00</span> / 10:00</div>
-    <button id="camReportBtn" onclick="reportUserCamera()" style="position:absolute;bottom:72px;right:12px;background:#ffd70018;border:1.5px solid #ffd700;color:#ffd700;font-size:12px;font-family:'Rajdhani',sans-serif;font-weight:700;padding:7px 13px;border-radius:22px;cursor:pointer;z-index:6;display:flex;align-items:center;gap:5px;box-shadow:0 2px 10px #0006;">📷 Report Camera</button>
+    <!-- Small always-visible add camera button (top-right) for manual adds -->
+    <button onclick="reportUserCamera()" style="position:absolute;bottom:90px;right:14px;background:#ffd70022;border:1.5px solid #ffd700;color:#ffd700;font-size:15px;font-family:'Rajdhani',sans-serif;font-weight:700;padding:13px 20px;border-radius:24px;cursor:pointer;z-index:6;white-space:nowrap;box-shadow:0 4px 18px #ffd70030">📷 Add Camera</button>
+    <!-- Camera action sheet — slides up on camera alert -->
+    <div id="camSheet">
+      <div class="cam-sheet-inner">
+        <div class="cam-sheet-title">
+          <div class="icon">📷</div>
+          <div class="txt">
+            <b id="camSheetType">SPEED CAMERA</b>
+            <span id="camSheetRoad">—</span>
+          </div>
+          <div class="dist" id="camSheetDist">—m</div>
+        </div>
+        <div class="cam-btns">
+          <button class="cam-action-btn ignore" onclick="ignoreCurrentCamera()">
+            <div class="emo">🚫</div>
+            <div>IGNORE CAMERA</div>
+            <div class="sub">Skip this camera</div>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
   <div id="btmPanel">
     <div class="sc"><div class="lb">Limit</div><div class="vl c" id="dLimit">—</div></div>
@@ -370,189 +405,48 @@ canvas{display:block}
 <div id="howtoScreen" class="screen">
   <div id="howtoHdr">
     <h2>HOW TO USE</h2>
-    <button class="s-btn wn" style="font-size:12px" onclick="openDemo()">🎮 DEMO (15 scenes)</button>
     <button class="tbtn" onclick="showScreen('startScreen')">← BACK</button>
   </div>
   <div id="howtoBody">
-
     <div class="how-sec">
       <h3><span>🚀</span>GETTING STARTED</h3>
-      <div class="how-item">
-        <div class="how-icon ac">📍</div>
-        <div class="how-t"><b>Mount your phone</b>
-          <p>Use a windshield or dashboard mount. Keep the screen visible while driving safely. Grant location permission when prompted.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">▶</div>
-        <div class="how-t"><b>Press START RIDE</b>
-          <p>Confirm the dialog. GPS activates, the speedometer appears, and speed limit detection begins immediately.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🛑</div>
-        <div class="how-t"><b>End your ride</b>
-          <p>Tap END in the top bar or the END tile at bottom right. The trip is saved automatically. Auto-ends after 10 min stationary.</p></div>
-      </div>
+      <div class="how-item"><div class="how-icon ac">📍</div><div class="how-t"><b>Mount your phone</b><p>Use a windshield or dashboard mount. Grant location permission when prompted.</p></div></div>
+      <div class="how-item"><div class="how-icon ac">▶</div><div class="how-t"><b>Press START RIDE</b><p>GPS activates, speedometer appears, speed limit detection begins immediately.</p></div></div>
+      <div class="how-item"><div class="how-icon ac">🛑</div><div class="how-t"><b>End your ride</b><p>Tap END. Trip saved automatically. Auto-ends after 10 min stationary.</p></div></div>
     </div>
-
     <div class="how-sec">
-      <h3><span>🎯</span>SPEEDOMETER DISPLAY</h3>
-      <div class="how-item">
-        <div class="how-icon gr">🟢</div>
-        <div class="how-t"><b>Green arc = safe zone</b>
-          <p>The arc from 0 to the speed limit turns green. Your speed is safely within the limit.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon wn">🟠</div>
-        <div class="how-t"><b>Orange = over limit</b>
-          <p>Needle turns orange when you exceed the speed limit. A ⚡ alert icon appears. Reduce speed immediately.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon dc">🔴</div>
-        <div class="how-t"><b>Red = 20+ over limit</b>
-          <p>Critical zone. Pulsed beep sounds, ⚠ alert appears, and the alarm activates. You are significantly over the limit.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🔵</div>
-        <div class="how-t"><b>Speed limit badge (left)</b>
-          <p>The red-circle badge on the left of the dial shows the current road's speed limit — updates automatically as you change roads.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ca">📷</div>
-        <div class="how-t"><b>Camera badge (right)</b>
-          <p>Appears when a speed camera is within 250m. Flashes to draw attention. Alarm sounds if you are over the limit near the camera.</p></div>
-      </div>
+      <h3><span>🔔</span>SOUNDS</h3>
+      <div class="how-item"><div class="how-icon ca">📷</div><div class="how-t"><b>Camera within 100m</b><p>1 long beep when entering 100m radius. Repeats every 5 seconds until you pass. If already under speed limit — just 1 notification beep then silence.</p></div></div>
+      <div class="how-item"><div class="how-icon wn">⚡</div><div class="how-t"><b>1–9 km/h over limit</b><p>Short beep every 5 seconds.</p></div></div>
+      <div class="how-item"><div class="how-icon dc">⚠</div><div class="how-t"><b>10+ km/h over limit</b><p>Short beep every 3 seconds (more urgent).</p></div></div>
     </div>
-
     <div class="how-sec">
-      <h3><span>🔔</span>ALERT ICONS &amp; SOUNDS</h3>
-      <div class="how-item">
-        <div class="how-icon ca">📷</div>
-        <div class="how-t"><b>Yellow 📷 — Speed Camera</b>
-          <p>Single long descending tone (~750ms). Plays immediately when you enter 250 m of a camera, then repeats every 3 seconds until you pass it. Stops the instant you exit the 250 m radius.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon po">🚔</div>
-        <div class="how-t"><b>Purple 🚔 — Police Radar</b>
-          <p>Three-note siren (A4→E5→C5). Detected from OSM police enforcement nodes. Repeats every 5 seconds while within range.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon wn">⚡</div>
-        <div class="how-t"><b>Orange ⚡ — Over Limit</b>
-          <p>Double square-wave burst. Fires once when you exceed the limit for 1.5 seconds. Does not repeat unless cleared.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon dc">⚠</div>
-        <div class="how-t"><b>Red ⚠ — 20+ Over Limit</b>
-          <p>Single beep every 5 seconds when 1–9 km/h over the limit. Single beep every 1 second when 10+ km/h over the limit, plus continuous alarm warble. All sounds stop the moment you drop below the limit.</p></div>
-      </div>
-      <div class="sound-grid" style="margin-top:8px">
-        <button class="sound-btn cam-s" onclick="testSound('cam')"><span>📷</span><span>Camera Chime</span></button>
-        <button class="sound-btn spd-s" onclick="testSound('spd')"><span>⚠</span><span>Speed Alert</span></button>
-        <button class="sound-btn pol-s" onclick="testSound('pol')"><span>🚔</span><span>Police Siren</span></button>
-        <button class="sound-btn alm-s" onclick="testSound('alm')"><span>🔔</span><span>Alarm (3s)</span></button>
-        <button class="sound-btn spd-s" onclick="setSpdBeep('severe');setTimeout(()=>setSpdBeep(false),3000)" style="border-color:#ff6b00;color:#ff6b00"><span>⚡</span><span>3s Urgent Beep</span></button>
-      </div>
+      <h3><span>📷</span>CAMERAS</h3>
+      <div class="how-item"><div class="how-icon ca">📍</div><div class="how-t"><b>Report a camera</b><p>Tap "📷 Add Camera" during any ride to save GPS coordinates.</p></div></div>
+      <div class="how-item"><div class="how-icon ca">💾</div><div class="how-t"><b>Stored permanently</b><p>Saved in browser IndexedDB. Survives restarts. Exported with all data.</p></div></div>
     </div>
-
-    <div class="how-sec">
-      <h3><span>🌐</span>BACKGROUND TRACKING</h3>
-      <div class="how-item">
-        <div class="how-icon ac">🔋</div>
-        <div class="how-t"><b>Screen-off GPS</b>
-          <p>SpeedSense uses a Service Worker + keep-alive ping to continue monitoring even when your screen turns off. GPS tracking, violation logging, and camera alerts all continue in the background.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🔔</div>
-        <div class="how-t"><b>Background notifications</b>
-          <p>Allow notifications when prompted. Speed limit violations and camera alerts will show as phone notifications even with the screen off.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon wn">⚠</div>
-        <div class="how-t"><b>iOS limitation</b>
-          <p>iOS Safari limits background execution. For best results on iPhone, keep the app in the foreground or install as a Home Screen app via Share → Add to Home Screen.</p></div>
-      </div>
-    </div>
-
-
-    <div class="how-sec">
-      <h3><span>📷</span>REPORT A CAMERA</h3>
-      <div class="how-item"><div class="how-icon ca">📍</div><div class="how-t"><b>Tap "📷 Report Camera"</b>
-        <p>During any ride, tap the yellow "📷 Report Camera" button on the speedometer screen to save the exact GPS coordinates of a camera the app missed.</p></div></div>
-      <div class="how-item"><div class="how-icon ca">💾</div><div class="how-t"><b>Stored in IndexedDB</b>
-        <p>Your reported cameras are saved permanently in your browser's IndexedDB. They survive page refreshes and app restarts.</p></div></div>
-      <div class="how-item"><div class="how-icon ca">🔁</div><div class="how-t"><b>Active on next pass</b>
-        <p>The next time you drive within 250 m of a saved location, SpeedSense plays the camera chime — just like an OSM camera.</p></div></div>
-      <div class="how-item"><div class="how-icon ac">📋</div><div class="how-t"><b>Manage cameras</b>
-        <p>Tap MY CAMERAS on the home screen to view and delete your reported locations.</p></div></div>
-    </div>
-
-    <div class="how-sec">
-      <h3><span>📊</span>SPEED LIMITS (AUTO)</h3>
-      <div class="how-item">
-        <div class="how-icon ac">🗺</div>
-        <div class="how-t"><b>OpenStreetMap data</b>
-          <p>Speed limits are read from OSM road tags via Nominatim reverse geocoding every 7 seconds. Covers all mapped roads worldwide.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon gr">🌍</div>
-        <div class="how-t"><b>Country fallback</b>
-          <p>When OSM has no tag, SpeedSense uses a built-in database of 40+ country speed limits by road class (motorway, primary, residential, etc.).</p></div>
-      </div>
-    </div>
-
-    <div class="how-sec">
-      <h3><span>📋</span>TRIP HISTORY &amp; SHARING</h3>
-      <div class="how-item">
-        <div class="how-icon ac">💾</div>
-        <div class="how-t"><b>Unlimited storage</b>
-          <p>All trips stored in IndexedDB (primary) with localStorage backup. Data persists through page refreshes and browser restarts. Export to JSON to back up across devices.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">📤</div>
-        <div class="how-t"><b>Share a trip</b>
-          <p>Each trip can be shared as a self-contained HTML report page with map, speed graph, violations, and camera log — all embedded in one file.</p></div>
-      </div>
-      <div class="how-item">
-        <div class="how-icon ac">🗺</div>
-        <div class="how-t"><b>Route map</b>
-          <p>Tap any trip to see the colour-coded route on an embedded OpenStreetMap. Blue = safe, orange = over limit, red = 20+ over.</p></div>
-      </div>
-    </div>
-
     <div class="how-sec">
       <h3><span>⚙️</span>TECHNOLOGY</h3>
       <div class="tech-grid">
-        <div class="tech-card"><div class="tname">Web GPS API</div>
-          <div class="tdesc">navigator.geolocation.watchPosition with high accuracy mode. Real m/s speed from device sensors.</div></div>
-        <div class="tech-card"><div class="tname">Nominatim OSM</div>
-          <div class="tdesc">Free reverse geocoding from OpenStreetMap. Extracts road name, postcode, country, and maxspeed tags.</div></div>
-        <div class="tech-card"><div class="tname">Overpass API</div>
-          <div class="tdesc">Queries OSM for speed cameras, enforcement nodes, and police positions within dynamic radius of your location.</div></div>
-        <div class="tech-card"><div class="tname">Web Audio API</div>
-          <div class="tdesc">PCM buffer synthesis — no audio files needed. Heartbeat keeps iOS AudioContext alive during long drives.</div></div>
-        <div class="tech-card"><div class="tname">Screen Wake Lock</div>
-          <div class="tdesc">navigator.wakeLock.request('screen') keeps display on. Falls back to looping video on iOS.</div></div>
-        <div class="tech-card"><div class="tname">Service Worker</div>
-          <div class="tdesc">Background keep-alive ping. Push notifications for alerts when screen is off. Periodic GPS relay.</div></div>
-        <div class="tech-card"><div class="tname">Leaflet.js</div>
-          <div class="tdesc">Interactive OSM maps in trip detail. Colour-coded polylines, violation and camera markers.</div></div>
-        <div class="tech-card"><div class="tname">Canvas 2D</div>
-          <div class="tdesc">Speedometer arc, needle, live graph — all drawn at device pixel ratio for crisp retina rendering.</div></div>
+        <div class="tech-card"><div class="tname">Web GPS API</div><div class="tdesc">watchPosition high accuracy. Adaptive Kalman filter for smooth speed.</div></div>
+        <div class="tech-card"><div class="tname">Nominatim OSM</div><div class="tdesc">Free reverse geocoding. Road name, country, maxspeed tags.</div></div>
+        <div class="tech-card"><div class="tname">Overpass API</div><div class="tdesc">Speed cameras within 100–900m depending on road type.</div></div>
+        <div class="tech-card"><div class="tname">IndexedDB</div><div class="tdesc">All trips and user cameras stored permanently in browser cache.</div></div>
+        <div class="tech-card"><div class="tname">Service Worker</div><div class="tdesc">Background keep-alive. Push notifications when screen off.</div></div>
+        <div class="tech-card"><div class="tname">Leaflet.js</div><div class="tdesc">Interactive route maps with colour-coded speed lines.</div></div>
       </div>
     </div>
-
   </div>
 </div>
 
-
 <!-- ══ USER CAMERAS ══ -->
-<div id="ucamScreen" class="screen" style="flex-direction:column">
+<div id="ucamScreen" class="screen" style="flex-direction:column;background:var(--bg)">
   <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0">
     <span style="font-family:'Orbitron',monospace;font-size:14px;color:var(--cam);font-weight:700;flex:1;letter-spacing:2px">MY CAMERAS</span>
     <button class="tbtn" onclick="showScreen('startScreen')">← BACK</button>
   </div>
   <div style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px" id="ucamList">
-    <div style="color:var(--muted);text-align:center;margin-top:40px;font-size:14px">No cameras reported yet.<br>Tap "📷 Report Camera" while riding.</div>
+    <div style="color:var(--muted);text-align:center;margin-top:40px;font-size:14px">No cameras reported yet.</div>
   </div>
 </div>
 
@@ -560,7 +454,7 @@ canvas{display:block}
 <div id="histScreen" class="screen">
   <div id="histHdr">
     <h2>TRIP HISTORY</h2>
-    <button class="s-btn ac" style="font-size:11px" onclick="dlHistory()">⬇ Export</button>
+    <button class="s-btn ac" style="font-size:11px" onclick="dlAllData()">⬇ Export</button>
     <button class="tbtn" onclick="showScreen('startScreen')">← BACK</button>
   </div>
   <div id="histList"><div class="no-trips"><span style="font-size:26px">🚗</span><span>No trips yet</span></div></div>
@@ -604,7 +498,7 @@ canvas{display:block}
 'use strict';
 
 /* ══════════════════════════════════════════════════════
-   COUNTRY SPEED LIMIT DATABASE (40+ countries)
+   COUNTRY SPEED LIMIT DATABASE
 ══════════════════════════════════════════════════════ */
 const CLIM={
   DEFAULT:{mw:120,tk:100,pr:80,sc:60,res:30,urb:50,rur:80},
@@ -649,7 +543,6 @@ const CLIM={
   BR:{mw:120,tk:110,pr:80,sc:60,res:30,urb:60,rur:80},
   AR:{mw:130,tk:130,pr:110,sc:80,res:40,urb:60,rur:110},
   TR:{mw:120,tk:110,pr:90,sc:90,res:30,urb:50,rur:90},
-  AE:{mw:160,tk:140,pr:120,sc:80,res:40,urb:60,rur:100},
 };
 const R2K={motorway:'mw',motorway_link:'mw',trunk:'tk',trunk_link:'tk',
   primary:'pr',primary_link:'pr',secondary:'sc',secondary_link:'sc',
@@ -658,31 +551,26 @@ const R2K={motorway:'mw',motorway_link:'mw',trunk:'tk',trunk_link:'tk',
 function fallbackLimit(cc,rt){const c=CLIM[cc]||CLIM.DEFAULT;return c[R2K[rt]||'urb']||c.urb||50;}
 
 /* ══════════════════════════════════════════════════════
-   STORAGE
+   STORAGE — IndexedDB primary, localStorage backup
 ══════════════════════════════════════════════════════ */
 const LS_KEY='speedsense_v6';
 let _idb=null;
-function openIDB(){return new Promise((res,rej)=>{if(_idb){res(_idb);return;}const req=indexedDB.open('speedsense',3);req.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains('trips'))db.createObjectStore('trips',{keyPath:'id'});if(!db.objectStoreNames.contains('ucams'))db.createObjectStore('ucams',{keyPath:'id',autoIncrement:true});};req.onsuccess=e=>{_idb=e.target.result;res(_idb);};req.onerror=()=>rej(req.error);});}
+function openIDB(){return new Promise((res,rej)=>{if(_idb){res(_idb);return;}const req=indexedDB.open('speedsense',4);req.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains('trips'))db.createObjectStore('trips',{keyPath:'id'});if(!db.objectStoreNames.contains('ucams'))db.createObjectStore('ucams',{keyPath:'id',autoIncrement:true});};req.onsuccess=e=>{_idb=e.target.result;res(_idb);};req.onerror=()=>rej(req.error);});}
 async function idbGetAll(store){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly'),r=tx.objectStore(store).getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
 async function idbPut(store,obj){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).put(obj);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
 async function idbDelete(store,key){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
 async function idbClear(store){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite'),r=tx.objectStore(store).clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
 async function saveTrips(trips){
-  // Write to localStorage
   try{localStorage.setItem(LS_KEY,JSON.stringify(trips));}catch(e){}
-  // Write all to IDB (put overwrites by id key)
   try{
     const db=await openIDB();
-    await new Promise((res,rej)=>{
-      const tx=db.transaction('trips','readwrite');
-      tx.oncomplete=res; tx.onerror=()=>rej(tx.error);
-      tx.objectStore('trips').clear();          // clear old data first
-      trips.forEach(t=>tx.objectStore('trips').put(t));
-    });
+    await new Promise((res,rej)=>{const tx=db.transaction('trips','readwrite');tx.oncomplete=res;tx.onerror=()=>rej(tx.error);tx.objectStore('trips').clear();trips.forEach(t=>tx.objectStore('trips').put(t));});
   }catch(e){}
 }
-async function loadTrips(){try{const rows=await idbGetAll('trips');if(rows&&rows.length>0){try{localStorage.setItem(LS_KEY,JSON.stringify(rows));}catch(e){}return rows.sort((a,b)=>a.id-b.id);}
-}catch(e){}try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}}
+async function loadTrips(){
+  try{const rows=await idbGetAll('trips');if(rows&&rows.length>0){try{localStorage.setItem(LS_KEY,JSON.stringify(rows));}catch(e){}return rows.sort((a,b)=>a.id-b.id);}}catch(e){}
+  try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}
+}
 async function appendTrip(t){await idbPut('trips',t).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]');a.push(t);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
 async function deleteTripById(id){await idbDelete('trips',id).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]').filter(t=>t.id!==id);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
 async function updateBadge(){const trips=await loadTrips();const el=document.getElementById('tripBadge');if(el)el.textContent=trips.length+' trip'+(trips.length===1?'':'s');}
@@ -691,164 +579,123 @@ async function addUCam(cam){await idbPut('ucams',cam).catch(()=>{});}
 async function delUCam(id){await idbDelete('ucams',id).catch(()=>{});}
 
 /* ══════════════════════════════════════════════════════
+   EXPORT / IMPORT ALL DATA (trips + cameras)
+══════════════════════════════════════════════════════ */
+async function dlAllData(){
+  const trips=await loadTrips();
+  const ucams=await loadUCams();
+  const blob=new Blob([JSON.stringify({version:2,trips,ucams},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`speedsense_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);
+}
+function importAllData(evt){
+  const f=evt.target.files[0];if(!f)return;
+  const fr=new FileReader();
+  fr.onload=async(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      // Support both old format (array of trips) and new format {version,trips,ucams}
+      const newTrips=Array.isArray(data)?data:(data.trips||[]);
+      const newCams=Array.isArray(data)?[]:(data.ucams||[]);
+      const exTrips=await loadTrips();
+      const exIds=new Set(exTrips.map(t=>t.id));
+      const addedTrips=newTrips.filter(t=>t&&t.id&&!exIds.has(t.id));
+      const merged=[...exTrips,...addedTrips].sort((a,b)=>a.id-b.id);
+      await saveTrips(merged);
+      // Import cameras (by id)
+      const exCams=await loadUCams();
+      const exCamIds=new Set(exCams.map(c=>c.id));
+      for(const c of newCams){if(c&&c.id&&!exCamIds.has(c.id))await addUCam(c);}
+      await updateBadge();
+      alert(`✓ Imported ${addedTrips.length} trip(s) and ${newCams.length} camera(s).`);
+      if(document.getElementById('histScreen').classList.contains('active'))renderHistList();
+    }catch(e2){alert('Import failed: '+e2.message);}
+  };
+  fr.readAsText(f);evt.target.value='';
+}
+async function clearHistory(){if(!confirm('Delete ALL trip history? Cannot be undone.'))return;await idbClear('trips').catch(()=>{});try{localStorage.removeItem(LS_KEY);}catch(e){}updateBadge();if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}
+
+/* ══════════════════════════════════════════════════════
    SERVICE WORKER + BACKGROUND GPS
 ══════════════════════════════════════════════════════ */
-let _sw=null, _bgPing=null, _notifGranted=false;
+let _sw=null,_bgPing=null,_notifGranted=false;
 
 async function initSW(){
-  if(!('serviceWorker' in navigator)) return;
+  if(!('serviceWorker' in navigator))return;
   try{
-    // Inline SW as blob URL so single-file works without a server
     const swCode=`
-const CACHE='ss-v5';
+const CACHE='ss-v6';
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(clients.claim()));
 self.addEventListener('message',async e=>{
-  if(!e.data) return;
-  if(e.data.type==='KEEP_ALIVE'){
-    try{e.source&&e.source.postMessage({type:'ALIVE',ts:Date.now()});}catch(x){}
-  }
+  if(!e.data)return;
+  if(e.data.type==='KEEP_ALIVE'){try{e.source&&e.source.postMessage({type:'ALIVE',ts:Date.now()});}catch(x){}}
   if(e.data.type==='SPEED_ALERT'&&Notification.permission==='granted'){
-    await self.registration.showNotification('⚠ SpeedSense',{
-      body:e.data.msg,tag:'spd',renotify:true,silent:false,
-      vibrate:[200,100,200,100,400]
-    });
+    await self.registration.showNotification('⚠ SpeedSense',{body:e.data.msg,tag:'spd',renotify:true,silent:false,vibrate:[200,100,200,100,400]});
   }
   if(e.data.type==='CAM_ALERT'&&Notification.permission==='granted'){
-    await self.registration.showNotification('📷 Camera Ahead',{
-      body:e.data.msg,tag:'cam',renotify:true,silent:false,
-      vibrate:[100,50,100]
-    });
-  }
-  if(e.data.type==='BG_GPS'){
-    const cls=await clients.matchAll({type:'window'});
-    cls.forEach(c=>c.postMessage({type:'BG_TICK',ts:Date.now()}));
+    await self.registration.showNotification('📷 Camera Ahead',{body:e.data.msg,tag:'cam',renotify:true,silent:false,vibrate:[100,50,100]});
   }
 });
-self.addEventListener('notificationclick',e=>{
-  e.notification.close();
-  e.waitUntil(clients.openWindow('/'));
-});`;
+self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.openWindow('/'));});`;
     const blob=new Blob([swCode],{type:'application/javascript'});
     const url=URL.createObjectURL(blob);
     const reg=await navigator.serviceWorker.register(url,{scope:'/'});
     _sw=reg;
-    navigator.serviceWorker.addEventListener('message',onSWMsg);
+    navigator.serviceWorker.addEventListener('message',()=>{});
     document.getElementById('bgStatus').textContent='🟢 Background GPS: Service Worker active';
-  }catch(e){
-    document.getElementById('bgStatus').textContent='⚠ Background: Limited (no SW support)';
-  }
-  // Request notifications
+  }catch(e){document.getElementById('bgStatus').textContent='⚠ Background: Limited mode';}
   if('Notification' in window){
     const p=await Notification.requestPermission().catch(()=>'denied');
     _notifGranted=p==='granted';
-    if(_notifGranted) document.getElementById('bgStatus').textContent='🟢 Background GPS + Notifications active';
+    if(_notifGranted)document.getElementById('bgStatus').textContent='🟢 Background GPS + Notifications active';
   }
 }
 
-function onSWMsg(e){
-  if(e.data&&e.data.type==='BG_TICK'&&rideActive){
-    // SW is alive — GPS watchPosition continues regardless
-  }
-}
+function startBGPing(){if(_bgPing)return;_bgPing=setInterval(()=>{if(!_sw||!_sw.active)return;_sw.active.postMessage({type:'KEEP_ALIVE'});},20000);document.getElementById('bgBadge').style.display='';}
+function stopBGPing(){if(_bgPing){clearInterval(_bgPing);_bgPing=null;}document.getElementById('bgBadge').style.display='none';}
+function sendSWAlert(type,data){if(!_sw||!_sw.active)return;_sw.active.postMessage({type,msg:data});}
 
-function startBGPing(){
-  if(_bgPing) return;
-  _bgPing=setInterval(()=>{
-    if(!_sw||!_sw.active) return;
-    _sw.active.postMessage({type:'KEEP_ALIVE'});
-  },20000);
-  document.getElementById('bgBadge').style.display='';
-}
-function stopBGPing(){if(_bgPing){clearInterval(_bgPing);_bgPing=null;} document.getElementById('bgBadge').style.display='none';}
-
-function sendSWAlert(type,data){
-  if(!_sw||!_sw.active) return;
-  _sw.active.postMessage({type,msg:data});
-}
-
-/* Keep GPS running when screen turns off — visibility API */
 document.addEventListener('visibilitychange',()=>{
   if(rideActive){
-    if(document.visibilityState==='hidden'){
-      // Screen turned off — GPS watchPosition continues, SW keeps things alive
-      startBGPing();
-    } else {
-      unlockAudio(); reqWake();
-    }
+    if(document.visibilityState==='hidden')startBGPing();
+    else{unlockAudio();reqWake();}
   }
 });
 
 /* ══════════════════════════════════════════════════════
-   AUDIO ENGINE
+   AUDIO ENGINE — only 2 sounds: short beep, long beep
 ══════════════════════════════════════════════════════ */
 let _ac=null,_buf=null,_hb=null;
 function AC(){if(!_ac||_ac.state==='closed')_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
-function mkBuf(freq,dur,wave,vol){
+function mkTone(freq,dur,vol=1.0){
   try{
     const ctx=AC(),sr=ctx.sampleRate,n=Math.ceil(sr*dur);
     const b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);
-    const atk=Math.ceil(sr*.015),rel=Math.ceil(sr*.04);
+    const atk=Math.ceil(sr*.012),rel=Math.ceil(sr*.04);
     for(let i=0;i<n;i++){
-      const t=i/sr;let s=0;
-      if(wave==='sin')s=Math.sin(2*Math.PI*freq*t);
-      else if(wave==='sq')s=Math.sign(Math.sin(2*Math.PI*freq*t));
-      else if(wave==='saw')s=2*(t*freq-Math.floor(.5+t*freq));
-      else if(wave==='tri')s=2*Math.abs(2*(t*freq-Math.floor(t*freq+.5)))-1;
-      const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1;
-      d[i]=s*vol*env;
+      const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1.0;
+      d[i]=Math.sin(2*Math.PI*freq*(i/sr))*vol*env;
     }
     return b;
   }catch(e){return null;}
 }
 function buildBufs(){
   if(_buf)return;
-  try{
-    _buf={
-      /* Speed beep — short sharp blip */
-      sp: mkBuf(880,.12,'sq',.74),
-      /* Speed violation onset — double hit */
-      sa: mkBuf(660,.16,'sq',.82), sb: mkBuf(550,.16,'sq',.76),
-      /* Camera long beep — smooth sine descend, 750ms */
-      cl: mkBuf(1200,.75,'sin',.92),
-      /* Police long beep — tri wave, 750ms */
-      pl: mkBuf(660,.75,'tri',.90),
-      /* Alarm warble */
-      aa: mkBuf(740,.11,'saw',.60), ab: mkBuf(620,.11,'saw',.54),
-    };
-  }catch(e){_buf=null;}
+  try{_buf={short:mkTone(880,.12,1.0),long:mkTone(950,.65,1.0)};}catch(e){_buf=null;}
 }
-function play(b,delay=0){
+function playBuf(b){
   if(!b)return;
   const ctx=AC();
-  const doPlay=()=>{
-    try{
-      if(!b)return;
-      const src=ctx.createBufferSource();
-      const g=ctx.createGain();
-      // Small attack ramp prevents click artifacts
-      g.gain.setValueAtTime(0,ctx.currentTime+delay);
-      g.gain.linearRampToValueAtTime(1,ctx.currentTime+delay+0.005);
-      src.buffer=b;src.connect(g);g.connect(ctx.destination);
-      src.start(ctx.currentTime+delay);
-    }catch(e){}
-  };
-  if(ctx.state==='running'){doPlay();}
-  else{ctx.resume().then(doPlay).catch(()=>{});}
+  const doPlay=()=>{try{const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();}catch(e){}};
+  if(ctx.state==='running')doPlay();
+  else ctx.resume().then(doPlay).catch(()=>{});
 }
 function unlockAudio(){
   try{
     const ctx=AC();
-    const resume=()=>{
-      _buf=null; buildBufs();
-      // Play a 0-gain buffer to fully unlock on iOS
-      try{
-        const b=ctx.createBuffer(1,1,ctx.sampleRate);
-        const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();
-      }catch(e){}
-    };
-    if(ctx.state==='suspended') ctx.resume().then(resume).catch(()=>{});
-    else resume();
+    const resume=()=>{_buf=null;buildBufs();try{const b=ctx.createBuffer(1,1,ctx.sampleRate);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();}catch(e){}};
+    if(ctx.state==='suspended')ctx.resume().then(resume).catch(()=>{});else resume();
   }catch(e){}
 }
 function startHB(){
@@ -856,81 +703,64 @@ function startHB(){
   _hb=setInterval(()=>{
     try{
       const ctx=AC();
-      if(ctx.state==='suspended'){
-        ctx.resume().then(()=>{_buf=null;buildBufs();});
-        return;
-      }
-      if(!_buf) buildBufs();
-      // Keep iOS audio session alive with a silent buffer every 15s
-      const b=ctx.createBuffer(1,1,ctx.sampleRate);
-      const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();
-    }catch(e){_buf=null;} // force rebuild on next play
+      if(ctx.state==='suspended'){ctx.resume().then(()=>{_buf=null;buildBufs();});return;}
+      if(!_buf)buildBufs();
+      const b=ctx.createBuffer(1,1,ctx.sampleRate);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();
+    }catch(e){_buf=null;}
   },15000);
 }
 function stopHB(){if(_hb){clearInterval(_hb);_hb=null;}}
 
-/* Long-tone helpers for camera and police */
-function camChime(){buildBufs();if(!_buf)return;play(_buf.cl);}
-function spdBurst(){buildBufs();if(!_buf)return;play(_buf.sa,0);play(_buf.sb,.22);}
-function policeWail(){buildBufs();if(!_buf)return;play(_buf.pl);}
-let _spi=null,_ali=null,_cami=null,_alis=0,_spiMode='';
-
+/* Speed beep interval */
+let _spi=null,_spiMode='';
 /*
-  setSpdBeep('mild')   → 1 short beep every 5 s  (1–10 km/h over limit)
-  setSpdBeep('severe') → 1 short beep every 1 s  (10+ km/h over limit)
+  setSpdBeep('mild')   → short beep every 5s  (1–9 km/h over)
+  setSpdBeep('severe') → short beep every 3s  (10+ km/h over)
   setSpdBeep(false)    → stop
 */
 function setSpdBeep(mode){
-  if(mode&&_spi&&_spiMode===mode) return;   // already in this mode
+  if(mode&&_spi&&_spiMode===mode)return;
   if(_spi){clearInterval(_spi);_spi=null;_spiMode='';}
-  if(!mode) return;
-  buildBufs(); if(!_buf) return;
+  if(!mode)return;
+  buildBufs();if(!_buf)return;
   _spiMode=mode;
-  play(_buf.sp);  // immediate first beep
-  const ms = mode==='severe' ? 1000 : 5000;
-  _spi=setInterval(()=>{ if(_buf) play(_buf.sp); }, ms);
+  playBuf(_buf.short); // immediate
+  const ms=mode==='severe'?3000:5000;
+  _spi=setInterval(()=>{if(_buf)playBuf(_buf.short);},ms);
 }
 
-/* Long camera beep every 3 s */
-function setCamBeep(on){
-  if(on&&!_cami){ buildBufs(); camChime(); _cami=setInterval(()=>{ if(_buf) camChime(); },3000); }
-  else if(!on&&_cami){ clearInterval(_cami); _cami=null; }
-}
-
-/* Long police beep every 3 s */
-function setPolicBeep(on){
-  if(on&&!_cami){ buildBufs(); policeWail(); _cami=setInterval(()=>{ if(_buf) policeWail(); },3000); }
-  else if(!on&&_cami){ clearInterval(_cami); _cami=null; }
-}
-
-function setAlarm(on){
-  if(on&&!_ali){buildBufs();_alis=0;_ali=setInterval(()=>{if(!_buf)return;_alis++;play(_alis%2?_buf.aa:_buf.ab);},550);}
-  else if(!on&&_ali){clearInterval(_ali);_ali=null;}
-}
-
-// Unlock audio on first gesture (once per event type)
-['touchstart','pointerdown','mousedown'].forEach(ev=>
-  document.addEventListener(ev,()=>{unlockAudio();startHB();},{once:true,passive:true}));
-// Also unlock on visibility change (returning from lock screen)
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible') unlockAudio();
-});
-
-function testSound(t){
-  unlockAudio();buildBufs();if(!_buf)return;
-  if(t==='cam'){
-    camChime(); setTimeout(camChime,3000);          // long beep × 2 @ 3 s
-  }else if(t==='spd'){
-    setSpdBeep('mild');                             // 5 s mild beep
-    setTimeout(()=>setSpdBeep(false),6000);
-  }else if(t==='pol'){
-    policeWail(); setTimeout(policeWail,3000);      // long beep × 2 @ 3 s
-  }else if(t==='alm'){
-    setSpdBeep('severe');                           // 1 s severe beep + alarm
-    setAlarm(true);
-    setTimeout(()=>{ setSpdBeep(false); setAlarm(false); },4000);
+/* Camera long beep — enters range: 1 long beep + repeat every 5s if over limit */
+let _cami=null,_camBeepMode=false;
+function setCamBeep(on,overLimit){
+  if(!on){
+    if(_cami){clearInterval(_cami);_cami=null;}
+    _camBeepMode=false;
+    return;
+  }
+  if(!_camBeepMode){
+    _camBeepMode=true;
+    buildBufs();
+    playBuf(_buf&&_buf.long); // always 1 long beep on entry
+    if(overLimit){
+      // Repeat every 5s while over limit near camera
+      _cami=setInterval(()=>{if(_buf)playBuf(_buf.long);},5000);
+    }
+    // If not over limit: only 1 notification beep, no repeat
   }
 }
+// Update repeating based on current speed/limit state
+function updateCamBeep(overLimit){
+  if(!_camBeepMode)return;
+  if(overLimit&&!_cami){
+    _cami=setInterval(()=>{if(_buf)playBuf(_buf.long);},5000);
+  } else if(!overLimit&&_cami){
+    clearInterval(_cami);_cami=null;
+  }
+}
+
+['touchstart','pointerdown','mousedown'].forEach(ev=>
+  document.addEventListener(ev,()=>{unlockAudio();startHB();},{once:true,passive:true}));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')unlockAudio();});
 
 /* ══════════════════════════════════════════════════════
    WAKE LOCK
@@ -938,273 +768,137 @@ function testSound(t){
 let _wl=null,_ns=null;
 async function reqWake(){
   if('wakeLock' in navigator){try{_wl=await navigator.wakeLock.request('screen');_wl.addEventListener('release',()=>setWB(false));setWB(true);return;}catch(e){}}
-  try{_ns=document.createElement('video');Object.assign(_ns,{playsinline:true,muted:true,loop:true,src:'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMQ=='});
-  _ns.style.cssText='position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:.01;pointer-events:none';document.body.appendChild(_ns);await _ns.play();setWB(true);}catch(e){setWB(false);}
+  try{_ns=document.createElement('video');Object.assign(_ns,{playsinline:true,muted:true,loop:true,src:'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMQ=='});_ns.style.cssText='position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:.01;pointer-events:none';document.body.appendChild(_ns);await _ns.play();setWB(true);}catch(e){setWB(false);}
 }
 function relWake(){if(_wl){_wl.release().catch(()=>{});_wl=null;}if(_ns){_ns.pause();_ns.remove();_ns=null;}setWB(false);}
 function setWB(on){const b=document.getElementById('wakeBadge');if(!b)return;b.textContent=on?'ON':'DIM';b.className='badge wake'+(on?'':' off');}
 document.addEventListener('visibilitychange',()=>{if(rideActive&&document.visibilityState==='visible')reqWake();});
 
 /* ══════════════════════════════════════════════════════
-   DEMO MODE — fully wired to all v6 sound settings
-   Each step shows a specific feature with correct sound behaviour:
-   • Camera:  long beep (setCamBeep) every 5 s while in range
-   • Police:  long beep (setPolicBeep) every 5 s while in range
-   • 1–9 over:   setSpdBeep('mild')   every 5 s, no alarm
-   • 10+ over:  setSpdBeep('severe')  every 1 s + setAlarm
-   • Back to safe: all sounds stop cleanly
-   END button or auto-finish → back to home, no trip saved
+   DEMO MODE
 ══════════════════════════════════════════════════════ */
 let demoActive=false,demoTmr=null,demoStep=0;
 
-/*
-  Each step:
-    spd  – displayed speed
-    lim  – speed limit shown in badge
-    road – road name in top bar
-    acc  – GPS accuracy shown (metres)
-    cam  – true = speed camera within 250m (long beep every 5s)
-    pol  – true = police radar within 250m (long beep every 5s)
-    dur  – ms before next step
-    note – shown as info icon (optional)
-*/
 const DEMO_SCRIPT=[
-  // ── Scene 1: Start, GPS lock
-  {spd:0,  lim:50, road:'Orchard Rd, Singapore', acc:8,  cam:false,pol:false, dur:1800,
-   note:'🛰 GPS locked · Speed limit detected from OpenStreetMap'},
-
-  // ── Scene 2: Driving normally, under limit → green
-  {spd:32, lim:50, road:'Orchard Rd, Singapore', acc:6,  cam:false,pol:false, dur:1600,
-   note:null},
-
-  // ── Scene 3: Speed approaching limit → still green
-  {spd:48, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:false,pol:false, dur:1600,
-   note:null},
-
-  // ── Scene 4: CAMERA AHEAD — long beep fires, repeats every 5 s
-  {spd:52, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:true, pol:false, dur:5500,
-   note:'📷 Camera 180m — long beep every 5 s · Alarm if over limit'},
-
-  // ── Scene 5: Slowed for camera → alarm stops
-  {spd:44, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:false,pol:false, dur:1600,
-   note:'✅ Slowed down · Camera passed · Alarm off'},
-
-  // ── Scene 6: Road change → limit updates to 60
-  {spd:55, lim:60, road:'ECP Expressway',         acc:9,  cam:false,pol:false, dur:1600,
-   note:'🔽 Speed limit changed to 60 km/h'},
-
-  // ── Scene 7: 1–20 over limit → orange, burst + 3-second beep
-  {spd:72, lim:60, road:'ECP Expressway',         acc:8,  cam:false,pol:false, dur:4000,
-   note:'⚡ 12 km/h over · beep every 5 s'},
-
-  // ── Scene 8: >20 over limit → red, burst + 1-second beep + alarm
-  {spd:90, lim:60, road:'ECP Expressway',         acc:7,  cam:false,pol:false, dur:4500,
-   note:'⚠ 30 km/h over · beep every 1 s + alarm'},
-
-  // ── Scene 9: Slowing → urgent beep stops, reverts to 3-second
-  {spd:75, lim:60, road:'ECP Expressway',         acc:7,  cam:false,pol:false, dur:3500,
-   note:'⚡ Still 15 over · beep every 1 s + alarm'},
-
-  // ── Scene 10: Back under limit → all speed sounds stop
-  {spd:58, lim:60, road:'ECP Expressway',         acc:6,  cam:false,pol:false, dur:1600,
-   note:'✅ Under limit · all beeps stopped'},
-
-  // ── Scene 11: POLICE RADAR — long tri-wave beep every 5 s
-  {spd:60, lim:60, road:'ECP Expressway',         acc:6,  cam:false,pol:true,  dur:5500,
-   note:'🚔 Police radar 220m — long beep every 5 s'},
-
-  // ── Scene 12: Police passed → silent
-  {spd:58, lim:60, road:'ECP Expressway',         acc:6,  cam:false,pol:false, dur:1600,
-   note:'✅ Radar passed'},
-
-  // ── Scene 13: Camera + over limit simultaneously → cam beep + alarm
-  {spd:68, lim:60, road:'Nicoll Highway',         acc:7,  cam:true, pol:false, dur:5000,
-   note:'📷 Camera + over limit · beep every 1 s + alarm + cam chime every 5 s'},
-
-  // ── Scene 14: Slowed for camera
-  {spd:55, lim:60, road:'Nicoll Highway',         acc:6,  cam:false,pol:false, dur:1600,
-   note:'✅ Slowed · all alerts cleared'},
-
-  // ── Scene 15: Stopped — stop timer visible
-  {spd:0,  lim:50, road:'Destination Reached',   acc:4,  cam:false,pol:false, dur:2000,
-   note:'🏁 Demo complete — tap END or wait to return home'},
+  {spd:0,  lim:50, road:'Orchard Rd, Singapore', acc:8,  cam:false, camDist:0,  dur:1800, note:'🛰 GPS locked · Speed limit 50 km/h from OSM'},
+  {spd:32, lim:50, road:'Orchard Rd, Singapore', acc:6,  cam:false, camDist:0,  dur:1600, note:null},
+  {spd:48, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:false, camDist:0,  dur:1600, note:null},
+  {spd:52, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:true,  camDist:95, dur:2000, note:'📷 Camera 95m · sheet shows IGNORE + SAVE buttons'},
+  {spd:52, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:true,  camDist:60, dur:2000, note:'📷 60m · tap IGNORE to silence · SAVE to remember'},
+  {spd:52, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:true,  camDist:20, dur:1500, note:'📷 20m — slowing down…'},
+  {spd:44, lim:50, road:'Orchard Rd, Singapore', acc:5,  cam:false, camDist:0,  dur:1600, note:'✅ Camera passed · sheet dismissed · beeps stopped'},
+  {spd:55, lim:60, road:'ECP Expressway',         acc:9,  cam:false, camDist:0,  dur:1600, note:'🔽 Limit changed to 60 km/h'},
+  {spd:67, lim:60, road:'ECP Expressway',         acc:8,  cam:false, camDist:0,  dur:4000, note:'⚡ 7 km/h over · short beep every 5 s'},
+  {spd:78, lim:60, road:'ECP Expressway',         acc:7,  cam:false, camDist:0,  dur:4500, note:'⚠ 18 km/h over · short beep every 3 s (urgent)'},
+  {spd:58, lim:60, road:'ECP Expressway',         acc:6,  cam:false, camDist:0,  dur:1600, note:'✅ Under limit · all beeps stopped'},
+  {spd:66, lim:60, road:'Nicoll Highway',          acc:7,  cam:true,  camDist:88, dur:2500, note:'📷 Camera 88m + over limit · sheet pops up'},
+  {spd:66, lim:60, road:'Nicoll Highway',          acc:7,  cam:true,  camDist:45, dur:2500, note:'📷 45m · long beep + speed beep every 3s'},
+  {spd:54, lim:60, road:'Nicoll Highway',          acc:6,  cam:false, camDist:0,  dur:1600, note:'✅ Slowed · sheet dismissed · all beeps stopped'},
+  {spd:0,  lim:50, road:'Destination Reached',    acc:4,  cam:false, camDist:0,  dur:2200, note:'🏁 Demo complete · tap END or wait'},
 ];
 
 function openDemo(){
-  unlockAudio(); startHB(); buildBufs();
-  // Full state reset
-  Object.assign(S,{
-    speed:0, spdLimit:50, roadType:'', maxSpd:0, viol:0, camCnt:0,
-    dist:0, t0:Date.now(), stopT:null, stopDur:0,
-    log:[], spdLog:[], violLog:[], camLog:[], spdHist:[],
-    road:'Demo Mode', country:'SG', acc:8,
-    lat:1.3521, lng:103.8198, pLat:null, pLng:null,
-    nearCam:false, alertedIds:new Set(), cameras:[], userCams:[],
-    exceeded:false, excStart:null, sumSpd:0, sumN:0,
-    lastGeo:0, lastOvp:0,
-    startPC:'238823', endPC:'179097',
-    startAddr:'Orchard Rd, 238823', endAddr:'ECP Expressway, 179097',
-    kV:0, kP:1
-  });
-  demoActive=true; demoStep=0;
-  clearAllIcons();
-  // UI setup
+  unlockAudio();startHB();buildBufs();
+  Object.assign(S,{speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,dist:0,t0:Date.now(),stopT:null,stopDur:0,log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],road:'Demo Mode',country:'SG',acc:8,lat:1.3521,lng:103.8198,pLat:null,pLng:null,nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],ignoredCams:new Set(),exceeded:false,excStart:null,sumSpd:0,sumN:0,lastGeo:0,lastOvp:0,startPC:'238823',endPC:'179097',startAddr:'Orchard Rd, 238823',endAddr:'ECP Expressway, 179097',rtDistCheck:0,rtAvgSpeed:0,rtLastKm:0});
+  demoActive=true;demoStep=0;clearAllIcons();
   showScreen('rideScreen');
   document.getElementById('demoBadge').style.display='';
   document.getElementById('gpsDot').className='gps-dot fix';
   document.getElementById('tCountry').textContent='SG';
   document.getElementById('wakeBadge').textContent='ON';
   document.getElementById('wakeBadge').className='badge wake';
-  // Start render + timer
-  initCanvas(); startTripTimer(); rafId=requestAnimationFrame(drawLoop);
-  reqWake(); startHB();
+  initCanvas();startTripTimer();rafId=requestAnimationFrame(drawLoop);
+  reqWake();startHB();
   runDemoStep();
 }
 
 function runDemoStep(){
-  if(!demoActive){ return; }
-  if(demoStep>=DEMO_SCRIPT.length){ endDemo(); return; }
-
+  if(!demoActive)return;
+  if(demoStep>=DEMO_SCRIPT.length){endDemo();return;}
   const sc=DEMO_SCRIPT[demoStep++];
   const stepLat=S.lat+(demoStep*.0010);
   const stepLng=S.lng+(demoStep*.0014);
-
-  // Update state
-  S.speed    = sc.spd;
-  S.spdLimit = sc.lim;
-  S.road     = sc.road;
-  S.acc      = sc.acc;
-  S.nearCam  = sc.cam || sc.pol;
-  S.lat      = stepLat;
-  S.lng      = stepLng;
-
-  // Track stats
-  if(S.speed>S.maxSpd) S.maxSpd=S.speed;
-  if(S.speed>2){ S.sumSpd+=S.speed; S.sumN++; }
-  S.dist += S.speed*sc.dur/3600000;
-
-  // Speed log
-  S.spdHist.push(S.speed);
-  if(S.spdHist.length>500) S.spdHist.shift();
-  S.spdLog.push({t:Date.now(), s:Math.round(S.speed), l:S.spdLimit,
-    la:stepLat, lo:stepLng, r:S.road});
-
-  // Update DOM stats
-  document.getElementById('dLimit').textContent = S.spdLimit;
-  document.getElementById('dSpeed').textContent = Math.round(S.speed);
-  document.getElementById('dMax').textContent   = Math.round(S.maxSpd);
-  document.getElementById('dViol').textContent  = S.viol;
-  document.getElementById('dCams').textContent  = S.camCnt;
-  document.getElementById('tAcc').textContent   = `±${S.acc}m`;
-  document.getElementById('tRoad').textContent  = S.road;
-  const mg = S.speed - S.spdLimit;
-  document.getElementById('dSpeed').className   = 'vl'+(mg>=10?' d':mg>0?' w':' g');
-
-  // ── CAMERA ALERT ──
+  S.speed=sc.spd;S.spdLimit=sc.lim;S.road=sc.road;S.acc=sc.acc;S.nearCam=sc.cam;S.lat=stepLat;S.lng=stepLng;
+  if(S.speed>S.maxSpd)S.maxSpd=S.speed;
+  if(S.speed>2){S.sumSpd+=S.speed;S.sumN++;}
+  S.dist+=S.speed*sc.dur/3600000;
+  S.spdHist.push(S.speed);if(S.spdHist.length>500)S.spdHist.shift();
+  S.spdLog.push({t:Date.now(),s:Math.round(S.speed),l:S.spdLimit,la:stepLat,lo:stepLng,r:S.road});
+  // Realtime avg per km
+  if(S.dist-S.rtLastKm>=1){S.rtLastKm=Math.floor(S.dist);S.rtAvgSpeed=S.sumN>0?Math.round(S.sumSpd/S.sumN):0;}
+  document.getElementById('dLimit').textContent=S.spdLimit;
+  document.getElementById('dSpeed').textContent=Math.round(S.speed);
+  document.getElementById('dMax').textContent=Math.round(S.maxSpd);
+  document.getElementById('dViol').textContent=S.viol;
+  document.getElementById('dCams').textContent=S.camCnt;
+  document.getElementById('tAcc').textContent=`±${S.acc}m`;
+  document.getElementById('tRoad').textContent=S.road;
+  const mg=S.speed-S.spdLimit;
+  document.getElementById('dSpeed').className='vl'+(mg>=10?' d':mg>0?' w':' g');
+  const overLimit=S.speed>(S.spdLimit||50);
+  // Camera alert
   if(sc.cam){
     if(!S.alertedIds.has('dcam')){
-      S.alertedIds.add('dcam');
-      S.camCnt++;
+      S.alertedIds.add('dcam');S.camCnt++;
       document.getElementById('dCams').textContent=S.camCnt;
-      S.camLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,
-        road:S.road,dist:180,type:'camera'});
-      // Long camera beep starts, repeats every 5 s
-      setCamBeep(true);
-      showIcon('cam','cam','📷','Camera 180m ahead',8000);
-      // If already over limit at camera → alarm
-      if(S.speed>(S.spdLimit||50)) setAlarm(true);
+      S.camLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,road:S.road,dist:80,type:'camera'});
+      setCamBeep(true,overLimit);
+      const dDist=sc.camDist||80;
+      showIcon('cam','cam','📷',`Camera ${dDist}m ahead`,sc.dur);
+      showCamSheet({type:'camera',id:'dcam',lat:stepLat,lng:stepLng},dDist,S.road,overLimit);
+    } else {
+      updateCamBeep(overLimit);
+      updateCamSheetDist(sc.camDist||80,overLimit);
     }
   } else {
-    setCamBeep(false);
-    S.alertedIds.delete('dcam');
-  }
-
-  // ── POLICE ALERT ──
-  if(sc.pol){
-    if(!S.alertedIds.has('dpol')){
-      S.alertedIds.add('dpol');
-      S.camCnt++;
-      document.getElementById('dCams').textContent=S.camCnt;
-      S.camLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,
-        road:S.road,dist:220,type:'police'});
-      // Long police beep starts, repeats every 5 s
-      setPolicBeep(true);
-      showIcon('cam','police','🚔','Radar 220m ahead',8000);
+    if(S.alertedIds.has('dcam')){
+      setCamBeep(false);clearIcon('cam');S.alertedIds.delete('dcam');
+      hideCamSheet();
     }
+  }
+  // Speed violation
+  if(mg>=10){
+    if(!S.exceeded){S.exceeded=true;S.viol++;S.violLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,spd:Math.round(S.speed),lim:S.spdLimit,road:S.road,pc:S.endPC});document.getElementById('dViol').textContent=S.viol;}
+    showIcon('spd','speed','⚠',`${Math.round(S.speed)}/${S.spdLimit} (+${Math.round(mg)})`,sc.dur);
+    setSpdBeep('severe');
+  } else if(mg>0){
+    if(!S.exceeded){S.exceeded=true;showIcon('spd','warn','⚡',`${Math.round(S.speed)}/${S.spdLimit} (+${Math.round(mg)})`,sc.dur);}
+    setSpdBeep('mild');
   } else {
-    setPolicBeep(false);
-    S.alertedIds.delete('dpol');
+    S.exceeded=false;setSpdBeep(false);clearIcon('spd');
   }
-
-  // ── SPEED VIOLATION ──
-  if(mg >= 10){
-    // 10+ over → severe: 1-second beep + alarm
-    if(!S.exceeded){
-      S.exceeded=true; S.viol++;
-      S.violLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,
-        spd:Math.round(S.speed),lim:S.spdLimit,road:S.road,pc:S.endPC});
-      showIcon('spd','speed','⚠',`${Math.round(S.speed)}/${S.spdLimit} km/h (+${Math.round(mg)})`,7000);
-      document.getElementById('dViol').textContent=S.viol;
-    }
-    setSpdBeep('severe');   // 1-second beep
-    setAlarm(true);         // continuous warble
-
-  } else if(mg > 0){
-    // 1–9 over → mild 5-second beep, no alarm
-    if(!S.exceeded){
-      S.exceeded=true;
-      showIcon('spd','warn','⚡',`${Math.round(S.speed)}/${S.spdLimit} km/h (+${Math.round(mg)})`,6000);
-    }
-    setSpdBeep('mild');     // 5-second beep
-    setAlarm(false);        // no alarm for mild overspeed
-
-  } else {
-    // Safe: clear all speed alerts
-    S.exceeded=false;
-    S.excStart=null;
-    setSpdBeep(false);
-    clearIcon('spd');
-    // Only kill alarm if also not near a camera over limit
-    if(!sc.cam || S.speed<=(S.spdLimit||50)) setAlarm(false);
-  }
-
-  // ── INFO NOTE ──
-  if(sc.note){
-    showIcon('note','info','ℹ',sc.note,sc.dur-200);
-  }
-
-  demoTmr=setTimeout(runDemoStep, sc.dur);
+  if(sc.note)showIcon('note','info','ℹ',sc.note,sc.dur-100);
+  demoTmr=setTimeout(runDemoStep,sc.dur);
 }
 
 function endDemo(){
-  // Stop everything — do NOT call endRide() — no trip saved, go straight home
-  demoActive=false;
-  clearTimeout(demoTmr);
-  // All sounds off
-  setSpdBeep(false); _spiMode='';
-  setCamBeep(false);
-  setPolicBeep(false);
-  setAlarm(false);
-  // Stop render + timer
-  cancelAnimationFrame(rafId); rafId=null;
-  clearInterval(tripTmr); tripTmr=null;
-  // Release wake + BG
-  stopHB(); relWake(); stopBGPing();
-  // Clean UI
+  demoActive=false;clearTimeout(demoTmr);
+  setSpdBeep(false);_spiMode='';setCamBeep(false);hideCamSheet();
+  cancelAnimationFrame(rafId);rafId=null;
+  clearInterval(tripTmr);tripTmr=null;
+  stopHB();relWake();stopBGPing();
   document.getElementById('demoBadge').style.display='none';
   document.getElementById('stopPill').style.display='none';
   clearAllIcons();
-  // Home
   showScreen('startScreen');
 }
 
 /* ══════════════════════════════════════════════════════
-   ALERT ICONS
+   ALERT ICONS — stacked, no overlap, distinct only
 ══════════════════════════════════════════════════════ */
 const _icons={};
 function showIcon(key,cls,emoji,text,ms=6000){
   const c=document.getElementById('alertIcons');if(!c)return;
-  if(_icons[key]){clearTimeout(_icons[key].t);_icons[key].el.remove();}
+  if(_icons[key]){
+    clearTimeout(_icons[key].t);
+    // Update text if same key
+    const existEl=_icons[key].el;
+    const sp=existEl.querySelector('span:last-child');
+    if(sp)sp.textContent=text;
+    const t=setTimeout(()=>{existEl.classList.add('gone');setTimeout(()=>existEl.remove(),360);delete _icons[key];},ms);
+    _icons[key].t=t;
+    return;
+  }
   const d=document.createElement('div');
   d.className=`aicon ${cls}`;
   d.innerHTML=`<span style="font-size:15px;line-height:1">${emoji}</span><span>${text}</span>`;
@@ -1212,7 +906,7 @@ function showIcon(key,cls,emoji,text,ms=6000){
   const t=setTimeout(()=>{d.classList.add('gone');setTimeout(()=>d.remove(),360);delete _icons[key];},ms);
   _icons[key]={el:d,t};
 }
-function clearIcon(k){if(_icons[k]){clearTimeout(_icons[k].t);_icons[k].el.remove();delete _icons[k];}}
+function clearIcon(k){if(_icons[k]){clearTimeout(_icons[k].t);_icons[k].el.classList.add('gone');setTimeout(()=>{if(_icons[k])_icons[k].el.remove();delete _icons[k];},360);}}
 function clearAllIcons(){Object.keys(_icons).forEach(clearIcon);}
 
 /* ══════════════════════════════════════════════════════
@@ -1227,9 +921,11 @@ const S={
   log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],
   road:'Locating…',country:'',acc:null,
   lat:null,lng:null,pLat:null,pLng:null,
-  nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],
+  nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],ignoredCams:new Set(),
   exceeded:false,excStart:null,sumSpd:0,sumN:0,
-  lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:''
+  lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:'',
+  // Realtime per-km avg (not stored)
+  rtDistCheck:0,rtAvgSpeed:0,rtLastKm:0,
 };
 
 /* ══════════════════════════════════════════════════════
@@ -1238,38 +934,15 @@ const S={
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  // Invalidate leaflet map size when detail screen opens
-  if(id==='detScreen') setTimeout(()=>{if(_lmap)_lmap.invalidateSize();},150);
+  if(id==='detScreen')setTimeout(()=>{if(_lmap)_lmap.invalidateSize();},150);
 }
 
 /* ══════════════════════════════════════════════════════
    CONFIRM
 ══════════════════════════════════════════════════════ */
-function confirmStart(){
-  pendingAct='start';
-  document.getElementById('ovT').textContent='Start Ride?';
-  document.getElementById('ovM').textContent='Live GPS monitoring will activate. Mount your phone safely.';
-  document.getElementById('ovY').className='bc by';
-  document.getElementById('overlay').classList.add('on');
-}
-function confirmEnd(){
-  pendingAct='end';
-  document.getElementById('ovT').textContent='End This Ride?';
-  document.getElementById('ovM').textContent='GPS tracking stops and the trip will be saved.';
-  document.getElementById('ovY').className='bc by r';
-  document.getElementById('overlay').classList.add('on');
-}
-function doConfirm(){
-  closeOverlay();
-  const act=pendingAct; pendingAct=null;
-  if(act==='start'){
-    if(demoActive) endDemo();
-    startRide();
-  } else if(act==='end'){
-    if(demoActive) endDemo();
-    else endRide();
-  }
-}
+function confirmStart(){pendingAct='start';document.getElementById('ovT').textContent='Start Ride?';document.getElementById('ovM').textContent='Live GPS monitoring will activate. Mount your phone safely.';document.getElementById('ovY').className='bc by';document.getElementById('overlay').classList.add('on');}
+function confirmEnd(){pendingAct='end';document.getElementById('ovT').textContent='End This Ride?';document.getElementById('ovM').textContent='GPS tracking stops and the trip will be saved.';document.getElementById('ovY').className='bc by r';document.getElementById('overlay').classList.add('on');}
+function doConfirm(){closeOverlay();const act=pendingAct;pendingAct=null;if(act==='start'){if(demoActive)endDemo();startRide();}else if(act==='end'){if(demoActive)endDemo();else endRide();}}
 function closeOverlay(){document.getElementById('overlay').classList.remove('on');}
 
 /* ══════════════════════════════════════════════════════
@@ -1277,21 +950,13 @@ function closeOverlay(){document.getElementById('overlay').classList.remove('on'
 ══════════════════════════════════════════════════════ */
 function startRide(){
   if(demoActive){demoActive=false;clearTimeout(demoTmr);}
-  Object.assign(S,{
-    speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,
-    dist:0,t0:Date.now(),stopT:null,stopDur:0,
-    log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],
-    road:'Locating…',country:'',acc:null,lat:null,lng:null,pLat:null,pLng:null,
-    nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],
-    exceeded:false,excStart:null,sumSpd:0,sumN:0,
-    lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:''
-  });
-  rideActive=true; clearAllIcons();
-  loadUCams().then(cams=>{ S.userCams=cams; });
+  Object.assign(S,{speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,dist:0,t0:Date.now(),stopT:null,stopDur:0,log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],road:'Locating…',country:'',acc:null,lat:null,lng:null,pLat:null,pLng:null,nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],ignoredCams:new Set(),exceeded:false,excStart:null,sumSpd:0,sumN:0,lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:'',rtDistCheck:0,rtAvgSpeed:0,rtLastKm:0});
+  rideActive=true;clearAllIcons();
+  loadUCams().then(cams=>{S.userCams=cams;});
   document.getElementById('demoBadge').style.display='none';
   showScreen('rideScreen');
-  initCanvas(); startTripTimer(); rafId=requestAnimationFrame(drawLoop);
-  startGPS(); reqWake(); unlockAudio(); startHB(); startBGPing();
+  initCanvas();startTripTimer();rafId=requestAnimationFrame(drawLoop);
+  startGPS();reqWake();unlockAudio();startHB();startBGPing();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1300,32 +965,34 @@ function startRide(){
 function startGPS(){
   if(!navigator.geolocation){showGPSErr('Geolocation not supported.');return;}
   document.getElementById('gpsDot').className='gps-dot search';
-  watchId=navigator.geolocation.watchPosition(onGPS,onGPSErr,
-    {enableHighAccuracy:true,maximumAge:500,timeout:25000});
+  watchId=navigator.geolocation.watchPosition(onGPS,onGPSErr,{enableHighAccuracy:true,maximumAge:0,timeout:25000});
 }
 
-/* Kalman filter + 4.5% calibration offset for GPS speed accuracy */
-const SPD_CAL=1.045;
 let _kV=0,_kP=1;
-function kalmanSpeed(raw){const Q=0.08,R=1.5;_kP+=Q;const K=_kP/(_kP+R);_kV+=K*(raw-_kV);_kP=(1-K)*_kP;return Math.max(0,_kV);}
+function kalmanSpeed(raw){
+  const delta=Math.abs(raw-_kV);
+  const R=delta>10?0.1:delta>5?0.4:delta>2?1.0:2.0;
+  const Q=0.5;_kP=_kP+Q;
+  const K=_kP/(_kP+R);_kV=_kV+K*(raw-_kV);_kP=(1-K)*_kP;
+  return Math.max(0,_kV);
+}
 
 function onGPS(pos){
   if(!rideActive||demoActive)return;
   document.getElementById('gpsDot').className='gps-dot fix';
   const{latitude:la,longitude:lo,speed:spd,accuracy:acc}=pos.coords;
   S.pLat=S.lat;S.pLng=S.lng;S.lat=la;S.lng=lo;S.acc=Math.round(acc);
-  // If GPS reports exactly 0 or null speed → immediate zero (no smoothing)
-  const rawKmh=(spd!=null&&spd>=0)?spd*3.6*SPD_CAL:0;
-  if(rawKmh===0){ S.speed=0; _kV=0; _kP=1; }       // instant stop
-  else S.speed=kalmanSpeed(rawKmh);                  // smooth only when moving
+  const rawKmh=(spd!=null&&spd>=0)?spd*3.6:0;
+  if(rawKmh===0){S.speed=0;_kV=0;_kP=1;}
+  else S.speed=kalmanSpeed(rawKmh);
   if(S.speed>S.maxSpd)S.maxSpd=S.speed;
   if(S.speed>2){S.sumSpd+=S.speed;S.sumN++;}
   if(S.pLat!==null)S.dist+=hav(S.pLat,S.pLng,la,lo);
-  const ab=document.getElementById('tAcc');
-  ab.textContent=`±${S.acc}m`;ab.className='badge'+(acc<20?' good':acc>60?' poor':'');
+  // Realtime per-km avg
+  if(S.dist-S.rtLastKm>=1){S.rtLastKm=Math.floor(S.dist);S.rtAvgSpeed=S.sumN>0?Math.round(S.sumSpd/S.sumN):0;}
+  const ab=document.getElementById('tAcc');ab.textContent=`±${S.acc}m`;ab.className='badge'+(acc<20?' good':acc>60?' poor':'');
   S.spdHist.push(S.speed);if(S.spdHist.length>500)S.spdHist.shift();
-  S.spdLog.push({t:Date.now(),s:Math.round(S.speed),l:S.spdLimit,la,lo,r:S.road});
-  if(S.spdLog.length>2000)S.spdLog.shift();
+  S.spdLog.push({t:Date.now(),s:Math.round(S.speed),l:S.spdLimit,la,lo,r:S.road});if(S.spdLog.length>2000)S.spdLog.shift();
   const now=Date.now();
   if(now-S.lastGeo>7000){S.lastGeo=now;revGeo(la,lo);}
   if(now-S.lastOvp>28000){S.lastOvp=now;fetchCams(la,lo);}
@@ -1335,9 +1002,8 @@ function onGPS(pos){
   document.getElementById('dMax').textContent=Math.round(S.maxSpd);
   document.getElementById('dViol').textContent=S.viol;
   document.getElementById('dCams').textContent=S.camCnt;
-  const dspd=document.getElementById('dSpeed');
   const mg=S.speed-S.spdLimit;
-  dspd.className='vl'+(mg>20?' d':mg>0?' w':' g');
+  document.getElementById('dSpeed').className='vl'+(mg>10?' d':mg>0?' w':' g');
 }
 function onGPSErr(e){if(e.code===3)return;showGPSErr({1:'Permission denied.',2:'GPS unavailable.'}[e.code]||'GPS error.');}
 function showGPSErr(m){document.getElementById('gpsMsg').textContent=m;document.getElementById('gpsErr').classList.add('on');}
@@ -1348,13 +1014,12 @@ function retryGPS(){document.getElementById('gpsErr').classList.remove('on');if(
 ══════════════════════════════════════════════════════ */
 async function revGeo(la,lo){
   try{
-    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${la}&lon=${lo}&format=json&zoom=17&addressdetails=1&extratags=1`,
-      {headers:{'Accept-Language':'en','User-Agent':'SpeedSenseApp/5.0'},signal:AbortSignal.timeout(8000)});
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${la}&lon=${lo}&format=json&zoom=17&addressdetails=1&extratags=1`,{headers:{'Accept-Language':'en','User-Agent':'SpeedSenseApp/6.0'},signal:AbortSignal.timeout(8000)});
     if(!r.ok)return;
     const d=await r.json();
     const a=d.address||{};
     const road=a.road||a.pedestrian||a.motorway||a.trunk||a.primary||a.secondary||a.path||a.footway||a.suburb||d.display_name?.split(',')[0]||'Unknown Road';
-    S.road=road; document.getElementById('tRoad').textContent=road;
+    S.road=road;document.getElementById('tRoad').textContent=road;
     const cc=(a.country_code||'').toUpperCase();
     if(cc&&cc!==S.country){S.country=cc;document.getElementById('tCountry').textContent=cc;}
     const pc=a.postcode||'';
@@ -1376,65 +1041,59 @@ async function revGeo(la,lo){
 }
 function parseLim(raw){
   const s=String(raw).trim().toLowerCase();
-  if(s==='none'||s==='unlimited')return 130;
-  if(s==='walk')return 10;if(s==='living_street')return 20;
+  if(s==='none'||s==='unlimited')return 130;if(s==='walk')return 10;if(s==='living_street')return 20;
   const mph=s.match(/^(\d+)\s*mph/);if(mph)return Math.round(parseInt(mph[1])*1.60934);
   const km=s.match(/^(\d+)/);if(km){const v=parseInt(km[1]);return v>5&&v<=250?v:null;}
   return null;
 }
 
 /* ══════════════════════════════════════════════════════
-   OVERPASS CAMERAS
+   OVERPASS — camera radius 100m
 ══════════════════════════════════════════════════════ */
 async function fetchCams(la,lo){
   try{
     const key=R2K[S.roadType]||'urb';
-    const R=key==='mw'||key==='tk'?900:key==='pr'||key==='sc'?600:400;
-    const q=`[out:json][timeout:14];(node["highway"="speed_camera"](around:${R},${la},${lo});node["enforcement"="maxspeed"](around:${R},${la},${lo});node["enforcement"="speed"](around:${R},${la},${lo});node["man_made"="monitoring_station"]["monitoring:vehicle"](around:${R},${la},${lo});node["device"="speed_camera"](around:${R},${la},${lo});node["highway"="enforcement"](around:${R},${la},${lo});node["traffic_calming"="camera"](around:${R},${la},${lo});node["camera:type"="speed"](around:${R},${la},${lo});node["camera:type"="ANPR"](around:${R},${la},${lo});node["amenity"="police"]["police"!="station"](around:${R},${la},${lo}););out body;`;
-    const res=await fetch('https://overpass-api.de/api/interpreter',
-      {method:'POST',body:'data='+encodeURIComponent(q),
-       headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:AbortSignal.timeout(14000)});
+    const R=key==='mw'||key==='tk'?600:key==='pr'||key==='sc'?400:250;
+    const q=`[out:json][timeout:14];(node["highway"="speed_camera"](around:${R},${la},${lo});node["enforcement"="maxspeed"](around:${R},${la},${lo});node["enforcement"="speed"](around:${R},${la},${lo});node["device"="speed_camera"](around:${R},${la},${lo});node["camera:type"="speed"](around:${R},${la},${lo});node["camera:type"="ANPR"](around:${R},${la},${lo});node["traffic_calming"="camera"](around:${R},${la},${lo});node["amenity"="police"]["police"!="station"](around:${R},${la},${lo}););out body;`;
+    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'},signal:AbortSignal.timeout(14000)});
     if(!res.ok)return;
     const data=await res.json();
     S.cameras=(data.elements||[]).map(el=>({id:el.id,lat:el.lat,lng:el.lon,type:el.tags?.amenity==='police'?'police':'camera'}));
     const ids=new Set(S.cameras.map(c=>c.id));
-    for(const id of S.alertedIds)if(!ids.has(id))S.alertedIds.delete(id);
+    for(const id of S.alertedIds)if(!ids.has(id)&&typeof id!=='string')S.alertedIds.delete(id);
   }catch(e){}
 }
 
 /* ══════════════════════════════════════════════════════
-   CAMERA PROXIMITY
+   CAMERA PROXIMITY — 100m trigger radius
 ══════════════════════════════════════════════════════ */
 function checkCams(la,lo){
-  const allCams=[...S.cameras,...(S.userCams||[]).map(c=>({id:'u'+c.id,lat:c.lat,lng:c.lng,type:'camera'}))];
+  const allCams=[...S.cameras,...(S.userCams||[]).map(c=>({id:'u'+c.id,lat:c.lat,lng:c.lng,type:'camera'}))]
+    .filter(c=>!S.ignoredCams.has(c.id));
   let minD=Infinity,best=null;
   for(const c of allCams){const d=hav(la,lo,c.lat,c.lng)*1000;if(d<minD){minD=d;best=c;}}
-  const inR=best&&minD<=250,was=S.nearCam;S.nearCam=inR;
+  const inR=best&&minD<=100,was=S.nearCam;S.nearCam=inR;
   if(inR){
+    const overLimit=S.speed>(S.spdLimit||50);
     if(!S.alertedIds.has(best.id)){
       S.alertedIds.add(best.id);S.camCnt++;
       S.camLog.push({time:fmtT(Date.now()),lat:la,lng:lo,road:S.road,dist:Math.round(minD),type:best.type});
       document.getElementById('dCams').textContent=S.camCnt;
-      if(best.type==='police'){
-        setPolicBeep(true);showIcon('cam','police','🚔',`Radar ${Math.round(minD)}m`,8000);
-        if(_notifGranted)sendSWAlert('CAM_ALERT',`Police radar ${Math.round(minD)}m — ${S.road}`);
-      } else {
-        setCamBeep(true);
-        const ov=S.speed>(S.spdLimit||50);
-        showIcon('cam','cam','📷',ov?`CAM ${Math.round(minD)}m — SLOW!`:`Camera ${Math.round(minD)}m`,7000);
-        if(ov){setAlarm(true);if(_notifGranted)sendSWAlert('CAM_ALERT',`Camera ${Math.round(minD)}m — you are over the limit!`);}
-      }
+      setCamBeep(true,overLimit);
+      const msg=overLimit?`CAM ${Math.round(minD)}m — SLOW!`:`Camera ${Math.round(minD)}m`;
+      showIcon('cam',best.type==='police'?'police':'cam',best.type==='police'?'🚔':'📷',msg,8000);
+      if(overLimit&&_notifGranted)sendSWAlert('CAM_ALERT',`Camera ${Math.round(minD)}m — over limit!`);
+      showCamSheet(best,Math.round(minD),S.road,overLimit);
+    } else {
+      updateCamBeep(overLimit);
+      updateCamSheetDist(Math.round(minD),overLimit);
     }
-    if(best.type!=='police'&&S.speed>(S.spdLimit||50)-8)setAlarm(true);
-    else if(!S.exceeded)setAlarm(false);
   } else {
-    // Camera out of range — stop alert sounds and icons IMMEDIATELY
     if(was){
-      clearIcon('cam');        // remove 📷 badge icon at once
-      setCamBeep(false);       // stop long camera beep
-      setPolicBeep(false);     // stop long police beep
-      S.alertedIds.clear();    // allow re-alert when approaching next camera
-      if(!S.exceeded) setAlarm(false);
+      clearIcon('cam');
+      setCamBeep(false);
+      S.alertedIds.clear();
+      hideCamSheet();
     }
   }
 }
@@ -1453,39 +1112,24 @@ function handleStop(){
   } else {S.stopT=null;S.stopDur=0;el.style.display='none';}
 }
 function handleViol(la,lo){
-  const lim=S.spdLimit||50, exc=S.speed>lim, mg=S.speed-lim;
+  const lim=S.spdLimit||50,exc=S.speed>lim,mg=S.speed-lim;
   if(exc){
-    if(!S.excStart) S.excStart=Date.now();
-    // 1.5s grace period before triggering
+    if(!S.excStart)S.excStart=Date.now();
     if(Date.now()-S.excStart>1500){
       if(!S.exceeded){
-        S.exceeded=true; S.viol++;
-        if(S.log.length) S.log[S.log.length-1].exc=(S.log[S.log.length-1].exc||0)+1;
-        S.violLog.push({time:fmtT(Date.now()),lat:la,lng:lo,
-          spd:Math.round(S.speed),lim,road:S.road,pc:S.endPC});
-        showIcon('spd',mg>=10?'speed':'warn',mg>=10?'⚠':'⚡',
-          `${Math.round(S.speed)}/${lim} km/h (+${Math.round(mg)})`,8000);
-        if(mg>=10){
-          setAlarm(true);
-          if(_notifGranted) sendSWAlert('SPEED_ALERT',
-            `${Math.round(S.speed)}km/h in ${lim} zone on ${S.road}`);
-        }
+        S.exceeded=true;S.viol++;
+        if(S.log.length)S.log[S.log.length-1].exc=(S.log[S.log.length-1].exc||0)+1;
+        S.violLog.push({time:fmtT(Date.now()),lat:la,lng:lo,spd:Math.round(S.speed),lim,road:S.road,pc:S.endPC});
+        showIcon('spd',mg>=10?'speed':'warn',mg>=10?'⚠':'⚡',`${Math.round(S.speed)}/${lim} km/h (+${Math.round(mg)})`,8000);
+        if(mg>=10&&_notifGranted)sendSWAlert('SPEED_ALERT',`${Math.round(S.speed)}km/h in ${lim} zone on ${S.road}`);
       }
-      // 0–10 over: mild beep every 5s, no alarm
-      // 10+ over:  severe beep every 1s + alarm
-      if(mg>=10){
-        setSpdBeep('severe');   // 1-second beep
-        setAlarm(true);
-      } else {
-        setSpdBeep('mild');     // 5-second beep
-        setAlarm(false);
-      }
+      // 1–9 over: beep every 5s; 10+ over: beep every 3s
+      setSpdBeep(mg>=10?'severe':'mild');
     }
   } else {
-    S.excStart=null; S.exceeded=false;
-    setSpdBeep(false); _spiMode='';
+    S.excStart=null;S.exceeded=false;
+    setSpdBeep(false);_spiMode='';
     clearIcon('spd');
-    if(!S.nearCam) setAlarm(false);
   }
 }
 
@@ -1503,22 +1147,57 @@ function startTripTimer(){
 }
 
 /* ══════════════════════════════════════════════════════
-   CANVAS
+   CANVAS — speedometer with duration + per-km avg
 ══════════════════════════════════════════════════════ */
 let cv,cx2,cW,cH;
 function initCanvas(){cv=document.getElementById('speedCanvas');cx2=cv.getContext('2d');resizeCv();window.addEventListener('resize',resizeCv);}
 function resizeCv(){if(!cv)return;const d=window.devicePixelRatio||1;cv.width=cv.offsetWidth*d;cv.height=cv.offsetHeight*d;cW=cv.width;cH=cv.height;}
 function drawLoop(){if(!rideActive&&!demoActive)return;drawFrame();rafId=requestAnimationFrame(drawLoop);}
+
 function drawFrame(){
   if(!cx2)return;cx2.clearRect(0,0,cW,cH);
   const lim=S.spdLimit||50,mg=S.speed-lim;
-  const col=mg>20?'#ff2d2d':mg>0?'#ff6b00':'#00d4ff';
-  const ox=cW/2,oy=cH*.45,r=Math.min(cW*.40,cH*.42);
-  drawArc(ox,oy,r,col,lim);drawDigits(ox,oy,r,col);drawLimBadge(ox,oy,r,lim);
+  const col=mg>10?'#ff2d2d':mg>0?'#ff6b00':'#00d4ff';
+  const ox=cW/2,oy=cH*.44,r=Math.min(cW*.39,cH*.41);
+  drawArc(ox,oy,r,col,lim);
+  drawDigits(ox,oy,r,col);
+  drawLimBadge(ox,oy,r,lim);
   if(S.nearCam)drawCamBadge(ox,oy,r);
   if(S.speed<1&&(S.lat!==null||demoActive))drawStopLabel(ox,oy,r);
+  drawRideInfo(ox,oy,r);
   drawSpdGraph();
 }
+
+function drawRideInfo(ox,oy,r){
+  if(!cx2)return;
+  const d=window.devicePixelRatio||1;
+  // Duration (big, below km/h label)
+  const elapsed=S.t0?Math.floor((Date.now()-S.t0)/1000):0;
+  const mm=Math.floor(elapsed/60),ss=elapsed%60;
+  const durStr=`${mm.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`;
+  // Distance
+  const distStr=S.dist.toFixed(1)+' km';
+  // Per-km avg speed (only show after 1km)
+  const avgStr=S.rtAvgSpeed>0?`AVG ${S.rtAvgSpeed} km/h`:'';
+  // Draw duration + distance in a pill below the speed digits
+  const py=oy+r*.72;
+  cx2.font=`700 ${r*.16}px Orbitron,monospace`;
+  cx2.fillStyle='#e8eaf0cc';
+  cx2.textAlign='center';cx2.textBaseline='middle';
+  cx2.shadowColor='#00d4ff';cx2.shadowBlur=8*d;
+  cx2.fillText(durStr,ox-r*.25,py);
+  cx2.shadowBlur=0;
+  cx2.font=`600 ${r*.105}px Rajdhani,sans-serif`;
+  cx2.fillStyle='#00d4ffaa';
+  cx2.fillText(distStr,ox+r*.30,py);
+  // Per-km avg line
+  if(avgStr){
+    cx2.font=`600 ${r*.088}px Rajdhani,sans-serif`;
+    cx2.fillStyle='#ffd70088';
+    cx2.fillText(avgStr,ox,py+r*.18);
+  }
+}
+
 function drawArc(ox,oy,r,col,lim){
   const d=window.devicePixelRatio||1,sa=Math.PI*.75,ea=Math.PI*2.25,rg=ea-sa,mx=160;
   const sf=Math.min(S.speed/mx,1),lf=Math.min(lim/mx,1),sA=sa+sf*rg,lA=sa+lf*rg;
@@ -1528,47 +1207,43 @@ function drawArc(ox,oy,r,col,lim){
   if(sA>lA){cx2.beginPath();cx2.arc(ox,oy,r,lA,sA);cx2.strokeStyle=col;cx2.lineWidth=r*.058;cx2.stroke();}
   for(let i=0;i<=16;i++){
     const a=sa+(i/16)*rg,mj=i%2===0,tl=mj?r*.10:r*.055,r1=r+r*.055,r2=r1-tl;
-    cx2.beginPath();cx2.moveTo(ox+Math.cos(a)*r1,oy+Math.sin(a)*r1);
-    cx2.lineTo(ox+Math.cos(a)*r2,oy+Math.sin(a)*r2);
-    cx2.strokeStyle='#353945';cx2.lineWidth=(mj?2:1)*d;cx2.stroke();
-    if(mj){cx2.font=`${r*.086}px Orbitron,monospace`;cx2.fillStyle='#44485a';cx2.textAlign='center';cx2.textBaseline='middle';
-      cx2.fillText(Math.round((i/16)*mx),ox+Math.cos(a)*(r1+r*.09),oy+Math.sin(a)*(r1+r*.09));}
+    cx2.beginPath();cx2.moveTo(ox+Math.cos(a)*r1,oy+Math.sin(a)*r1);cx2.lineTo(ox+Math.cos(a)*r2,oy+Math.sin(a)*r2);cx2.strokeStyle='#353945';cx2.lineWidth=(mj?2:1)*d;cx2.stroke();
+    if(mj){cx2.font=`${r*.086}px Orbitron,monospace`;cx2.fillStyle='#44485a';cx2.textAlign='center';cx2.textBaseline='middle';cx2.fillText(Math.round((i/16)*mx),ox+Math.cos(a)*(r1+r*.09),oy+Math.sin(a)*(r1+r*.09));}
   }
   const nx=ox+Math.cos(sA)*(r*.74),ny=oy+Math.sin(sA)*(r*.74);
   cx2.shadowColor=col;cx2.shadowBlur=18*d;
-  cx2.beginPath();cx2.moveTo(ox,oy);cx2.lineTo(nx,ny);
-  cx2.strokeStyle=col;cx2.lineWidth=3*d;cx2.stroke();cx2.shadowBlur=0;
+  cx2.beginPath();cx2.moveTo(ox,oy);cx2.lineTo(nx,ny);cx2.strokeStyle=col;cx2.lineWidth=3*d;cx2.stroke();cx2.shadowBlur=0;
   cx2.beginPath();cx2.arc(ox,oy,r*.065,0,Math.PI*2);cx2.fillStyle=col;cx2.fill();
   cx2.beginPath();cx2.arc(ox,oy,r*.030,0,Math.PI*2);cx2.fillStyle='#0a0c10';cx2.fill();
 }
 function drawDigits(ox,oy,r,col){
   const d=window.devicePixelRatio||1;
-  cx2.font=`900 ${r*.54}px Orbitron,monospace`;cx2.fillStyle=col;cx2.textAlign='center';cx2.textBaseline='middle';
-  cx2.shadowColor=col;cx2.shadowBlur=25*d;cx2.fillText(Math.round(S.speed),ox,oy+r*.07);cx2.shadowBlur=0;
-  cx2.font=`600 ${r*.12}px Rajdhani,sans-serif`;cx2.fillStyle='#5a6070';cx2.fillText('km/h',ox,oy+r*.39);
-  if(S.acc!==null){cx2.font=`500 ${r*.078}px Rajdhani,sans-serif`;cx2.fillStyle=S.acc<15?'#00e67660':'#ff6b0060';cx2.fillText(`GPS ±${S.acc}m`,ox,oy+r*.52);}
-  if(S.country){cx2.font=`600 ${r*.075}px Rajdhani,sans-serif`;cx2.fillStyle='#00d4ff40';cx2.fillText(S.country,ox,oy+r*.62);}
+  cx2.font=`900 ${r*.52}px Orbitron,monospace`;cx2.fillStyle=col;cx2.textAlign='center';cx2.textBaseline='middle';
+  cx2.shadowColor=col;cx2.shadowBlur=25*d;cx2.fillText(Math.round(S.speed),ox,oy+r*.06);cx2.shadowBlur=0;
+  cx2.font=`600 ${r*.11}px Rajdhani,sans-serif`;cx2.fillStyle='#5a6070';cx2.fillText('km/h',ox,oy+r*.37);
+  if(S.acc!==null){cx2.font=`500 ${r*.072}px Rajdhani,sans-serif`;cx2.fillStyle=S.acc<15?'#00e67660':'#ff6b0060';cx2.fillText(`GPS ±${S.acc}m`,ox,oy+r*.50);}
+  if(S.country){cx2.font=`600 ${r*.07}px Rajdhani,sans-serif`;cx2.fillStyle='#00d4ff40';cx2.fillText(S.country,ox,oy+r*.60);}
 }
 function drawLimBadge(ox,oy,r,lim){
-  const bx=ox-r*.92,by=oy+r*.04,br=r*.20;
+  const bx=ox-r*.90,by=oy+r*.04,br=r*.20;
   cx2.beginPath();cx2.arc(bx,by,br,0,Math.PI*2);cx2.fillStyle='#1a1d24';cx2.fill();
   cx2.strokeStyle='#ff2d2d';cx2.lineWidth=3*(window.devicePixelRatio||1);cx2.stroke();
-  cx2.font=`900 ${r*.153}px Orbitron,monospace`;cx2.fillStyle='#fff';cx2.textAlign='center';cx2.textBaseline='middle';cx2.fillText(lim,bx,by-r*.03);
-  cx2.font=`600 ${r*.075}px Rajdhani,sans-serif`;cx2.fillStyle='#ff2d2d';cx2.fillText('LIMIT',bx,by+r*.115);
+  cx2.font=`900 ${r*.148}px Orbitron,monospace`;cx2.fillStyle='#fff';cx2.textAlign='center';cx2.textBaseline='middle';cx2.fillText(lim,bx,by-r*.03);
+  cx2.font=`600 ${r*.072}px Rajdhani,sans-serif`;cx2.fillStyle='#ff2d2d';cx2.fillText('LIMIT',bx,by+r*.115);
 }
 function drawCamBadge(ox,oy,r){
-  const bx=ox+r*.92,by=oy+r*.04,bw=r*.36,bh=r*.30,fl=Math.sin(Date.now()/200)>0;
+  const bx=ox+r*.90,by=oy+r*.04,bw=r*.36,bh=r*.30,fl=Math.sin(Date.now()/200)>0;
   cx2.fillStyle=fl?'#ffd70030':'#ffd70010';cx2.strokeStyle='#ffd700';cx2.lineWidth=2*(window.devicePixelRatio||1);
   rrect(cx2,bx-bw/2,by-bh/2,bw,bh,7);cx2.fill();cx2.stroke();
   cx2.font=`${r*.15}px sans-serif`;cx2.textAlign='center';cx2.textBaseline='middle';cx2.fillText('📷',bx,by-r*.025);
-  cx2.font=`700 ${r*.074}px Rajdhani,sans-serif`;cx2.fillStyle='#ffd700';cx2.fillText('CAMERA',bx,by+r*.11);
+  cx2.font=`700 ${r*.072}px Rajdhani,sans-serif`;cx2.fillStyle='#ffd700';cx2.fillText('CAMERA',bx,by+r*.11);
 }
 function drawStopLabel(ox,oy,r){
-  cx2.font=`700 ${r*.10}px Rajdhani,sans-serif`;cx2.fillStyle='#5a6070';cx2.textAlign='center';cx2.textBaseline='middle';cx2.fillText('STOPPED',ox,oy-r*.48);
+  cx2.font=`700 ${r*.10}px Rajdhani,sans-serif`;cx2.fillStyle='#5a6070';cx2.textAlign='center';cx2.textBaseline='middle';cx2.fillText('STOPPED',ox,oy-r*.46);
 }
 function drawSpdGraph(){
   const pts=S.spdHist;if(pts.length<2)return;
-  const d=window.devicePixelRatio||1,gh=cH*.115,gw=cW*.84,gx=(cW-gw)/2,gy=cH-gh-cH*.025;
+  const d=window.devicePixelRatio||1,gh=cH*.10,gw=cW*.84,gx=(cW-gw)/2,gy=cH-gh-cH*.02;
   const mx=Math.max(160,...pts),lim=S.spdLimit||50;
   cx2.fillStyle='#12151c99';rrect(cx2,gx,gy,gw,gh,8);cx2.fill();
   cx2.beginPath();pts.forEach((v,i)=>{const px=gx+(i/(pts.length-1))*gw,py=gy+gh-(v/mx)*gh;i===0?cx2.moveTo(px,py):cx2.lineTo(px,py);});
@@ -1576,36 +1251,91 @@ function drawSpdGraph(){
   cx2.beginPath();pts.forEach((v,i)=>{const px=gx+(i/(pts.length-1))*gw,py=gy+gh-(v/mx)*gh;i===0?cx2.moveTo(px,py):cx2.lineTo(px,py);});
   cx2.strokeStyle='#00d4ff70';cx2.lineWidth=1.5*d;cx2.stroke();
   const lpy=gy+gh-(lim/mx)*gh;
-  cx2.beginPath();cx2.setLineDash([5,4]);cx2.moveTo(gx,lpy);cx2.lineTo(gx+gw,lpy);
-  cx2.strokeStyle='#ff2d2d55';cx2.lineWidth=1*d;cx2.stroke();cx2.setLineDash([]);
+  cx2.beginPath();cx2.setLineDash([5,4]);cx2.moveTo(gx,lpy);cx2.lineTo(gx+gw,lpy);cx2.strokeStyle='#ff2d2d55';cx2.lineWidth=1*d;cx2.stroke();cx2.setLineDash([]);
   cx2.font=`${8*d}px Rajdhani,sans-serif`;cx2.fillStyle='#5a6070';cx2.textAlign='left';cx2.textBaseline='top';cx2.fillText('SPEED HISTORY',gx+5,gy+4);
 }
 function rrect(c,x,y,w,h,rad){
   if(c.roundRect){c.beginPath();c.roundRect(x,y,w,h,rad);return;}
-  c.beginPath();c.moveTo(x+rad,y);c.lineTo(x+w-rad,y);c.quadraticCurveTo(x+w,y,x+w,y+rad);
-  c.lineTo(x+w,y+h-rad);c.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);c.lineTo(x+rad,y+h);
-  c.quadraticCurveTo(x,y+h,x,y+h-rad);c.lineTo(x,y+rad);c.quadraticCurveTo(x,y,x+rad,y);c.closePath();
+  c.beginPath();c.moveTo(x+rad,y);c.lineTo(x+w-rad,y);c.quadraticCurveTo(x+w,y,x+w,y+rad);c.lineTo(x+w,y+h-rad);c.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);c.lineTo(x+rad,y+h);c.quadraticCurveTo(x,y+h,x,y+h-rad);c.lineTo(x,y+rad);c.quadraticCurveTo(x,y,x+rad,y);c.closePath();
 }
 
 /* ══════════════════════════════════════════════════════
-   END RIDE
+   CAMERA ACTION SHEET
 ══════════════════════════════════════════════════════ */
+let _sheetCam=null; // currently alerted camera object
 
-/* User camera reporting */
+function showCamSheet(cam,dist,road,overLimit){
+  _sheetCam=cam;
+  const sheet=document.getElementById('camSheet');
+  if(!sheet)return;
+  // Title
+  const isPolice=cam.type==='police';
+  document.querySelector('.cam-sheet-title .icon').textContent=isPolice?'🚔':'📷';
+  document.getElementById('camSheetType').textContent=isPolice?'POLICE CAMERA':'SPEED CAMERA';
+  document.getElementById('camSheetRoad').textContent=road||'—';
+  document.getElementById('camSheetDist').textContent=dist+'m';
+  sheet.classList.add('show');
+}
+
+function hideCamSheet(){
+  const sheet=document.getElementById('camSheet');
+  if(sheet)sheet.classList.remove('show');
+  _sheetCam=null;
+}
+
+function updateCamSheetDist(dist,overLimit){
+  const el=document.getElementById('camSheetDist');
+  if(el)el.textContent=dist+'m';
+}
+
+/* ══════════════════════════════════════════════════════
+   USER CAMERAS
+══════════════════════════════════════════════════════ */
+// Bottom "📷 Add Camera" button — manual add at any time
 async function reportUserCamera(){
   if(!S.lat||!S.lng){showIcon('ucam','info','📍','GPS not ready',3000);return;}
-  const cam={id:Date.now(),lat:S.lat,lng:S.lng,road:S.road||'Unknown',
-    country:S.country||'',ts:fmtT(Date.now()),note:'User reported'};
-  await addUCam(cam);
-  S.userCams=await loadUCams();
-  camChime();showIcon('ucam','cam','📷',`Camera saved: ${S.road||'this location'}`,5000);
+  // Check not already very close to a saved user cam
+  const existing=await loadUCams();
+  const near=existing.find(c=>hav(S.lat,S.lng,c.lat,c.lng)*1000<30);
+  if(near){showIcon('ucam','cam','📷','Camera already saved here',3000);return;}
+  const cam={id:Date.now(),lat:S.lat,lng:S.lng,road:S.road||'Unknown',country:S.country||'',ts:fmtT(Date.now()),note:'User reported'};
+  await addUCam(cam);S.userCams=await loadUCams();
+  buildBufs();playBuf(_buf&&_buf.long);
+  showIcon('ucam','cam','📷',`Camera saved: ${S.road||'this location'}`,5000);
+}
+
+function ignoreCurrentCamera(){
+  if(!S.lat&&!demoActive){showIcon('igcam','warn','🚫','GPS not ready',2000);return;}
+  // For demo mode, use sheet camera
+  let best=_sheetCam;
+  let minD=80; // demo default
+  if(!demoActive){
+    if(!S.lat||!S.lng){showIcon('igcam','warn','🚫','GPS not ready',2000);return;}
+    const allC=[...S.cameras,...(S.userCams||[]).map(c=>({id:'u'+c.id,lat:c.lat,lng:c.lng,type:'camera',ucamId:c.id}))].filter(c=>!S.ignoredCams.has(c.id));
+    best=null;minD=Infinity;
+    for(const c of allC){const d=hav(S.lat,S.lng,c.lat,c.lng)*1000;if(d<minD){minD=d;best=c;}}
+    if(!best||minD>600){showIcon('igcam','warn','🚫','No camera nearby',2500);hideCamSheet();return;}
+  }
+  if(!best){hideCamSheet();return;}
+  S.ignoredCams.add(best.id);S.alertedIds.delete(best.id);
+  if(demoActive)S.alertedIds.delete('dcam');
+  S.nearCam=false;
+  setCamBeep(false);clearIcon('cam');
+  hideCamSheet();
+  showIcon('igcam','warn','🚫','Camera ignored — no more alerts',4000);
+  // If it was a user cam, offer to delete
+  if(best.ucamId){
+    setTimeout(()=>{
+      if(confirm('Also remove this from MY CAMERAS permanently?'))
+        delUCam(best.ucamId).then(()=>loadUCams().then(c=>{S.userCams=c;}));
+    },400);
+  }
 }
 
 async function openUCamScreen(){await renderUCamList();showScreen('ucamScreen');}
 async function renderUCamList(){
-  const cams=await loadUCams();
-  const el=document.getElementById('ucamList');if(!el)return;
-  if(!cams.length){el.innerHTML='<div style="color:var(--muted);text-align:center;margin-top:40px;font-size:14px">No cameras reported yet.<br>Tap "📷 Report Camera" while riding.</div>';return;}
+  const cams=await loadUCams();const el=document.getElementById('ucamList');if(!el)return;
+  if(!cams.length){el.innerHTML='<div style="color:var(--muted);text-align:center;margin-top:40px;font-size:14px">No cameras reported yet.<br>Tap "📷 Add Camera" while riding.</div>';return;}
   el.innerHTML=cams.slice().reverse().map(c=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px">
     <div style="flex:1;font-size:12px"><b style="color:var(--cam);font-size:13px">${c.road||'Unknown Road'}</b><br>
     <span style="color:var(--muted)">${c.ts} · ${c.country||'?'} · ${c.lat?.toFixed(5)},${c.lng?.toFixed(5)}</span></div>
@@ -1614,32 +1344,42 @@ async function renderUCamList(){
 }
 async function delUCamAndRefresh(id){await delUCam(id);await renderUCamList();}
 
+/* ══════════════════════════════════════════════════════
+   END RIDE
+══════════════════════════════════════════════════════ */
 function endRide(){
   if(!rideActive&&!demoActive)return;
   rideActive=false;demoActive=false;clearTimeout(demoTmr);
   cancelAnimationFrame(rafId);clearInterval(tripTmr);
-  setSpdBeep(false);_spiMode='';setCamBeep(false);setPolicBeep(false);setAlarm(false);stopHB();relWake();stopBGPing();
+  setSpdBeep(false);_spiMode='';setCamBeep(false);hideCamSheet();
+  stopHB();relWake();stopBGPing();
   if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
   const el=Math.floor((Date.now()-S.t0)/1000);
   const mm=Math.floor(el/60).toString().padStart(2,'0'),ss=(el%60).toString().padStart(2,'0');
   const avg=S.sumN>0?Math.round(S.sumSpd/S.sumN):0;
+  // Deduplicate violation log by time+road
+  const seenV=new Set();
+  const violLogDedup=S.violLog.filter(v=>{const k=`${v.time}|${v.road}|${v.spd}`;if(seenV.has(k))return false;seenV.add(k);return true;});
+  // Deduplicate cam log by time+road
+  const seenC=new Set();
+  const camLogDedup=S.camLog.filter(c=>{const k=`${c.time}|${c.road}|${c.type}`;if(seenC.has(k))return false;seenC.add(k);return true;});
   const trip={
     id:Date.now(),
     date:new Date().toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}),
     time:new Date(S.t0).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}),
     country:S.country,duration:`${mm}:${ss}`,dist:parseFloat(S.dist.toFixed(2)),
-    maxSpd:Math.round(S.maxSpd),avgSpd:avg,viol:S.viol,cams:S.camCnt,
+    maxSpd:Math.round(S.maxSpd),avgSpd:avg,viol:violLogDedup.length,cams:camLogDedup.length,
     startAddr:S.startAddr||'Unknown',endAddr:S.endAddr||'Unknown',
     startPC:S.startPC,endPC:S.endPC,
-    spdLog:S.spdLog.slice(-600),violLog:S.violLog,camLog:S.camLog,log:S.log
+    spdLog:S.spdLog.slice(-600),violLog:violLogDedup,camLog:camLogDedup,log:S.log
   };
   appendTrip(trip);_currentTripId=trip.id;
   document.getElementById('eDist').textContent=S.dist.toFixed(2)+' km';
   document.getElementById('eTime').textContent=`${mm}:${ss}`;
   document.getElementById('eMax').textContent=Math.round(S.maxSpd)+' km/h';
   document.getElementById('eAvg').textContent=avg+' km/h';
-  document.getElementById('eViol').textContent=S.viol;
-  document.getElementById('eCam').textContent=S.camCnt;
+  document.getElementById('eViol').textContent=violLogDedup.length;
+  document.getElementById('eCam').textContent=camLogDedup.length;
   document.getElementById('eRoute').textContent=`${S.startAddr||S.startPC||'Start'} → ${S.endAddr||S.endPC||'End'}`;
   clearAllIcons();showScreen('endScreen');
 }
@@ -1651,8 +1391,7 @@ function resetApp(){updateBadge();showScreen('startScreen');}
 ══════════════════════════════════════════════════════ */
 function openHistory(){renderHistList();showScreen('histScreen');}
 async function renderHistList(){
-  const trips=(await loadTrips()).slice().reverse();
-  const el=document.getElementById('histList');
+  const trips=(await loadTrips()).slice().reverse();const el=document.getElementById('histList');
   if(!trips.length){el.innerHTML='<div class="no-trips"><span style="font-size:26px">🚗</span><span>No trips yet</span></div>';return;}
   el.innerHTML=trips.map((t,i)=>{
     const vc=t.viol>0?'style="color:var(--danger)"':'style="color:var(--success)"';
@@ -1676,10 +1415,7 @@ async function renderHistList(){
     </div>`;
   }).join('');
 }
-async function deleteTrip(id){
-  if(!confirm('Delete this trip?'))return;
-  await deleteTripById(id);await renderHistList();
-}
+async function deleteTrip(id){if(!confirm('Delete this trip?'))return;await deleteTripById(id);await renderHistList();}
 
 /* ══════════════════════════════════════════════════════
    TRIP DETAIL
@@ -1687,42 +1423,29 @@ async function deleteTrip(id){
 let _lmap=null;
 
 async function openDetail(id){
-  const trips=await loadTrips();
-  const t=trips.find(x=>x.id===id);if(!t)return;
+  const trips=await loadTrips();const t=trips.find(x=>x.id===id);if(!t)return;
   document.getElementById('detTitle').textContent=`${t.date} ${t.time}`;
   document.getElementById('detShareBtn').onclick=()=>shareTrip(id);
   const body=document.getElementById('detBody');
   body.innerHTML=`<div class="dsec"><h3>Summary</h3><div class="sgrid">
-    ${[['Distance',t.dist+'km'],['Duration',t.duration],['Max',t.maxSpd+'km/h'],
-       ['Avg',t.avgSpd+'km/h'],['Violations',t.viol],['Cameras',t.cams]]
+    ${[['Distance',t.dist+'km'],['Duration',t.duration],['Max',t.maxSpd+'km/h'],['Avg',t.avgSpd+'km/h'],['Violations',t.viol],['Cameras',t.cams]]
       .map(([l,v])=>`<div class="sstat"><div class="sl">${l}</div><div class="sv">${v}</div></div>`).join('')}
   </div></div>`;
   const hasPts=t.spdLog&&t.spdLog.length>0&&t.spdLog[0]&&t.spdLog[0].la;
   const osmLink=hasPts?osmUrl(t.spdLog):'';
   body.innerHTML+=`<div class="dsec"><h3>Route ${cflag(t.country)} ${t.country||''}</h3>
-    <div class="rstrip">
-      <div class="rpin">📍 ${t.startPC||'Start'}</div>
-      <div class="rarrow">────►</div>
-      <div class="rpin">🏁 ${t.endPC||'End'}</div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);line-height:1.6">
-      From: <span style="color:var(--text)">${t.startAddr||'Unknown'}</span><br>
-      To: <span style="color:var(--text)">${t.endAddr||'Unknown'}</span>
-    </div>
+    <div class="rstrip"><div class="rpin">📍 ${t.startPC||'Start'}</div><div class="rarrow">────►</div><div class="rpin">🏁 ${t.endPC||'End'}</div></div>
+    <div style="font-size:11px;color:var(--muted);line-height:1.6">From: <span style="color:var(--text)">${t.startAddr||'Unknown'}</span><br>To: <span style="color:var(--text)">${t.endAddr||'Unknown'}</span></div>
     ${osmLink?`<a class="osm-btn" href="${osmLink}" target="_blank" rel="noopener">🗺 Open in OpenStreetMap</a>`:''}
     ${hasPts?`<div id="mapWrap"><div id="routeMap"></div>
-      <div class="mleg">
-        <div class="ml"><div class="mld" style="background:#00d4ff"></div>Safe</div>
-        <div class="ml"><div class="mld" style="background:#ff6b00"></div>Over</div>
-        <div class="ml"><div class="mld" style="background:#ff2d2d"></div>+20</div>
-      </div>
+      <div class="mleg"><div class="ml"><div class="mld" style="background:#00d4ff"></div>Safe</div><div class="ml"><div class="mld" style="background:#ff6b00"></div>Over</div><div class="ml"><div class="mld" style="background:#ff2d2d"></div>+10</div></div>
     </div>`:''}
   </div>`;
-  if(t.spdLog&&t.spdLog.length>1)body.innerHTML+=`<div class="dsec"><h3>Speed Graph <span style="font-size:9px;color:var(--muted)">— dashed = limit</span></h3><div class="gw"><canvas id="detG"></canvas></div></div>`;
+  if(t.spdLog&&t.spdLog.length>1)body.innerHTML+=`<div class="dsec"><h3>Speed Graph</h3><div class="gw"><canvas id="detG"></canvas></div></div>`;
   if(t.spdLog&&t.spdLog.length>0){
     const step=Math.max(1,Math.floor(t.spdLog.length/80));
     const rows=t.spdLog.filter((_,i)=>i%step===0).map(e=>{
-      const m=e.s-e.l,rc=m>20?'ov':m>0?'wn':'ok',sc=m>20?'ov':m>0?'wn':'ok';
+      const m=e.s-e.l,rc=m>10?'ov':m>0?'wn':'ok',sc=m>10?'ov':m>0?'wn':'ok';
       const ts=new Date(e.t).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
       return `<div class="tlr ${rc}"><span class="tlt">${ts}</span><span class="tls ${sc}">${e.s}km/h</span><span class="tlro">${e.r||'—'}</span><span style="font-size:9px;color:var(--muted)">${e.l}lim</span></div>`;
     }).join('');
@@ -1739,133 +1462,44 @@ async function openDetail(id){
 }
 
 /* ══════════════════════════════════════════════════════
-   SHARE TRIP — generates full self-contained HTML report
+   SHARE TRIP
 ══════════════════════════════════════════════════════ */
 async function shareTrip(id){
-  const trips=await loadTrips();
-  const t=trips.find(x=>x.id===id);if(!t){alert('Trip not found');return;}
+  const trips=await loadTrips();const t=trips.find(x=>x.id===id);if(!t){alert('Trip not found');return;}
   const fl=cflag(t.country);
   const maxV=Math.max(80,...(t.spdLog||[]).map(e=>e.s));
-  // Build inline graph as data URI
   const gc=document.createElement('canvas');gc.width=800;gc.height=160;
   const gg=gc.getContext('2d');gg.fillStyle='#1a1d24';gg.fillRect(0,0,800,160);
   const pts=t.spdLog||[];
   if(pts.length>1){
     const step=Math.max(1,Math.floor(pts.length/800));const sp=pts.filter((_,i)=>i%step===0);
-    sp.forEach((e,i)=>{if(!i)return;const x1=((i-1)/(sp.length-1))*800,x2=(i/(sp.length-1))*800,y1=160-(sp[i-1].s/maxV)*160,y2=160-(e.s/maxV)*160,m=e.s-(e.l||50);gg.beginPath();gg.moveTo(x1,y1);gg.lineTo(x2,y2);gg.strokeStyle=m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';gg.lineWidth=2;gg.stroke();});
+    sp.forEach((e,i)=>{if(!i)return;const x1=((i-1)/(sp.length-1))*800,x2=(i/(sp.length-1))*800,y1=160-(sp[i-1].s/maxV)*160,y2=160-(e.s/maxV)*160,m=e.s-(e.l||50);gg.beginPath();gg.moveTo(x1,y1);gg.lineTo(x2,y2);gg.strokeStyle=m>10?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';gg.lineWidth=2;gg.stroke();});
     const mLim=(sp[Math.floor(sp.length/2)]?.l||50),ly=160-(mLim/maxV)*160;
     gg.beginPath();gg.setLineDash([6,4]);gg.moveTo(0,ly);gg.lineTo(800,ly);gg.strokeStyle='#ff2d2d80';gg.lineWidth=1.5;gg.stroke();gg.setLineDash([]);
     gg.fillStyle='#ff2d2d70';gg.font='12px sans-serif';gg.textAlign='left';gg.textBaseline='bottom';gg.fillText(`${mLim} km/h limit`,4,ly-2);
   }
   const graphImg=gc.toDataURL('image/png');
-
-  // Build timeline rows (text only for portability)
   const tlRows=(t.spdLog||[]).filter((_,i)=>i%(Math.max(1,Math.floor((t.spdLog||[]).length/60)))===0).map(e=>{
-    const m=e.s-e.l,bg=m>20?'#ff2d2d18':m>0?'#ff6b0015':'#00e6760a',bc=m>20?'#ff2d2d':m>0?'#ff6b00':'#00e676';
+    const m=e.s-e.l,bg=m>10?'#ff2d2d18':m>0?'#ff6b0015':'#00e6760a',bc=m>10?'#ff2d2d':m>0?'#ff6b00':'#00e676';
     const ts=new Date(e.t).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
     return `<tr style="background:${bg}"><td style="border-left:3px solid ${bc};padding:4px 8px;font-size:12px;color:#888;min-width:44px">${ts}</td><td style="padding:4px 8px;font-family:monospace;font-weight:700;font-size:13px;color:${bc}">${e.s} km/h</td><td style="padding:4px 8px;font-size:12px;color:#ccc">${e.r||'—'}</td><td style="padding:4px 8px;font-size:11px;color:#666">${e.l} lim</td></tr>`;
   }).join('');
-
   const violRows=(t.violLog||[]).map(v=>`<tr><td style="padding:5px 8px;color:#ff6b00">${v.time}</td><td style="padding:5px 8px;font-weight:700;color:#ff2d2d">${v.spd} km/h</td><td style="padding:5px 8px;color:#ccc">in ${v.lim} zone (+${v.spd-v.lim})</td><td style="padding:5px 8px;color:#888">${v.road||'—'}</td><td style="padding:5px 8px;color:#ffd700">${v.pc||''}</td></tr>`).join('');
-
   const camRows=(t.camLog||[]).map(c=>`<tr><td style="padding:5px 8px;color:#ff6b00">${c.time}</td><td style="padding:5px 8px">${c.type==='police'?'🚔 Police':'📷 Camera'}</td><td style="padding:5px 8px;color:#ccc">${c.road||'—'}</td><td style="padding:5px 8px;color:#888">${c.dist}m away</td></tr>`).join('');
-
   const hasGPS=pts.length>0&&pts[0]&&pts[0].la;
   const mapLink=hasGPS?`https://www.openstreetmap.org/?mlat=${pts[Math.floor(pts.length/2)].la}&mlon=${pts[Math.floor(pts.length/2)].lo}#map=14/${pts[Math.floor(pts.length/2)].la}/${pts[Math.floor(pts.length/2)].lo}`:'';
-
-  const html=`<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SpeedSense Trip Report — ${t.date} ${t.time}</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0c10;color:#e8eaf0;font-family:'Segoe UI',system-ui,sans-serif;padding:16px;max-width:800px;margin:0 auto}
-h1{font-family:monospace;color:#00d4ff;font-size:22px;letter-spacing:3px;margin-bottom:4px}
-h2{font-size:12px;color:#6b7280;letter-spacing:4px;text-transform:uppercase;margin-bottom:20px}
-.badge{display:inline-block;background:#1a1d24;border:1px solid #2a2e3a;border-radius:12px;padding:3px 10px;font-size:11px;color:#6b7280;margin-right:6px;margin-bottom:8px}
-.badge.ac{border-color:#00d4ff40;color:#00d4ff}
-.badge.dc{border-color:#ff2d2d40;color:#ff2d2d}
-.badge.ca{border-color:#ffd70040;color:#ffd700}
-.sec{background:#111318;border:1px solid #2a2e3a;border-radius:12px;padding:16px;margin-bottom:14px}
-.sec h3{font-size:10px;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #2a2e3a}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0}
-@media(max-width:400px){.grid{grid-template-columns:1fr 1fr}}
-.stat{text-align:center;background:#1a1d24;border-radius:6px;padding:10px}
-.stat .sl{font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
-.stat .sv{font-family:monospace;font-size:18px;font-weight:700;color:#e8eaf0;margin-top:2px}
-.route-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-.pin{font-size:12px;font-weight:700;color:#00d4ff;background:#1a1d24;padding:4px 12px;border-radius:14px;border:1px solid #2a2e3a}
-img.graph{width:100%;border-radius:6px;display:block}
-table{width:100%;border-collapse:collapse;font-size:12px}
-table td{padding:4px 6px;border-bottom:1px solid #1a1d2440}
-.legend{display:flex;gap:12px;font-size:10px;color:#888;margin-bottom:8px}
-.ld{display:inline-block;width:14px;height:3px;border-radius:1px;vertical-align:middle;margin-right:3px}
-a{color:#00d4ff}
-.footer{text-align:center;font-size:11px;color:#2a2e3a;margin-top:24px;padding-top:12px;border-top:1px solid #1a1d24}
-</style></head><body>
-<h1>SPEEDSENSE</h1>
-<h2>TRIP REPORT</h2>
-<div>
-  <span class="badge ac">${fl} ${t.country||'?'}</span>
-  <span class="badge">${t.date} ${t.time}</span>
-  <span class="badge">${t.duration} duration</span>
-  <span class="badge ${t.viol>0?'dc':''}">${t.viol} violations</span>
-  <span class="badge ca">${t.cams} camera alerts</span>
-</div>
-<div class="sec">
-  <h3>Summary</h3>
-  <div class="grid">
-    <div class="stat"><div class="sl">Distance</div><div class="sv">${t.dist} km</div></div>
-    <div class="stat"><div class="sl">Duration</div><div class="sv">${t.duration}</div></div>
-    <div class="stat"><div class="sl">Max Speed</div><div class="sv" style="color:${t.maxSpd>(t.spdLog?.[0]?.l||50)+20?'#ff2d2d':t.maxSpd>(t.spdLog?.[0]?.l||50)?'#ff6b00':'#00d4ff'}">${t.maxSpd} km/h</div></div>
-    <div class="stat"><div class="sl">Avg Speed</div><div class="sv">${t.avgSpd} km/h</div></div>
-    <div class="stat"><div class="sl">Violations</div><div class="sv" style="color:${t.viol>0?'#ff2d2d':'#00e676'}">${t.viol}</div></div>
-    <div class="stat"><div class="sl">Cam Alerts</div><div class="sv" style="color:#ffd700">${t.cams}</div></div>
-  </div>
-</div>
-<div class="sec">
-  <h3>Route</h3>
-  <div class="route-row">
-    <div class="pin">📍 ${t.startPC||'Start'}</div>
-    <div style="color:#6b7280">────────►</div>
-    <div class="pin">🏁 ${t.endPC||'End'}</div>
-  </div>
-  <div style="font-size:12px;color:#6b7280;line-height:1.7">
-    From: <span style="color:#e8eaf0">${t.startAddr||'Unknown'}</span><br>
-    To: <span style="color:#e8eaf0">${t.endAddr||'Unknown'}</span>
-  </div>
-  ${mapLink?`<p style="margin-top:10px;font-size:12px"><a href="${mapLink}" target="_blank" rel="noopener">🗺 View trip area on OpenStreetMap →</a></p>`:''}
-</div>
-${pts.length>1?`<div class="sec">
-  <h3>Speed Graph</h3>
-  <div class="legend">
-    <span><span class="ld" style="background:#00d4ff"></span>Safe</span>
-    <span><span class="ld" style="background:#ff6b00"></span>Over limit</span>
-    <span><span class="ld" style="background:#ff2d2d"></span>20+ over</span>
-    <span><span class="ld" style="background:#ff2d2d;height:1px"></span>Limit line</span>
-  </div>
-  <img class="graph" src="${graphImg}" alt="Speed graph">
-</div>`:''}
-${tlRows?`<div class="sec">
-  <h3>Speed Timeline</h3>
-  <div style="max-height:280px;overflow-y:auto">
-  <table><tbody>${tlRows}</tbody></table>
-  </div>
-</div>`:''}
-${violRows?`<div class="sec">
-  <h3>Violations (${t.violLog.length})</h3>
-  <table><thead><tr><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Time</td><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Speed</td><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Over by</td><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Road</td><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Postcode</td></tr></thead><tbody>${violRows}</tbody></table>
-</div>`:''}
-${camRows?`<div class="sec">
-  <h3>Camera Alerts (${t.camLog.length})</h3>
-  <table><thead><tr><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Time</td><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Type</td><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Road</td><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Distance</td></tr></thead><tbody>${camRows}</tbody></table>
-</div>`:''}
-<div class="footer">Generated by SpeedSense · ${new Date().toLocaleString()} · speedsense.app</div>
-</body></html>`;
-
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  // Try Web Share API first (mobile)
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpeedSense Trip — ${t.date} ${t.time}</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#0a0c10;color:#e8eaf0;font-family:'Segoe UI',system-ui,sans-serif;padding:16px;max-width:800px;margin:0 auto}h1{font-family:monospace;color:#00d4ff;font-size:22px;letter-spacing:3px;margin-bottom:4px}h2{font-size:12px;color:#6b7280;letter-spacing:4px;text-transform:uppercase;margin-bottom:20px}.badge{display:inline-block;background:#1a1d24;border:1px solid #2a2e3a;border-radius:12px;padding:3px 10px;font-size:11px;color:#6b7280;margin-right:6px;margin-bottom:8px}.badge.ac{border-color:#00d4ff40;color:#00d4ff}.badge.dc{border-color:#ff2d2d40;color:#ff2d2d}.badge.ca{border-color:#ffd70040;color:#ffd700}.sec{background:#111318;border:1px solid #2a2e3a;border-radius:12px;padding:16px;margin-bottom:14px}.sec h3{font-size:10px;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #2a2e3a}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{text-align:center;background:#1a1d24;border-radius:6px;padding:10px}.stat .sl{font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}.stat .sv{font-family:monospace;font-size:18px;font-weight:700;color:#e8eaf0;margin-top:2px}.route-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}.pin{font-size:12px;font-weight:700;color:#00d4ff;background:#1a1d24;padding:4px 12px;border-radius:14px;border:1px solid #2a2e3a}img.graph{width:100%;border-radius:6px;display:block}table{width:100%;border-collapse:collapse;font-size:12px}table td{padding:4px 6px;border-bottom:1px solid #1a1d2440}.legend{display:flex;gap:12px;font-size:10px;color:#888;margin-bottom:8px}.ld{display:inline-block;width:14px;height:3px;border-radius:1px;vertical-align:middle;margin-right:3px}a{color:#00d4ff}.footer{text-align:center;font-size:11px;color:#2a2e3a;margin-top:24px;padding-top:12px;border-top:1px solid #1a1d24}</style></head><body>
+<h1>SPEEDSENSE</h1><h2>TRIP REPORT</h2>
+<div><span class="badge ac">${fl} ${t.country||'?'}</span><span class="badge">${t.date} ${t.time}</span><span class="badge">${t.duration}</span><span class="badge ${t.viol>0?'dc':''}">${t.viol} violations</span><span class="badge ca">${t.cams} cam alerts</span></div>
+<div class="sec"><h3>Summary</h3><div class="grid"><div class="stat"><div class="sl">Distance</div><div class="sv">${t.dist} km</div></div><div class="stat"><div class="sl">Duration</div><div class="sv">${t.duration}</div></div><div class="stat"><div class="sl">Max Speed</div><div class="sv" style="color:${t.maxSpd>(t.spdLog?.[0]?.l||50)+10?'#ff2d2d':t.maxSpd>(t.spdLog?.[0]?.l||50)?'#ff6b00':'#00d4ff'}">${t.maxSpd} km/h</div></div><div class="stat"><div class="sl">Avg Speed</div><div class="sv">${t.avgSpd} km/h</div></div><div class="stat"><div class="sl">Violations</div><div class="sv" style="color:${t.viol>0?'#ff2d2d':'#00e676'}">${t.viol}</div></div><div class="stat"><div class="sl">Cam Alerts</div><div class="sv" style="color:#ffd700">${t.cams}</div></div></div></div>
+<div class="sec"><h3>Route</h3><div class="route-row"><div class="pin">📍 ${t.startPC||'Start'}</div><div style="color:#6b7280">───►</div><div class="pin">🏁 ${t.endPC||'End'}</div></div><div style="font-size:12px;color:#6b7280;line-height:1.7">From: <span style="color:#e8eaf0">${t.startAddr||'Unknown'}</span><br>To: <span style="color:#e8eaf0">${t.endAddr||'Unknown'}</span></div>${mapLink?`<p style="margin-top:10px;font-size:12px"><a href="${mapLink}" target="_blank">🗺 View on OpenStreetMap →</a></p>`:''}</div>
+${pts.length>1?`<div class="sec"><h3>Speed Graph</h3><div class="legend"><span><span class="ld" style="background:#00d4ff"></span>Safe</span><span><span class="ld" style="background:#ff6b00"></span>Over</span><span><span class="ld" style="background:#ff2d2d"></span>+10 over</span></div><img class="graph" src="${graphImg}" alt="Speed graph"></div>`:''}
+${tlRows?`<div class="sec"><h3>Speed Timeline</h3><div style="max-height:280px;overflow-y:auto"><table><tbody>${tlRows}</tbody></table></div></div>`:''}
+${violRows?`<div class="sec"><h3>Violations (${t.violLog.length})</h3><table><thead><tr><td style="padding:4px 8px;color:#6b7280;font-size:10px;text-transform:uppercase">Time</td><td style="padding:4px 8px;color:#6b7280;font-size:10px">Speed</td><td style="padding:4px 8px;color:#6b7280;font-size:10px">Over by</td><td style="padding:4px 8px;color:#6b7280;font-size:10px">Road</td><td style="padding:4px 8px;color:#6b7280;font-size:10px">Postcode</td></tr></thead><tbody>${violRows}</tbody></table></div>`:''}
+${camRows?`<div class="sec"><h3>Camera Alerts (${t.camLog.length})</h3><table><thead><tr><td style="padding:4px 8px;color:#6b7280;font-size:10px">Time</td><td style="padding:4px 8px;color:#6b7280;font-size:10px">Type</td><td style="padding:4px 8px;color:#6b7280;font-size:10px">Road</td><td style="padding:4px 8px;color:#6b7280;font-size:10px">Distance</td></tr></thead><tbody>${camRows}</tbody></table></div>`:''}
+<div class="footer">Generated by SpeedSense · ${new Date().toLocaleString()}</div></body></html>`;
+  const blob=new Blob([html],{type:'text/html'});const url=URL.createObjectURL(blob);
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([html],'speedsense_trip.html',{type:'text/html'})]})){
     navigator.share({title:`SpeedSense Trip — ${t.date}`,files:[new File([html],'speedsense_trip.html',{type:'text/html'})]}).catch(()=>{});
   } else {
@@ -1875,7 +1509,7 @@ ${camRows?`<div class="sec">
 }
 
 /* ══════════════════════════════════════════════════════
-   LEAFLET MAP
+   LEAFLET MAP — bigger
 ══════════════════════════════════════════════════════ */
 function initMap(log,viols,cams){
   const el=document.getElementById('routeMap');if(!el)return;
@@ -1884,7 +1518,7 @@ function initMap(log,viols,cams){
   _lmap=L.map('routeMap',{zoomControl:true,attributionControl:false,preferCanvas:true});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(_lmap);
   const step=Math.max(1,Math.floor(pts.length/400)),samp=pts.filter((_,i)=>i%step===0);
-  for(let i=1;i<samp.length;i++){const a=samp[i-1],b=samp[i],m=a.s-(a.l||50);L.polyline([[a.la,a.lo],[b.la,b.lo]],{color:m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff',weight:4,opacity:.88}).addTo(_lmap);}
+  for(let i=1;i<samp.length;i++){const a=samp[i-1],b=samp[i],m=a.s-(a.l||50);L.polyline([[a.la,a.lo],[b.la,b.lo]],{color:m>10?'#ff2d2d':m>0?'#ff6b00':'#00d4ff',weight:4,opacity:.88}).addTo(_lmap);}
   const mk=(em,bg)=>L.divIcon({html:`<div style="background:${bg};border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 1px 5px #0009">${em}</div>`,iconSize:[22,22],iconAnchor:[11,11],className:''});
   L.marker([pts[0].la,pts[0].lo],{icon:mk('📍','#00d4ff')}).bindPopup('<b>Start</b>').addTo(_lmap);
   L.marker([pts[pts.length-1].la,pts[pts.length-1].lo],{icon:mk('🏁','#00e676')}).bindPopup('<b>End</b>').addTo(_lmap);
@@ -1902,42 +1536,16 @@ function drawDetGraph(log){
   const d=window.devicePixelRatio||1;c.width=c.offsetWidth*d;c.height=c.offsetHeight*d;
   const g=c.getContext('2d'),W=c.width,H=c.height;
   const maxV=Math.max(80,...log.map(e=>e.s));
-  const step=Math.max(1,Math.floor(log.length/(W/d)));
-  const pts=log.filter((_,i)=>i%step===0);
+  const step=Math.max(1,Math.floor(log.length/(W/d)));const pts=log.filter((_,i)=>i%step===0);
   g.fillStyle='#1a1d24';g.fillRect(0,0,W,H);
   g.beginPath();pts.forEach((e,i)=>{const px=(i/(pts.length-1))*W,py=H-(e.s/maxV)*H;i===0?g.moveTo(px,py):g.lineTo(px,py);});
   g.lineTo(W,H);g.lineTo(0,H);g.closePath();g.fillStyle='#00d4ff08';g.fill();
-  pts.forEach((e,i)=>{if(!i)return;const x1=((i-1)/(pts.length-1))*W,x2=(i/(pts.length-1))*W,y1=H-(pts[i-1].s/maxV)*H,y2=H-(e.s/maxV)*H,m=e.s-(e.l||50);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokeStyle=m>20?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';g.lineWidth=2.5*d;g.stroke();});
+  pts.forEach((e,i)=>{if(!i)return;const x1=((i-1)/(pts.length-1))*W,x2=(i/(pts.length-1))*W,y1=H-(pts[i-1].s/maxV)*H,y2=H-(e.s/maxV)*H,m=e.s-(e.l||50);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokeStyle=m>10?'#ff2d2d':m>0?'#ff6b00':'#00d4ff';g.lineWidth=2.5*d;g.stroke();});
   const mLim=pts[Math.floor(pts.length/2)]?.l||50,ly=H-(mLim/maxV)*H;
   g.beginPath();g.setLineDash([4,3]);g.moveTo(0,ly);g.lineTo(W,ly);g.strokeStyle='#ff2d2d80';g.lineWidth=1.5*d;g.stroke();g.setLineDash([]);
   g.font=`${9*d}px Rajdhani,sans-serif`;g.fillStyle='#5a6070';g.textAlign='left';g.textBaseline='top';g.fillText('0',4,H-11*d);g.textBaseline='alphabetic';g.fillText(`${Math.round(maxV)} km/h`,4,11*d);
   g.fillStyle='#ff2d2d70';g.textBaseline='middle';g.fillText(`${mLim} limit`,W-55*d,ly-7);
 }
-
-/* ══════════════════════════════════════════════════════
-   IMPORT / EXPORT
-══════════════════════════════════════════════════════ */
-async function dlHistory(){const blob=new Blob([JSON.stringify(await loadTrips(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`speedsense_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
-function importHistory(evt){
-  const f=evt.target.files[0]; if(!f) return;
-  const fr=new FileReader();
-  fr.onload=async(e)=>{
-    try{
-      const data=JSON.parse(e.target.result);
-      if(!Array.isArray(data)) throw new Error('Not a valid SpeedSense export');
-      const ex=await loadTrips();
-      const ids=new Set(ex.map(t=>t.id));
-      const newTrips=data.filter(t=>t&&t.id&&!ids.has(t.id));
-      const merged=[...ex,...newTrips].sort((a,b)=>a.id-b.id);
-      await saveTrips(merged);
-      await updateBadge();
-      alert(`✓ Imported ${newTrips.length} new trip${newTrips.length===1?'':'s'}. Total: ${merged.length} trips.`);
-      if(document.getElementById('histScreen').classList.contains('active')) renderHistList();
-    }catch(e2){alert('Import failed: '+e2.message);}
-  };
-  fr.readAsText(f);evt.target.value='';
-}
-async function clearHistory(){if(!confirm('Delete ALL trip history? Cannot be undone.'))return;await idbClear('trips').catch(()=>{});try{localStorage.removeItem(LS_KEY);}catch(e){}updateBadge();if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}
 
 /* ══════════════════════════════════════════════════════
    UTILS
@@ -1947,14 +1555,26 @@ function fmtT(ts){return new Date(ts).toLocaleTimeString(undefined,{hour:'2-digi
 function cflag(cc){if(!cc||cc.length!==2)return '🌍';const pts=[...cc].map(c=>c.codePointAt(0)+0x1F1A5);return String.fromCodePoint(...pts);}
 
 /* ══════════════════════════════════════════════════════
+   VOLUME KEY SHORTCUTS
+══════════════════════════════════════════════════════ */
+function initVolumeKeys(){
+  if('mediaSession' in navigator){
+    try{navigator.mediaSession.setActionHandler('previoustrack',ignoreCurrentCamera);navigator.mediaSession.setActionHandler('nexttrack',reportUserCamera);}catch(e){}
+  }
+  document.addEventListener('keydown',e=>{
+    if(!rideActive&&!demoActive)return;
+    const k=e.code||e.key||'';
+    if(k==='AudioVolumeDown'||k==='VolumeDown'){e.preventDefault();ignoreCurrentCamera();}
+    else if(k==='AudioVolumeUp'||k==='VolumeUp'){e.preventDefault();reportUserCamera();}
+  },{passive:false});
+}
+
+/* ══════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════ */
 updateBadge();
 initSW();
-
-// Note: requestFullscreen removed — causes button event blocking on mobile.
-// The app is already visually full-screen via position:fixed; inset:0 CSS.
-
+initVolumeKeys();
 </script>
 </body>
 </html>
