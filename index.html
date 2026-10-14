@@ -491,6 +491,19 @@ canvas{display:block}
   </div>
 </div>
 
+<div id="iosGuide" style="display:none;position:fixed;inset:0;background:#000000ee;z-index:100;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0e1118;border:1.5px solid #ffd700;border-radius:20px;padding:24px;max-width:320px;text-align:center">
+    <div style="font-size:36px;margin-bottom:8px">🍎</div>
+    <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:#ffd700;letter-spacing:1px;margin-bottom:12px">iPHONE GPS TIP</div>
+    <div style="color:#e8eaf0;font-size:13px;line-height:1.7;margin-bottom:18px">
+      iOS stops GPS when screen locks.<br>
+      For uninterrupted tracking:<br><br>
+      <b style="color:#00d4ff">Settings → Display & Brightness<br>→ Auto-Lock → Never</b><br><br>
+      <span style="color:#8b92a5;font-size:11px">Remember to re-enable after your ride.<br>Add to Home Screen for best experience.</span>
+    </div>
+    <button onclick="document.getElementById('iosGuide').style.display='none';sessionStorage.setItem('iosGuideSeen','1')" style="background:#ffd700;color:#000;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;padding:12px 28px;border:none;border-radius:12px;cursor:pointer;width:100%">GOT IT — START RIDE</button>
+  </div>
+</div>
 </div><!-- /app -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -615,10 +628,34 @@ function importAllData(evt){
 }
 async function clearHistory(){if(!confirm('Delete ALL trip history? Cannot be undone.'))return;await idbClear('trips').catch(()=>{});try{localStorage.removeItem(LS_KEY);}catch(e){}updateBadge();if(document.getElementById('histScreen').classList.contains('active'))renderHistList();}
 
+const isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream)||
+  (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isOpera=/OPR|Opera/.test(navigator.userAgent);
+const isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
 /* ══════════════════════════════════════════════════════
    SERVICE WORKER + BACKGROUND GPS
 ══════════════════════════════════════════════════════ */
-let _sw=null,_bgPing=null,_notifGranted=false;
+let _sw=null,_bgPing=null,_notifGranted=false,_bgFallbackInterval=null;
+let _opKeepAlive=null;
+function startOpKeepAlive(){
+  if(_opKeepAlive)return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    gain.gain.value=0.001; // nearly silent
+    osc.frequency.value=1; // 1Hz sub-audible
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.start();
+    _opKeepAlive={ctx,osc};
+  }catch(e){}
+}
+function stopOpKeepAlive(){
+  if(!_opKeepAlive)return;
+  try{_opKeepAlive.osc.stop();_opKeepAlive.ctx.close();}catch(e){}
+  _opKeepAlive=null;
+}
 
 async function initSW(){
   if(!('serviceWorker' in navigator))return;
@@ -644,21 +681,46 @@ self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil
     _sw=reg;
     navigator.serviceWorker.addEventListener('message',()=>{});
     document.getElementById('bgStatus').textContent='🟢 Background GPS: Service Worker active';
-  }catch(e){document.getElementById('bgStatus').textContent='⚠ Background: Limited mode';}
+  }catch(e){
+    document.getElementById('bgStatus').textContent='⚠ Background: Limited mode';
+
+    // Fallback for Opera/browsers that block blob SWs: use silent audio keep-alive ping
+    if(!_bgFallbackInterval){
+      _bgFallbackInterval=setInterval(()=>{
+        try{unlockAudio();}catch(x){}
+      },25000);
+    }
+  }
   if('Notification' in window){
     const p=await Notification.requestPermission().catch(()=>'denied');
     _notifGranted=p==='granted';
-    if(_notifGranted)document.getElementById('bgStatus').textContent='🟢 Background GPS + Notifications active';
+    if(_notifGranted){
+      const ua=navigator.userAgent||'';
+      if(isIOS){
+        document.getElementById('bgStatus').textContent='🍎 iPhone: Set Auto-Lock to Never for GPS';
+      } else if(ua.includes('OPR')||ua.includes('Opera')){
+        document.getElementById('bgStatus').textContent='🟢 Opera: Keep screen on for best GPS accuracy';
+      } else {
+        document.getElementById('bgStatus').textContent='🟢 Background GPS + Notifications active';
+      }
+    } else if(_sw){
+      const ua=navigator.userAgent||'';
+      if(isIOS){
+        document.getElementById('bgStatus').textContent='🍎 iPhone: Set Auto-Lock to Never for GPS';
+      } else if(ua.includes('OPR')||ua.includes('Opera')){
+        document.getElementById('bgStatus').textContent='🟢 Opera: Keep screen on for best GPS accuracy';
+      }
+    }
   }
 }
 
-function startBGPing(){if(_bgPing)return;_bgPing=setInterval(()=>{if(!_sw||!_sw.active)return;_sw.active.postMessage({type:'KEEP_ALIVE'});},20000);document.getElementById('bgBadge').style.display='';}
+function startBGPing(){if(_bgPing)return;_bgPing=setInterval(()=>{if(_sw&&_sw.active)_sw.active.postMessage({type:'KEEP_ALIVE'});try{unlockAudio();}catch(x){}},15000);document.getElementById('bgBadge').style.display='';}
 function stopBGPing(){if(_bgPing){clearInterval(_bgPing);_bgPing=null;}document.getElementById('bgBadge').style.display='none';}
 function sendSWAlert(type,data){if(!_sw||!_sw.active)return;_sw.active.postMessage({type,msg:data});}
 
 document.addEventListener('visibilitychange',()=>{
   if(rideActive){
-    if(document.visibilityState==='hidden')startBGPing();
+    if(document.visibilityState==='hidden'){startBGPing();startHB();}
     else{unlockAudio();reqWake();}
   }
 });
@@ -765,12 +827,25 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 /* ══════════════════════════════════════════════════════
    WAKE LOCK
 ══════════════════════════════════════════════════════ */
-let _wl=null,_ns=null;
+let _wl=null,_ns=null,_iosAudio=null;
 async function reqWake(){
   if('wakeLock' in navigator){try{_wl=await navigator.wakeLock.request('screen');_wl.addEventListener('release',()=>setWB(false));setWB(true);return;}catch(e){}}
-  try{_ns=document.createElement('video');Object.assign(_ns,{playsinline:true,muted:true,loop:true,src:'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMQ=='});_ns.style.cssText='position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:.01;pointer-events:none';document.body.appendChild(_ns);await _ns.play();setWB(true);}catch(e){setWB(false);}
+  try{_ns=document.createElement('video');Object.assign(_ns,{playsinline:true,muted:true,loop:true,src:'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMQ=='});_ns.style.cssText='position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:.01;pointer-events:none';document.body.appendChild(_ns);await _ns.play();setWB(true);return;}catch(e){}
+  // Third fallback: silent AudioContext keep-alive (tricks Opera into keeping page alive)
+  if(!_wl){startOpKeepAlive();setWB(false);}
+  // iOS: silent audio loop — helps prevent screen dim
+  if(isIOS&&!_iosAudio){
+    try{
+      _iosAudio=new Audio();
+      // 1 second of silence as base64 WAV (44 bytes)
+      _iosAudio.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+      _iosAudio.loop=true;
+      _iosAudio.volume=0.01;
+      _iosAudio.play().catch(()=>{});
+    }catch(e){}
+  }
 }
-function relWake(){if(_wl){_wl.release().catch(()=>{});_wl=null;}if(_ns){_ns.pause();_ns.remove();_ns=null;}setWB(false);}
+function relWake(){if(_wl){_wl.release().catch(()=>{});_wl=null;}if(_ns){_ns.pause();_ns.remove();_ns=null;}stopOpKeepAlive();if(_iosAudio){try{_iosAudio.pause();}catch(e){}_iosAudio=null;}setWB(false);}
 function setWB(on){const b=document.getElementById('wakeBadge');if(!b)return;b.textContent=on?'ON':'DIM';b.className='badge wake'+(on?'':' off');}
 document.addEventListener('visibilitychange',()=>{if(rideActive&&document.visibilityState==='visible')reqWake();});
 
@@ -949,6 +1024,9 @@ function closeOverlay(){document.getElementById('overlay').classList.remove('on'
    RIDE
 ══════════════════════════════════════════════════════ */
 function startRide(){
+  if(isIOS&&!sessionStorage.getItem('iosGuideSeen')){
+    document.getElementById('iosGuide').style.display='flex';
+  }
   if(demoActive){demoActive=false;clearTimeout(demoTmr);}
   Object.assign(S,{speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,dist:0,t0:Date.now(),stopT:null,stopDur:0,log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],road:'Locating…',country:'',acc:null,lat:null,lng:null,pLat:null,pLng:null,nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],ignoredCams:new Set(),exceeded:false,excStart:null,sumSpd:0,sumN:0,lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:'',rtDistCheck:0,rtAvgSpeed:0,rtLastKm:0});
   rideActive=true;clearAllIcons();
@@ -957,6 +1035,8 @@ function startRide(){
   showScreen('rideScreen');
   initCanvas();startTripTimer();rafId=requestAnimationFrame(drawLoop);
   startGPS();reqWake();unlockAudio();startHB();startBGPing();
+  // Opera-specific one-time tip
+  try{const ua=navigator.userAgent||'';if((ua.includes('OPR')||ua.includes('Opera'))&&!sessionStorage.getItem('opera-tip-shown')){sessionStorage.setItem('opera-tip-shown','1');setTimeout(()=>{showIcon('opera-tip','info','🎭','Opera tip: Set screen timeout to "Never" in phone settings for uninterrupted GPS',8000);},1500);}}catch(e){}
 }
 
 /* ══════════════════════════════════════════════════════
@@ -965,7 +1045,7 @@ function startRide(){
 function startGPS(){
   if(!navigator.geolocation){showGPSErr('Geolocation not supported.');return;}
   document.getElementById('gpsDot').className='gps-dot search';
-  watchId=navigator.geolocation.watchPosition(onGPS,onGPSErr,{enableHighAccuracy:true,maximumAge:0,timeout:25000});
+  watchId=navigator.geolocation.watchPosition(onGPS,onGPSErr,{enableHighAccuracy:true,maximumAge:isIOS?500:0,timeout:isIOS?8000:25000});
 }
 
 let _kV=0,_kP=1;
@@ -1005,7 +1085,14 @@ function onGPS(pos){
   const mg=S.speed-S.spdLimit;
   document.getElementById('dSpeed').className='vl'+(mg>10?' d':mg>0?' w':' g');
 }
-function onGPSErr(e){if(e.code===3)return;showGPSErr({1:'Permission denied.',2:'GPS unavailable.'}[e.code]||'GPS error.');}
+function onGPSErr(e){
+  if(isIOS&&(e.code===1||e.code===3)&&rideActive){
+    if(!sessionStorage.getItem('iosGuideSeen'))
+      document.getElementById('iosGuide').style.display='flex';
+  }
+  if(e.code===3)return;
+  showGPSErr({1:'Permission denied.',2:'GPS unavailable.'}[e.code]||'GPS error.');
+}
 function showGPSErr(m){document.getElementById('gpsMsg').textContent=m;document.getElementById('gpsErr').classList.add('on');}
 function retryGPS(){document.getElementById('gpsErr').classList.remove('on');if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}startGPS();}
 
