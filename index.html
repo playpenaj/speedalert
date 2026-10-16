@@ -585,7 +585,13 @@ async function loadTrips(){
   try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}
 }
 async function appendTrip(t){await idbPut('trips',t).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]');a.push(t);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
-async function deleteTripById(id){await idbDelete('trips',id).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]').filter(t=>t.id!==id);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
+async function deleteTripById(id){
+  await idbDelete('trips',id).catch(()=>{});
+  try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]').filter(t=>t.id!==id);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}
+  // Record deleted id so imports never resurface it
+  try{const d=new Set(JSON.parse(localStorage.getItem('ss_deleted_ids')||'[]'));d.add(id);localStorage.setItem('ss_deleted_ids',JSON.stringify([...d]));}catch(e){}
+  updateBadge();
+}
 async function updateBadge(){const trips=await loadTrips();const el=document.getElementById('tripBadge');if(el)el.textContent=trips.length+' trip'+(trips.length===1?'':'s');}
 async function loadUCams(){try{return await idbGetAll('ucams');}catch(e){return[];}}
 async function addUCam(cam){await idbPut('ucams',cam).catch(()=>{});}
@@ -610,17 +616,33 @@ function importAllData(evt){
       // Support both old format (array of trips) and new format {version,trips,ucams}
       const newTrips=Array.isArray(data)?data:(data.trips||[]);
       const newCams=Array.isArray(data)?[]:(data.ucams||[]);
+
+      // ── Trips: merge by id, never re-add duplicates ──
       const exTrips=await loadTrips();
       const exIds=new Set(exTrips.map(t=>t.id));
-      const addedTrips=newTrips.filter(t=>t&&t.id&&!exIds.has(t.id));
+      // Also load deleted-trip IDs so we don't resurface deleted entries
+      let deletedIds=new Set();
+      try{deletedIds=new Set(JSON.parse(localStorage.getItem('ss_deleted_ids')||'[]'));}catch(x){}
+      const addedTrips=newTrips.filter(t=>t&&t.id&&!exIds.has(t.id)&&!deletedIds.has(t.id));
       const merged=[...exTrips,...addedTrips].sort((a,b)=>a.id-b.id);
       await saveTrips(merged);
-      // Import cameras (by id)
+
+      // ── Cameras: merge by id + lat/lng proximity (30m) to avoid near-dupes ──
       const exCams=await loadUCams();
       const exCamIds=new Set(exCams.map(c=>c.id));
-      for(const c of newCams){if(c&&c.id&&!exCamIds.has(c.id))await addUCam(c);}
+      let addedCams=0;
+      for(const c of newCams){
+        if(!c||!c.id)continue;
+        if(exCamIds.has(c.id))continue; // exact id duplicate
+        // Check proximity — skip if another cam within 30m already exists
+        const tooClose=exCams.some(ec=>hav(ec.lat,ec.lng,c.lat,c.lng)*1000<30);
+        if(tooClose)continue;
+        await addUCam(c);
+        exCams.push(c);exCamIds.add(c.id);
+        addedCams++;
+      }
       await updateBadge();
-      alert(`✓ Imported ${addedTrips.length} trip(s) and ${newCams.length} camera(s).`);
+      alert(`✓ Imported ${addedTrips.length} new trip(s) and ${addedCams} new camera(s).\n(Skipped ${newTrips.length-addedTrips.length} duplicate/deleted trip(s) and ${newCams.length-addedCams} duplicate camera(s).)`);
       if(document.getElementById('histScreen').classList.contains('active'))renderHistList();
     }catch(e2){alert('Import failed: '+e2.message);}
   };
@@ -728,90 +750,110 @@ document.addEventListener('visibilitychange',()=>{
 /* ══════════════════════════════════════════════════════
    AUDIO ENGINE — only 2 sounds: short beep, long beep
 ══════════════════════════════════════════════════════ */
-let _ac=null,_buf=null,_hb=null,_acUnlocked=false;
+/* ══════════════════════════════════════════════════════
+   AUDIO ENGINE — iOS Chrome/Opera/Safari compatible
+   Key rules:
+   1. AudioContext must be created AND started inside a user gesture
+   2. Buffers are bound to a specific context — rebuild if context changes
+   3. Always use ctx.currentTime for scheduling (not literal 0)
+   4. Resume must happen before every play attempt on iOS
+   5. Heartbeat every 3s on iOS keeps AC from auto-suspending
+══════════════════════════════════════════════════════ */
+let _ac=null,_acId=0,_bufCtxId=-1,_buf=null,_hb=null;
 
+// Get or create AudioContext — tracks an ID so we know when it changed
 function AC(){
   if(!_ac||_ac.state==='closed'){
-    _ac=new(window.AudioContext||window.webkitAudioContext)();
-    _acUnlocked=false;
+    try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){_ac=null;return null;}
+    _acId++;
   }
   return _ac;
 }
 
-// Build raw PCM buffers (called after AC is unlocked)
-function mkTone(freq,dur,vol=1.0){
-  try{
-    const ctx=AC(),sr=ctx.sampleRate,n=Math.ceil(sr*dur);
-    const b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);
-    const atk=Math.ceil(sr*.012),rel=Math.ceil(sr*.04);
-    for(let i=0;i<n;i++){
-      const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1.0;
-      d[i]=Math.sin(2*Math.PI*freq*(i/sr))*vol*env;
-    }
-    return b;
-  }catch(e){return null;}
+// Build tone buffers — always rebuilds if context has changed
+function mkRawTone(ctx,freq,dur,vol){
+  const sr=ctx.sampleRate,n=Math.ceil(sr*dur);
+  const b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);
+  const atk=Math.ceil(sr*.015),rel=Math.ceil(sr*.05);
+  for(let i=0;i<n;i++){
+    const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1;
+    d[i]=Math.sin(2*Math.PI*freq*(i/sr))*vol*env;
+  }
+  return b;
 }
 function buildBufs(){
-  if(_buf)return;
-  try{_buf={short:mkTone(880,.12,1.0),long:mkTone(950,.65,1.0)};}catch(e){_buf=null;}
-}
-
-// Play a buffer — always tries to resume first on iOS
-function playBuf(b){
-  if(!b)return;
+  const ctx=AC();
+  if(!ctx)return;
+  // Rebuild if no bufs OR if context changed since last build
+  if(_buf&&_bufCtxId===_acId)return;
   try{
-    const ctx=AC();
-    const doPlay=()=>{
-      try{
-        const s=ctx.createBufferSource();
-        s.buffer=b;
-        s.connect(ctx.destination);
-        s.start(0);
-      }catch(e){}
-    };
-    if(ctx.state==='running'){doPlay();}
-    else{ctx.resume().then(doPlay).catch(()=>{});}
-  }catch(e){}
+    _buf={short:mkRawTone(ctx,880,.13,1.0),long:mkRawTone(ctx,950,.7,1.0)};
+    _bufCtxId=_acId;
+  }catch(e){_buf=null;}
 }
 
-// Must be called from a direct user gesture (touch/click)
-// Plays a 50ms silent buffer — the only reliable iOS AudioContext unlock
+// Core play — resumes context first, then plays; rebuilds bufs if stale
+function playBuf(type){
+  const ctx=AC();
+  if(!ctx)return;
+  buildBufs(); // no-op if already built for this context
+  const b=_buf&&_buf[type];
+  if(!b)return;
+  const doPlay=()=>{
+    try{
+      const s=ctx.createBufferSource();
+      s.buffer=b;
+      s.connect(ctx.destination);
+      s.start(ctx.currentTime); // use currentTime, not 0
+    }catch(e){}
+  };
+  if(ctx.state==='running'){doPlay();}
+  else{ctx.resume().then(doPlay).catch(()=>{});}
+}
+
+// MUST be called from a direct tap/touch handler
+// Creates AC + plays a real silent buffer — iOS will not unlock with just .resume()
 function unlockAudio(){
   try{
     const ctx=AC();
+    if(!ctx)return;
     const doUnlock=()=>{
-      _acUnlocked=true;
       try{
+        // Play actual silent PCM — required by iOS to consider AC "user-activated"
         const sr=ctx.sampleRate;
-        const b=ctx.createBuffer(1,Math.ceil(sr*.05),sr); // 50ms silence
+        const silence=ctx.createBuffer(1,Math.ceil(sr*.1),sr); // 100ms silence
         const s=ctx.createBufferSource();
-        s.buffer=b;s.connect(ctx.destination);s.start(0);
+        s.buffer=silence;s.connect(ctx.destination);
+        s.start(ctx.currentTime);
       }catch(e){}
-      if(!_buf){buildBufs();}
+      buildBufs(); // safe to build now that AC is unlocked
     };
     if(ctx.state==='suspended')ctx.resume().then(doUnlock).catch(()=>{});
     else doUnlock();
   }catch(e){}
 }
 
-// Heartbeat: keep AC alive every 4s on iOS (it suspends fast), 15s elsewhere
+// Heartbeat — 3s on iOS (AC suspends in ~5s of silence), 12s elsewhere
 function startHB(){
   if(_hb)return;
-  const interval=isIOS?4000:15000;
+  const iv=isIOS?3000:12000;
   _hb=setInterval(()=>{
+    const ctx=AC();
+    if(!ctx)return;
+    if(ctx.state==='suspended'){
+      ctx.resume().then(()=>buildBufs()).catch(()=>{});
+      return;
+    }
+    buildBufs();
+    // Ping with a 1-sample near-silent buffer to keep AC alive
     try{
-      const ctx=AC();
-      if(ctx.state==='suspended'){
-        ctx.resume().then(()=>{if(!_buf)buildBufs();}).catch(()=>{});
-        return;
-      }
-      if(!_buf)buildBufs();
-      // Play a near-silent 1-sample buffer to keep AC active
       const b=ctx.createBuffer(1,1,ctx.sampleRate);
+      b.getChannelData(0)[0]=0.0001;
       const s=ctx.createBufferSource();
-      s.buffer=b;s.connect(ctx.destination);s.start(0);
-    }catch(e){_buf=null;}
-  },interval);
+      s.buffer=b;s.connect(ctx.destination);
+      s.start(ctx.currentTime);
+    }catch(e){}
+  },iv);
 }
 function stopHB(){if(_hb){clearInterval(_hb);_hb=null;}}
 
@@ -826,45 +868,39 @@ function setSpdBeep(mode){
   if(mode&&_spi&&_spiMode===mode)return;
   if(_spi){clearInterval(_spi);_spi=null;_spiMode='';}
   if(!mode)return;
-  buildBufs();if(!_buf)return;
   _spiMode=mode;
-  playBuf(_buf.short); // immediate
+  playBuf('short'); // immediate beep
   const ms=mode==='severe'?3000:5000;
-  _spi=setInterval(()=>{if(_buf)playBuf(_buf.short);},ms);
+  _spi=setInterval(()=>playBuf('short'),ms);
 }
 
-/* Camera long beep — enters range: 1 long beep + repeat every 5s if over limit */
+/* Camera long beep */
 let _cami=null,_camBeepMode=false;
 function setCamBeep(on,overLimit){
   if(!on){
     if(_cami){clearInterval(_cami);_cami=null;}
-    _camBeepMode=false;
-    return;
+    _camBeepMode=false;return;
   }
   if(!_camBeepMode){
     _camBeepMode=true;
-    buildBufs();
-    playBuf(_buf&&_buf.long); // always 1 long beep on entry
+    playBuf('long'); // always 1 long beep on entry
     if(overLimit){
-      // Repeat every 5s while over limit near camera
-      _cami=setInterval(()=>{if(_buf)playBuf(_buf.long);},5000);
+      _cami=setInterval(()=>playBuf('long'),5000);
     }
-    // If not over limit: only 1 notification beep, no repeat
   }
 }
-// Update repeating based on current speed/limit state
 function updateCamBeep(overLimit){
   if(!_camBeepMode)return;
-  if(overLimit&&!_cami){
-    _cami=setInterval(()=>{if(_buf)playBuf(_buf.long);},5000);
-  } else if(!overLimit&&_cami){
-    clearInterval(_cami);_cami=null;
-  }
+  if(overLimit&&!_cami){_cami=setInterval(()=>playBuf('long'),5000);}
+  else if(!overLimit&&_cami){clearInterval(_cami);_cami=null;}
 }
 
+// Re-unlock on every touch (not once) — iOS can re-suspend AC at any time
 ['touchstart','pointerdown','mousedown'].forEach(ev=>
-  document.addEventListener(ev,()=>{unlockAudio();startHB();},{once:true,passive:true}));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')unlockAudio();});
+  document.addEventListener(ev,()=>{unlockAudio();if(!_hb)startHB();},{passive:true}));
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){unlockAudio();}
+});
 
 /* ══════════════════════════════════════════════════════
    WAKE LOCK
@@ -915,7 +951,7 @@ const DEMO_SCRIPT=[
 ];
 
 function openDemo(){
-  unlockAudio();startHB();buildBufs();
+  unlockAudio();startHB();
   Object.assign(S,{speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,dist:0,t0:Date.now(),stopT:null,stopDur:0,log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],road:'Demo Mode',country:'SG',acc:8,lat:1.3521,lng:103.8198,pLat:null,pLng:null,nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],ignoredCams:new Set(),exceeded:false,excStart:null,sumSpd:0,sumN:0,lastGeo:0,lastOvp:0,startPC:'238823',endPC:'179097',startAddr:'Orchard Rd, 238823',endAddr:'ECP Expressway, 179097',rtDistCheck:0,rtAvgSpeed:0,rtLastKm:0});
   demoActive=true;demoStep=0;clearAllIcons();
   showScreen('rideScreen');
@@ -1072,11 +1108,19 @@ function startRide(){
   if(demoActive){demoActive=false;clearTimeout(demoTmr);}
   Object.assign(S,{speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,dist:0,t0:Date.now(),stopT:null,stopDur:0,log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],road:'Locating…',country:'',acc:null,lat:null,lng:null,pLat:null,pLng:null,nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],ignoredCams:new Set(),exceeded:false,excStart:null,sumSpd:0,sumN:0,lastGeo:0,lastOvp:0,startPC:'',endPC:'',startAddr:'',endAddr:'',rtDistCheck:0,rtAvgSpeed:0,rtLastKm:0});
   rideActive=true;clearAllIcons();
+  _kV=0;_kP=1;_kLastT=0;_kZeroCount=0; // reset Kalman state for fresh ride
   loadUCams().then(cams=>{S.userCams=cams;});
   document.getElementById('demoBadge').style.display='none';
   showScreen('rideScreen');
   initCanvas();startTripTimer();rafId=requestAnimationFrame(drawLoop);
   startGPS();reqWake();unlockAudio();startHB();startBGPing();
+  // Sound check: play short-short-long on ride start so user can confirm audio works
+  setTimeout(()=>{
+    playBuf('short');
+    setTimeout(()=>playBuf('short'),350);
+    setTimeout(()=>playBuf('long'),700);
+    showIcon('sndchk','info','🔊','Sound active — beep=speed alert, long beep=camera',5000);
+  },600);
   // Opera-specific one-time tip
   try{const ua=navigator.userAgent||'';if((ua.includes('OPR')||ua.includes('Opera'))&&!sessionStorage.getItem('opera-tip-shown')){sessionStorage.setItem('opera-tip-shown','1');setTimeout(()=>{showIcon('opera-tip','info','🎭','Opera tip: Set screen timeout to "Never" in phone settings for uninterrupted GPS',8000);},1500);}}catch(e){}
 }
@@ -1090,12 +1134,36 @@ function startGPS(){
   watchId=navigator.geolocation.watchPosition(onGPS,onGPSErr,{enableHighAccuracy:true,maximumAge:isIOS?500:0,timeout:isIOS?8000:25000});
 }
 
-let _kV=0,_kP=1;
-function kalmanSpeed(raw){
-  const delta=Math.abs(raw-_kV);
-  const R=delta>10?0.1:delta>5?0.4:delta>2?1.0:2.0;
-  const Q=0.5;_kP=_kP+Q;
-  const K=_kP/(_kP+R);_kV=_kV+K*(raw-_kV);_kP=(1-K)*_kP;
+/* ── Adaptive Kalman speed filter ──────────────────────
+   Goals:
+   • Track real speed closely (needle ≈ car speedo ±2–3 km/h)
+   • Smooth out GPS jitter without introducing visible lag
+   • Decay smoothly to zero after stopping (no snap)
+   • Don't over-smooth sudden legit speed changes
+   ─────────────────────────────────────────────────────*/
+let _kV=0,_kP=1,_kLastT=0,_kZeroCount=0;
+
+function kalmanSpeed(rawKmh, nowMs){
+  const dt=_kLastT>0?Math.min((nowMs-_kLastT)/1000,2):1; // seconds since last update, cap 2s
+  _kLastT=nowMs;
+
+  // Process noise Q scales with time gap — longer gap = more uncertainty
+  const Q=0.8*dt;
+
+  // Measurement noise R:
+  // • Large delta → trust GPS more (real acceleration/brake)
+  // • Small delta near current estimate → smooth (GPS jitter)
+  const delta=Math.abs(rawKmh-_kV);
+  const R = delta>15 ? 0.08   // big change → trust GPS fully
+           : delta>8  ? 0.25
+           : delta>4  ? 0.8
+           : delta>1  ? 2.0
+           :             4.0;  // tiny wobble → heavy smooth
+
+  _kP=_kP+Q;
+  const K=_kP/(_kP+R);
+  _kV=_kV+K*(rawKmh-_kV);
+  _kP=(1-K)*_kP;
   return Math.max(0,_kV);
 }
 
@@ -1104,9 +1172,31 @@ function onGPS(pos){
   document.getElementById('gpsDot').className='gps-dot fix';
   const{latitude:la,longitude:lo,speed:spd,accuracy:acc}=pos.coords;
   S.pLat=S.lat;S.pLng=S.lng;S.lat=la;S.lng=lo;S.acc=Math.round(acc);
-  const rawKmh=(spd!=null&&spd>=0)?spd*3.6:0;
-  if(rawKmh===0){S.speed=0;_kV=0;_kP=1;}
-  else S.speed=kalmanSpeed(rawKmh);
+  const now=Date.now();
+
+  // Raw speed: pos.coords.speed can be null or 0 on iOS even when moving
+  // Strategy: if truly 0 (confirmed by 3+ consecutive zero readings), decay to 0;
+  // otherwise treat a single 0 as a GPS hiccup and use Kalman smoothing
+  let rawKmh=(spd!=null&&spd>=0)?spd*3.6:0;
+
+  if(rawKmh===0){
+    _kZeroCount++;
+    if(_kZeroCount>=3){
+      // Confirmed stopped — decay smoothly rather than snap
+      _kV=_kV*0.55; // each tick: 55% of previous (smooth decay)
+      _kP=1;
+      if(_kV<0.5){_kV=0;_kP=1;} // fully settled
+    } else {
+      // Single/double zero — could be GPS hiccup, keep Kalman running
+      rawKmh=_kV*0.8; // nudge toward zero but don't snap
+      _kV=kalmanSpeed(rawKmh,now);
+    }
+  } else {
+    _kZeroCount=0;
+    _kV=kalmanSpeed(rawKmh,now);
+  }
+  S.speed=Math.max(0,_kV);
+
   if(S.speed>S.maxSpd)S.maxSpd=S.speed;
   if(S.speed>2){S.sumSpd+=S.speed;S.sumN++;}
   if(S.pLat!==null)S.dist+=hav(S.pLat,S.pLng,la,lo);
@@ -1114,8 +1204,7 @@ function onGPS(pos){
   if(S.dist-S.rtLastKm>=1){S.rtLastKm=Math.floor(S.dist);S.rtAvgSpeed=S.sumN>0?Math.round(S.sumSpd/S.sumN):0;}
   const ab=document.getElementById('tAcc');ab.textContent=`±${S.acc}m`;ab.className='badge'+(acc<20?' good':acc>60?' poor':'');
   S.spdHist.push(S.speed);if(S.spdHist.length>500)S.spdHist.shift();
-  S.spdLog.push({t:Date.now(),s:Math.round(S.speed),l:S.spdLimit,la,lo,r:S.road});if(S.spdLog.length>2000)S.spdLog.shift();
-  const now=Date.now();
+  S.spdLog.push({t:now,s:Math.round(S.speed),l:S.spdLimit,la,lo,r:S.road});if(S.spdLog.length>2000)S.spdLog.shift();
   if(now-S.lastGeo>7000){S.lastGeo=now;revGeo(la,lo);}
   if(now-S.lastOvp>28000){S.lastOvp=now;fetchCams(la,lo);}
   checkCams(la,lo);handleStop();handleViol(la,lo);
@@ -1429,7 +1518,7 @@ async function reportUserCamera(){
   if(near){showIcon('ucam','cam','📷','Camera already saved here',3000);return;}
   const cam={id:Date.now(),lat:S.lat,lng:S.lng,road:S.road||'Unknown',country:S.country||'',ts:fmtT(Date.now()),note:'User reported'};
   await addUCam(cam);S.userCams=await loadUCams();
-  buildBufs();playBuf(_buf&&_buf.long);
+  playBuf('long');
   showIcon('ucam','cam','📷',`Camera saved: ${S.road||'this location'}`,5000);
 }
 
