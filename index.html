@@ -303,9 +303,9 @@ canvas{display:block}
   <div class="globe-badge">🌍 Works anywhere in the world</div>
   <div class="info-text">Live GPS · Auto speed limits · Camera alerts<br>Background tracking · Persistent history</div>
   <div class="bg-info" id="bgStatus">🔋 Background GPS: tap START to enable</div>
-  <button class="start-btn" onclick="confirmStart()">START RIDE</button>
+  <button class="start-btn" onclick="unlockAudio();confirmStart()">START RIDE</button>
   <div class="start-row">
-    <button class="s-btn wn" onclick="openDemo()">🎮 DEMO</button>
+    <button class="s-btn wn" onclick="unlockAudio();openDemo()">🎮 DEMO</button>
     <button class="s-btn ac" onclick="showScreen('howtoScreen')">📖 HOW TO USE</button>
   </div>
   <div class="start-row">
@@ -358,7 +358,7 @@ canvas{display:block}
           <div class="dist" id="camSheetDist">—m</div>
         </div>
         <div class="cam-btns">
-          <button class="cam-action-btn ignore" onclick="ignoreCurrentCamera()">
+          <button class="cam-action-btn ignore" onclick="unlockAudio();ignoreCurrentCamera()">
             <div class="emo">🚫</div>
             <div>IGNORE CAMERA</div>
             <div class="sub">Skip this camera</div>
@@ -476,7 +476,7 @@ canvas{display:block}
     <h3 id="ovT">Confirm</h3>
     <p  id="ovM">Are you sure?</p>
     <div class="ovbtns">
-      <button class="bc by" id="ovY" onclick="doConfirm()">CONFIRM</button>
+      <button class="bc by" id="ovY" onclick="unlockAudio();doConfirm()">CONFIRM</button>
       <button class="bc bn"          onclick="closeOverlay()">CANCEL</button>
     </div>
   </div>
@@ -501,7 +501,7 @@ canvas{display:block}
       <b style="color:#00d4ff">Settings → Display & Brightness<br>→ Auto-Lock → Never</b><br><br>
       <span style="color:#8b92a5;font-size:11px">Remember to re-enable after your ride.<br>Add to Home Screen for best experience.</span>
     </div>
-    <button onclick="document.getElementById('iosGuide').style.display='none';sessionStorage.setItem('iosGuideSeen','1')" style="background:#ffd700;color:#000;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;padding:12px 28px;border:none;border-radius:12px;cursor:pointer;width:100%">GOT IT — START RIDE</button>
+    <button onclick="unlockAudio();document.getElementById('iosGuide').style.display='none';sessionStorage.setItem('iosGuideSeen','1')" style="background:#ffd700;color:#000;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;padding:12px 28px;border:none;border-radius:12px;cursor:pointer;width:100%">GOT IT — START RIDE</button>
   </div>
 </div>
 </div><!-- /app -->
@@ -728,8 +728,17 @@ document.addEventListener('visibilitychange',()=>{
 /* ══════════════════════════════════════════════════════
    AUDIO ENGINE — only 2 sounds: short beep, long beep
 ══════════════════════════════════════════════════════ */
-let _ac=null,_buf=null,_hb=null;
-function AC(){if(!_ac||_ac.state==='closed')_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+let _ac=null,_buf=null,_hb=null,_acUnlocked=false;
+
+function AC(){
+  if(!_ac||_ac.state==='closed'){
+    _ac=new(window.AudioContext||window.webkitAudioContext)();
+    _acUnlocked=false;
+  }
+  return _ac;
+}
+
+// Build raw PCM buffers (called after AC is unlocked)
 function mkTone(freq,dur,vol=1.0){
   try{
     const ctx=AC(),sr=ctx.sampleRate,n=Math.ceil(sr*dur);
@@ -746,30 +755,63 @@ function buildBufs(){
   if(_buf)return;
   try{_buf={short:mkTone(880,.12,1.0),long:mkTone(950,.65,1.0)};}catch(e){_buf=null;}
 }
+
+// Play a buffer — always tries to resume first on iOS
 function playBuf(b){
   if(!b)return;
-  const ctx=AC();
-  const doPlay=()=>{try{const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();}catch(e){}};
-  if(ctx.state==='running')doPlay();
-  else ctx.resume().then(doPlay).catch(()=>{});
+  try{
+    const ctx=AC();
+    const doPlay=()=>{
+      try{
+        const s=ctx.createBufferSource();
+        s.buffer=b;
+        s.connect(ctx.destination);
+        s.start(0);
+      }catch(e){}
+    };
+    if(ctx.state==='running'){doPlay();}
+    else{ctx.resume().then(doPlay).catch(()=>{});}
+  }catch(e){}
 }
+
+// Must be called from a direct user gesture (touch/click)
+// Plays a 50ms silent buffer — the only reliable iOS AudioContext unlock
 function unlockAudio(){
   try{
     const ctx=AC();
-    const resume=()=>{_buf=null;buildBufs();try{const b=ctx.createBuffer(1,1,ctx.sampleRate);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();}catch(e){}};
-    if(ctx.state==='suspended')ctx.resume().then(resume).catch(()=>{});else resume();
+    const doUnlock=()=>{
+      _acUnlocked=true;
+      try{
+        const sr=ctx.sampleRate;
+        const b=ctx.createBuffer(1,Math.ceil(sr*.05),sr); // 50ms silence
+        const s=ctx.createBufferSource();
+        s.buffer=b;s.connect(ctx.destination);s.start(0);
+      }catch(e){}
+      if(!_buf){buildBufs();}
+    };
+    if(ctx.state==='suspended')ctx.resume().then(doUnlock).catch(()=>{});
+    else doUnlock();
   }catch(e){}
 }
+
+// Heartbeat: keep AC alive every 4s on iOS (it suspends fast), 15s elsewhere
 function startHB(){
   if(_hb)return;
+  const interval=isIOS?4000:15000;
   _hb=setInterval(()=>{
     try{
       const ctx=AC();
-      if(ctx.state==='suspended'){ctx.resume().then(()=>{_buf=null;buildBufs();});return;}
+      if(ctx.state==='suspended'){
+        ctx.resume().then(()=>{if(!_buf)buildBufs();}).catch(()=>{});
+        return;
+      }
       if(!_buf)buildBufs();
-      const b=ctx.createBuffer(1,1,ctx.sampleRate);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start();
+      // Play a near-silent 1-sample buffer to keep AC active
+      const b=ctx.createBuffer(1,1,ctx.sampleRate);
+      const s=ctx.createBufferSource();
+      s.buffer=b;s.connect(ctx.destination);s.start(0);
     }catch(e){_buf=null;}
-  },15000);
+  },interval);
 }
 function stopHB(){if(_hb){clearInterval(_hb);_hb=null;}}
 
