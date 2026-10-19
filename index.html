@@ -865,13 +865,28 @@ let _spi=null,_spiMode='';
   setSpdBeep(false)    → stop
 */
 function setSpdBeep(mode){
-  if(mode&&_spi&&_spiMode===mode)return;
-  if(_spi){clearInterval(_spi);_spi=null;_spiMode='';}
-  if(!mode)return;
+  // Always clear existing interval first
+  if(_spi){clearInterval(_spi);_spi=null;}
+  if(!mode){_spiMode='';return;}
+  // Only skip if exact same mode AND interval already running (not a restart)
+  // NOTE: removed early-return guard — demo restarts need fresh intervals
   _spiMode=mode;
-  playBuf('short'); // immediate beep
   const ms=mode==='severe'?3000:5000;
-  _spi=setInterval(()=>playBuf('short'),ms);
+  // Resume AC first, then play immediately + start interval
+  const ctx=AC();
+  if(ctx&&ctx.state!=='running'){
+    ctx.resume().then(()=>{
+      buildBufs();
+      playBuf('short');
+      _spi=setInterval(()=>playBuf('short'),ms);
+    }).catch(()=>{
+      playBuf('short');
+      _spi=setInterval(()=>playBuf('short'),ms);
+    });
+  } else {
+    playBuf('short');
+    _spi=setInterval(()=>playBuf('short'),ms);
+  }
 }
 
 /* Camera long beep */
@@ -883,9 +898,16 @@ function setCamBeep(on,overLimit){
   }
   if(!_camBeepMode){
     _camBeepMode=true;
-    playBuf('long'); // always 1 long beep on entry
-    if(overLimit){
-      _cami=setInterval(()=>playBuf('long'),5000);
+    // Resume AC first, then play long beep
+    const ctx=AC();
+    const doPlay=()=>{
+      playBuf('long');
+      if(overLimit){_cami=setInterval(()=>playBuf('long'),5000);}
+    };
+    if(ctx&&ctx.state!=='running'){
+      ctx.resume().then(doPlay).catch(doPlay);
+    } else {
+      doPlay();
     }
   }
 }
@@ -951,6 +973,9 @@ const DEMO_SCRIPT=[
 ];
 
 function openDemo(){
+  // Reset beep state fully before demo starts — prevents stale guards
+  if(_spi){clearInterval(_spi);_spi=null;}_spiMode='';
+  if(_cami){clearInterval(_cami);_cami=null;}_camBeepMode=false;
   unlockAudio();startHB();
   Object.assign(S,{speed:0,spdLimit:50,roadType:'',maxSpd:0,viol:0,camCnt:0,dist:0,t0:Date.now(),stopT:null,stopDur:0,log:[],spdLog:[],violLog:[],camLog:[],spdHist:[],road:'Demo Mode',country:'SG',acc:8,lat:1.3521,lng:103.8198,pLat:null,pLng:null,nearCam:false,alertedIds:new Set(),cameras:[],userCams:[],ignoredCams:new Set(),exceeded:false,excStart:null,sumSpd:0,sumN:0,lastGeo:0,lastOvp:0,startPC:'238823',endPC:'179097',startAddr:'Orchard Rd, 238823',endAddr:'ECP Expressway, 179097',rtDistCheck:0,rtAvgSpeed:0,rtLastKm:0});
   demoActive=true;demoStep=0;clearAllIcons();
@@ -1116,9 +1141,14 @@ function startRide(){
   startGPS();reqWake();unlockAudio();startHB();startBGPing();
   // Sound check: play short-short-long on ride start so user can confirm audio works
   setTimeout(()=>{
-    playBuf('short');
-    setTimeout(()=>playBuf('short'),350);
-    setTimeout(()=>playBuf('long'),700);
+    const ctx=AC();
+    const doSndChk=()=>{
+      playBuf('short');
+      setTimeout(()=>playBuf('short'),350);
+      setTimeout(()=>playBuf('long'),700);
+    };
+    if(ctx&&ctx.state!=='running'){ctx.resume().then(doSndChk).catch(doSndChk);}
+    else doSndChk();
     showIcon('sndchk','info','🔊','Sound active — beep=speed alert, long beep=camera',5000);
   },600);
   // Opera-specific one-time tip
