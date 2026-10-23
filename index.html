@@ -318,6 +318,19 @@ canvas{display:block}
     <input id="importFile" type="file" accept=".json" style="position:fixed;top:-9999px;left:-9999px" onchange="importAllData(event)">
     <button class="s-btn dc" onclick="clearHistory()">🗑 Clear Trips</button>
   </div>
+  <!-- Volume control -->
+  <div style="width:100%;max-width:340px;background:#1a1d24;border:1px solid #2a2e3a;border-radius:14px;padding:14px 18px;margin-top:4px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;color:#e8eaf0;letter-spacing:1px">🔊 BEEP VOLUME</span>
+      <span id="volPct" style="font-family:'Orbitron',monospace;font-size:13px;color:#00d4ff;font-weight:700">100%</span>
+    </div>
+    <input id="volSlider" type="range" min="0" max="100" value="100"
+      style="width:100%;accent-color:#00d4ff;height:6px;cursor:pointer"
+      oninput="setVolume(this.value)" onchange="setVolume(this.value)">
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#6b7280">
+      <span>Mute</span><span>Max (recommended for riding)</span>
+    </div>
+  </div>
 </div>
 
 <!-- ══ RIDE ══ -->
@@ -759,13 +772,32 @@ document.addEventListener('visibilitychange',()=>{
    4. Resume must happen before every play attempt on iOS
    5. Heartbeat every 3s on iOS keeps AC from auto-suspending
 ══════════════════════════════════════════════════════ */
-let _ac=null,_acId=0,_bufCtxId=-1,_buf=null,_hb=null;
+let _ac=null,_acId=0,_bufCtxId=-1,_buf=null,_hb=null,_gain=null;
+let _vol=1.0; // 0.0–1.0, saved to localStorage
+
+function setVolume(pct){
+  _vol=Math.max(0,Math.min(100,parseInt(pct)||0))/100;
+  try{localStorage.setItem('ss_vol',pct);}catch(e){}
+  const el=document.getElementById('volPct');
+  if(el)el.textContent=Math.round(_vol*100)+'%';
+  const sl=document.getElementById('volSlider');
+  if(sl)sl.value=Math.round(_vol*100);
+  if(_gain)_gain.gain.setTargetAtTime(_vol,_ac.currentTime,.01);
+}
+// Load saved volume on init
+(function(){
+  try{const v=localStorage.getItem('ss_vol');if(v!=null)setVolume(v);}catch(e){}
+})();
 
 // Get or create AudioContext — tracks an ID so we know when it changed
 function AC(){
   if(!_ac||_ac.state==='closed'){
-    try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){_ac=null;return null;}
+    try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){_ac=null;_gain=null;return null;}
     _acId++;
+    // Master gain node — all sounds route through this for volume control
+    _gain=_ac.createGain();
+    _gain.gain.value=_vol;
+    _gain.connect(_ac.destination);
   }
   return _ac;
 }
@@ -812,7 +844,7 @@ function playBuf(type){
     try{
       const s=ctx.createBufferSource();
       s.buffer=b;
-      s.connect(ctx.destination);
+      s.connect(_gain||ctx.destination); // route through master gain
       s.start(ctx.currentTime); // use currentTime, not 0
     }catch(e){}
   };
@@ -832,7 +864,7 @@ function unlockAudio(){
         const sr=ctx.sampleRate;
         const silence=ctx.createBuffer(1,Math.ceil(sr*.1),sr); // 100ms silence
         const s=ctx.createBufferSource();
-        s.buffer=silence;s.connect(ctx.destination);
+        s.buffer=silence;s.connect(_gain||ctx.destination);
         s.start(ctx.currentTime);
       }catch(e){}
       buildBufs(); // safe to build now that AC is unlocked
@@ -859,7 +891,7 @@ function startHB(){
       const b=ctx.createBuffer(1,1,ctx.sampleRate);
       b.getChannelData(0)[0]=0.0001;
       const s=ctx.createBufferSource();
-      s.buffer=b;s.connect(ctx.destination);
+      s.buffer=b;s.connect(_gain||ctx.destination);
       s.start(ctx.currentTime);
     }catch(e){}
   },iv);
@@ -874,20 +906,17 @@ let _spi=null,_spiMode='';
   setSpdBeep(false)    → stop
 */
 function setSpdBeep(mode){
-  // Always clear existing interval first (synchronously)
+  // If mode unchanged and interval already running — do nothing, let it keep ticking
+  if(mode&&_spiMode===mode&&_spi)return;
+  // Clear existing interval
   if(_spi){clearInterval(_spi);_spi=null;}
   if(!mode){_spiMode='';return;}
-  // Skip only if same mode AND interval is already running — avoids restarting mid-beep
-  // (mode change always falls through since _spi was just cleared)
-  if(_spiMode===mode){
-    // Re-arm the interval even for same mode (interval was just cleared above)
-  }
   _spiMode=mode;
+  // mild = 1–9 km/h over → beep every 5s; severe = 10+ km/h over → beep every 3s
   const ms=mode==='severe'?3000:5000;
-  // Start interval synchronously — playBuf handles AC resume internally
-  // Do NOT put _spi inside an async callback; runDemoStep clears it before callback fires
+  // Start interval synchronously so runDemoStep re-calls can't accidentally kill it
   _spi=setInterval(()=>playBuf('short'),ms);
-  // Immediate first beep — resume AC then play
+  // Immediate first beep — resume AC first if needed
   const ctx=AC();
   if(ctx&&ctx.state!=='running'){
     ctx.resume().then(()=>{buildBufs();playBuf('short');}).catch(()=>{});
