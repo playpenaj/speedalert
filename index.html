@@ -774,10 +774,19 @@ function AC(){
 function mkRawTone(ctx,freq,dur,vol){
   const sr=ctx.sampleRate,n=Math.ceil(sr*dur);
   const b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);
-  const atk=Math.ceil(sr*.015),rel=Math.ceil(sr*.05);
+  const atk=Math.ceil(sr*.008),rel=Math.ceil(sr*.03);
   for(let i=0;i<n;i++){
+    const t=i/sr;
     const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1;
-    d[i]=Math.sin(2*Math.PI*freq*(i/sr))*vol*env;
+    // Aggressive alarm tone: sawtooth-like with many harmonics + slight detune
+    // Sawtooth approximation (harsh, cuts through noise)
+    let s=0;
+    for(let h=1;h<=8;h++) s+=Math.sin(2*Math.PI*freq*h*t)*(1/h);
+    // Add slight frequency modulation for urgency
+    s+=Math.sin(2*Math.PI*(freq*1.02)*t)*0.3;
+    // Hard clip to simulate distortion (louder perceived)
+    s=Math.max(-1,Math.min(1,s*1.4));
+    d[i]=s*vol*env;
   }
   return b;
 }
@@ -865,27 +874,25 @@ let _spi=null,_spiMode='';
   setSpdBeep(false)    → stop
 */
 function setSpdBeep(mode){
-  // Always clear existing interval first
+  // Always clear existing interval first (synchronously)
   if(_spi){clearInterval(_spi);_spi=null;}
   if(!mode){_spiMode='';return;}
-  // Only skip if exact same mode AND interval already running (not a restart)
-  // NOTE: removed early-return guard — demo restarts need fresh intervals
+  // Skip only if same mode AND interval is already running — avoids restarting mid-beep
+  // (mode change always falls through since _spi was just cleared)
+  if(_spiMode===mode){
+    // Re-arm the interval even for same mode (interval was just cleared above)
+  }
   _spiMode=mode;
   const ms=mode==='severe'?3000:5000;
-  // Resume AC first, then play immediately + start interval
+  // Start interval synchronously — playBuf handles AC resume internally
+  // Do NOT put _spi inside an async callback; runDemoStep clears it before callback fires
+  _spi=setInterval(()=>playBuf('short'),ms);
+  // Immediate first beep — resume AC then play
   const ctx=AC();
   if(ctx&&ctx.state!=='running'){
-    ctx.resume().then(()=>{
-      buildBufs();
-      playBuf('short');
-      _spi=setInterval(()=>playBuf('short'),ms);
-    }).catch(()=>{
-      playBuf('short');
-      _spi=setInterval(()=>playBuf('short'),ms);
-    });
+    ctx.resume().then(()=>{buildBufs();playBuf('short');}).catch(()=>{});
   } else {
     playBuf('short');
-    _spi=setInterval(()=>playBuf('short'),ms);
   }
 }
 
@@ -898,16 +905,14 @@ function setCamBeep(on,overLimit){
   }
   if(!_camBeepMode){
     _camBeepMode=true;
-    // Resume AC first, then play long beep
+    // Set interval synchronously — playBuf handles AC resume internally
+    if(overLimit){_cami=setInterval(()=>playBuf('long'),5000);}
+    // Immediate long beep — resume AC then play
     const ctx=AC();
-    const doPlay=()=>{
-      playBuf('long');
-      if(overLimit){_cami=setInterval(()=>playBuf('long'),5000);}
-    };
     if(ctx&&ctx.state!=='running'){
-      ctx.resume().then(doPlay).catch(doPlay);
+      ctx.resume().then(()=>{buildBufs();playBuf('long');}).catch(()=>{});
     } else {
-      doPlay();
+      playBuf('long');
     }
   }
 }
