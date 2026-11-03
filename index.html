@@ -303,6 +303,7 @@ canvas{display:block}
   <div class="globe-badge">🌍 Works anywhere in the world</div>
   <div class="info-text">Live GPS · Auto speed limits · Camera alerts<br>Background tracking · Persistent history</div>
   <div class="bg-info" id="bgStatus">🔋 Background GPS: tap START to enable</div>
+  <div id="syncBadge" style="display:none;font-size:12px;font-family:'Rajdhani',sans-serif;font-weight:600;letter-spacing:1px;padding:3px 10px;border-radius:20px;background:#ffffff08;transition:color .3s"></div>
   <button class="start-btn" onclick="unlockAudio();confirmStart()">START RIDE</button>
   <div class="start-row">
     <button class="s-btn wn" onclick="unlockAudio();openDemo()">🎮 DEMO</button>
@@ -597,18 +598,125 @@ async function loadTrips(){
   try{const rows=await idbGetAll('trips');if(rows&&rows.length>0){try{localStorage.setItem(LS_KEY,JSON.stringify(rows));}catch(e){}return rows.sort((a,b)=>a.id-b.id);}}catch(e){}
   try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return[];}
 }
-async function appendTrip(t){await idbPut('trips',t).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]');a.push(t);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();}
+async function appendTrip(t){await idbPut('trips',t).catch(()=>{});try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]');a.push(t);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}updateBadge();sbPushTrip(t).catch(()=>{});}
 async function deleteTripById(id){
   await idbDelete('trips',id).catch(()=>{});
   try{const a=JSON.parse(localStorage.getItem(LS_KEY)||'[]').filter(t=>t.id!==id);localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){}
   // Record deleted id so imports never resurface it
   try{const d=new Set(JSON.parse(localStorage.getItem('ss_deleted_ids')||'[]'));d.add(id);localStorage.setItem('ss_deleted_ids',JSON.stringify([...d]));}catch(e){}
   updateBadge();
+  sbDeleteTrip(id).catch(()=>{});
 }
 async function updateBadge(){const trips=await loadTrips();const el=document.getElementById('tripBadge');if(el)el.textContent=trips.length+' trip'+(trips.length===1?'':'s');}
 async function loadUCams(){try{return await idbGetAll('ucams');}catch(e){return[];}}
-async function addUCam(cam){await idbPut('ucams',cam).catch(()=>{});}
-async function delUCam(id){await idbDelete('ucams',id).catch(()=>{});}
+async function addUCam(cam){await idbPut('ucams',cam).catch(()=>{});sbPushCam(cam).catch(()=>{});}
+async function delUCam(id){await idbDelete('ucams',id).catch(()=>{});sbDeleteCam(id).catch(()=>{});}
+
+/* ══════════════════════════════════════════════════════
+   SUPABASE SYNC — device-ID based, no login required
+   Tables needed:
+     ss_trips  (device_id text, trip_id bigint PK per device, data jsonb, deleted bool)
+     ss_cameras(device_id text, cam_id text, data jsonb, deleted bool)
+══════════════════════════════════════════════════════ */
+const SUPABASE_URL='https://gdvbplbqehrtrgiwwcja.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkdmJwbGJxZWhydHJnaXd3Y2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMzExOTEsImV4cCI6MjEwNTgwNzE5MX0.w61-EWRvERE2QzXTKMifXp63Pqq5BFgMDKx99k3LPkY';
+
+// Stable device ID — created once, stored in localStorage
+function getDeviceId(){
+  let id=localStorage.getItem('ss_device_id');
+  if(!id){id='dev_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);localStorage.setItem('ss_device_id',id);}
+  return id;
+}
+
+// Low-level Supabase REST call
+async function sbFetch(path,method='GET',body=null){
+  const opts={method,headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':undefined}};
+  if(body)opts.body=JSON.stringify(body);
+  const r=await fetch(SUPABASE_URL+'/rest/v1/'+path,opts);
+  if(!r.ok){const t=await r.text().catch(()=>'');throw new Error(r.status+' '+t);}
+  return r.status===204?null:r.json();
+}
+
+let _sbSyncing=false;
+function showSyncBadge(state){
+  // state: 'syncing' | 'ok' | 'err' | ''
+  let el=document.getElementById('syncBadge');
+  if(!el)return;
+  if(state===''){el.style.display='none';return;}
+  el.style.display='';
+  el.textContent=state==='syncing'?'☁ Syncing…':state==='ok'?'☁ Synced':state==='err'?'☁ Offline':'';
+  el.style.color=state==='ok'?'#00e676':state==='err'?'#ff6b00':'#00d4ff';
+}
+
+// Push one trip to Supabase (upsert)
+async function sbPushTrip(t){
+  await sbFetch('ss_trips?on_conflict=device_id,trip_id','POST',[{device_id:getDeviceId(),trip_id:t.id,data:t,deleted:false}]);
+}
+// Mark trip deleted in Supabase
+async function sbDeleteTrip(id){
+  await sbFetch(`ss_trips?device_id=eq.${getDeviceId()}&trip_id=eq.${id}`,'PATCH',[{deleted:true}]);
+}
+// Push one camera (upsert)
+async function sbPushCam(c){
+  await sbFetch('ss_cameras?on_conflict=device_id,cam_id','POST',[{device_id:getDeviceId(),cam_id:String(c.id),data:c,deleted:false}]);
+}
+// Mark camera deleted
+async function sbDeleteCam(id){
+  await sbFetch(`ss_cameras?device_id=eq.${getDeviceId()}&cam_id=eq.${id}`,'PATCH',[{deleted:true}]);
+}
+
+// Full sync: pull from Supabase and merge into local, then push any local-only records
+async function sbSync(){
+  if(_sbSyncing)return;
+  _sbSyncing=true;
+  showSyncBadge('syncing');
+  try{
+    const did=getDeviceId();
+    // ── Pull trips ──
+    const remoteTrips=await sbFetch(`ss_trips?device_id=eq.${did}&deleted=eq.false&select=trip_id,data`);
+    if(remoteTrips&&remoteTrips.length){
+      const localTrips=await loadTrips();
+      const localIds=new Set(localTrips.map(t=>t.id));
+      let added=0;
+      for(const row of remoteTrips){
+        if(!row.data||localIds.has(row.data.id))continue;
+        await idbPut('trips',row.data).catch(()=>{});
+        added++;
+      }
+      if(added)updateBadge();
+    }
+    // ── Pull cameras ──
+    const remoteCams=await sbFetch(`ss_cameras?device_id=eq.${did}&deleted=eq.false&select=cam_id,data`);
+    if(remoteCams&&remoteCams.length){
+      const localCams=await loadUCams();
+      const localCamIds=new Set(localCams.map(c=>String(c.id)));
+      for(const row of remoteCams){
+        if(!row.data||localCamIds.has(String(row.data.id)))continue;
+        const tooClose=localCams.some(ec=>hav(ec.lat,ec.lng,row.data.lat,row.data.lng)*1000<30);
+        if(tooClose)continue;
+        await idbPut('ucams',row.data).catch(()=>{});
+        localCams.push(row.data);localCamIds.add(String(row.data.id));
+      }
+    }
+    // ── Push local trips not yet in Supabase ──
+    const remoteIds=new Set((remoteTrips||[]).map(r=>r.trip_id));
+    const allLocal=await loadTrips();
+    for(const t of allLocal){
+      if(!remoteIds.has(t.id))await sbPushTrip(t).catch(()=>{});
+    }
+    // ── Push local cameras not yet in Supabase ──
+    const remoteCamIds=new Set((remoteCams||[]).map(r=>r.cam_id));
+    const allLocalCams=await loadUCams();
+    for(const c of allLocalCams){
+      if(!remoteCamIds.has(String(c.id)))await sbPushCam(c).catch(()=>{});
+    }
+    showSyncBadge('ok');
+    setTimeout(()=>showSyncBadge(''),3000);
+  }catch(e){
+    showSyncBadge('err');
+    setTimeout(()=>showSyncBadge(''),5000);
+  }finally{_sbSyncing=false;}
+}
 
 /* ══════════════════════════════════════════════════════
    EXPORT / IMPORT ALL DATA (trips + cameras)
@@ -803,32 +911,52 @@ function AC(){
 }
 
 // Build tone buffers — always rebuilds if context has changed
-function mkRawTone(ctx,freq,dur,vol){
-  const sr=ctx.sampleRate,n=Math.ceil(sr*dur);
+// Single clean beep tone — used for both short and long
+function mkAlertTone(ctx,type){
+  const sr=ctx.sampleRate;
+  // One clean beep: 1100Hz sine, 120ms, fast attack/release
+  const dur=type==='short'?0.12:0.55;
+  const n=Math.ceil(sr*dur);
   const b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);
-  const atk=Math.ceil(sr*.008),rel=Math.ceil(sr*.03);
+  const atk=Math.ceil(sr*.006),rel=Math.ceil(sr*.015);
   for(let i=0;i<n;i++){
     const t=i/sr;
     const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1;
-    // Aggressive alarm tone: sawtooth-like with many harmonics + slight detune
-    // Sawtooth approximation (harsh, cuts through noise)
-    let s=0;
-    for(let h=1;h<=8;h++) s+=Math.sin(2*Math.PI*freq*h*t)*(1/h);
-    // Add slight frequency modulation for urgency
-    s+=Math.sin(2*Math.PI*(freq*1.02)*t)*0.3;
-    // Hard clip to simulate distortion (louder perceived)
-    s=Math.max(-1,Math.min(1,s*1.4));
-    d[i]=s*vol*env;
+    d[i]=(Math.sin(2*Math.PI*1100*t)*0.8+Math.sin(2*Math.PI*2200*t)*0.2)*env;
   }
   return b;
 }
+
+// Motorcycle engine rev-up startup sound (~1.4s)
+function mkBikeRev(ctx){
+  const sr=ctx.sampleRate,dur=1.4,n=Math.ceil(sr*dur);
+  const b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);
+  for(let i=0;i<n;i++){
+    const t=i/sr;
+    // Engine RPM curve: idle ~80Hz, revs up to ~220Hz, slight drop back
+    const rpmCurve=t<0.05?80:t<0.8?80+180*(Math.pow((t-.05)/.75,.6)):220-30*((t-.8)/.6);
+    const rpm=Math.max(80,rpmCurve);
+    // Engine sound = sawtooth (rich harmonics like a real engine)
+    let s=0;
+    for(let h=1;h<=10;h++)s+=Math.sin(2*Math.PI*rpm*h*t)*(1/h)*Math.pow(.82,h-1);
+    // Throttle crackle: add noise bursts during rev
+    const crack=t>.1&&t<.85?Math.sin(2*Math.PI*rpm*4.3*t)*0.15*(1-Math.exp(-(t-.1)*4)):0;
+    // Exhaust thump at ~10Hz modulation
+    const thump=0.3+0.7*Math.abs(Math.sin(2*Math.PI*rpm/60*t*.5));
+    // Amplitude envelope: quick start, sustain rev, fade out
+    const env=t<.04?t/.04:t>1.1?Math.max(0,1-(t-1.1)/.3):1;
+    d[i]=Math.max(-1,Math.min(1,(s+crack)*thump*env*0.9));
+  }
+  return b;
+}
+
 function buildBufs(){
   const ctx=AC();
   if(!ctx)return;
   // Rebuild if no bufs OR if context changed since last build
   if(_buf&&_bufCtxId===_acId)return;
   try{
-    _buf={short:mkRawTone(ctx,880,.13,1.0),long:mkRawTone(ctx,950,.7,1.0)};
+    _buf={short:mkAlertTone(ctx,'short'),long:mkAlertTone(ctx,'long'),rev:mkBikeRev(ctx)};
     _bufCtxId=_acId;
   }catch(e){_buf=null;}
 }
@@ -912,16 +1040,20 @@ function setSpdBeep(mode){
   if(_spi){clearInterval(_spi);_spi=null;}
   if(!mode){_spiMode='';return;}
   _spiMode=mode;
-  // mild = 1–9 km/h over → beep every 5s; severe = 10+ km/h over → beep every 3s
+  // mild = 1 beep every 5s; severe = beep-beep every 3s
   const ms=mode==='severe'?3000:5000;
-  // Start interval synchronously so runDemoStep re-calls can't accidentally kill it
-  _spi=setInterval(()=>playBuf('short'),ms);
+  const doBeep=()=>{
+    playBuf('short');
+    if(mode==='severe')setTimeout(()=>playBuf('short'),160); // beep-beep
+  };
+  // Start interval synchronously
+  _spi=setInterval(doBeep,ms);
   // Immediate first beep — resume AC first if needed
   const ctx=AC();
   if(ctx&&ctx.state!=='running'){
-    ctx.resume().then(()=>{buildBufs();playBuf('short');}).catch(()=>{});
+    ctx.resume().then(()=>{buildBufs();doBeep();}).catch(()=>{});
   } else {
-    playBuf('short');
+    doBeep();
   }
 }
 
@@ -1173,17 +1305,17 @@ function startRide(){
   showScreen('rideScreen');
   initCanvas();startTripTimer();rafId=requestAnimationFrame(drawLoop);
   startGPS();reqWake();unlockAudio();startHB();startBGPing();
-  // Sound check: play short-short-long on ride start so user can confirm audio works
+  // Startup: bike engine rev, then a ready double-pip
   setTimeout(()=>{
     const ctx=AC();
     const doSndChk=()=>{
-      playBuf('short');
-      setTimeout(()=>playBuf('short'),350);
-      setTimeout(()=>playBuf('long'),700);
+      buildBufs();
+      playBuf('rev'); // bike roar
+      setTimeout(()=>playBuf('short'),1500); // ready pip after rev
     };
     if(ctx&&ctx.state!=='running'){ctx.resume().then(doSndChk).catch(doSndChk);}
     else doSndChk();
-    showIcon('sndchk','info','🔊','Sound active — beep=speed alert, long beep=camera',5000);
+    showIcon('sndchk','info','🏍️','SpeedSense ready — alerts active',4000);
   },600);
   // Opera-specific one-time tip
   try{const ua=navigator.userAgent||'';if((ua.includes('OPR')||ua.includes('Opera'))&&!sessionStorage.getItem('opera-tip-shown')){sessionStorage.setItem('opera-tip-shown','1');setTimeout(()=>{showIcon('opera-tip','info','🎭','Opera tip: Set screen timeout to "Never" in phone settings for uninterrupted GPS',8000);},1500);}}catch(e){}
@@ -1857,6 +1989,8 @@ function initVolumeKeys(){
 updateBadge();
 initSW();
 initVolumeKeys();
+// Supabase: sync on load (pull remote data + push any local-only records)
+setTimeout(()=>sbSync(),1500);
 </script>
 </body>
 </html>
