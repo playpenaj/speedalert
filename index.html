@@ -640,13 +640,36 @@ async function sbFetch(path,method='GET',body=null){
 
 let _sbSyncing=false;
 function showSyncBadge(state){
-  // state: 'syncing' | 'ok' | 'err' | ''
   let el=document.getElementById('syncBadge');
   if(!el)return;
-  if(state===''){el.style.display='none';return;}
   el.style.display='';
-  el.textContent=state==='syncing'?'☁ Syncing…':state==='ok'?'☁ Synced':state==='err'?'☁ Offline':'';
-  el.style.color=state==='ok'?'#00e676':state==='err'?'#ff6b00':'#00d4ff';
+  if(state==='syncing'){
+    el.textContent='☁ Syncing…';
+    el.style.color='#00d4ff';
+    el.style.background='#00d4ff12';
+    el.style.border='1px solid #00d4ff44';
+  } else if(state==='ok'){
+    el.textContent='✅ Sync completed — database connected';
+    el.style.color='#00e676';
+    el.style.background='#00e67612';
+    el.style.border='1px solid #00e67644';
+    setTimeout(()=>{
+      el.textContent='☁ Cloud sync active';
+      el.style.color='#6b7280';
+      el.style.background='transparent';
+      el.style.border='none';
+    },4000);
+  } else if(state==='err'){
+    el.textContent='⚠️ Offline — data saved locally';
+    el.style.color='#ff6b00';
+    el.style.background='#ff6b0012';
+    el.style.border='1px solid #ff6b0044';
+    setTimeout(()=>{
+      el.style.display='none';
+    },6000);
+  } else {
+    el.style.display='none';
+  }
 }
 
 // Push one trip to Supabase (upsert)
