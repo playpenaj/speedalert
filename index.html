@@ -613,10 +613,11 @@ async function addUCam(cam){await idbPut('ucams',cam).catch(()=>{});sbPushCam(ca
 async function delUCam(id){await idbDelete('ucams',id).catch(()=>{});sbDeleteCam(id).catch(()=>{});}
 
 /* ══════════════════════════════════════════════════════
-   SUPABASE SYNC — device-ID based, no login required
-   Tables needed:
-     ss_trips  (device_id text, trip_id bigint PK per device, data jsonb, deleted bool)
-     ss_cameras(device_id text, cam_id text, data jsonb, deleted bool)
+   SUPABASE SYNC
+   ss_trips         — private per device (device_id + trip_id PK)
+   ss_shared_cameras— GLOBAL, shared across ALL devices
+                      (cam_id text PK, data jsonb, added_by text, deleted bool)
+   Any camera added by any user is visible to everyone on the same route.
 ══════════════════════════════════════════════════════ */
 const SUPABASE_URL='https://gdvbplbqehrtrgiwwcja.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkdmJwbGJxZWhydHJnaXd3Y2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMzExOTEsImV4cCI6MjEwNTgwNzE5MX0.w61-EWRvERE2QzXTKMifXp63Pqq5BFgMDKx99k3LPkY';
@@ -656,13 +657,13 @@ async function sbPushTrip(t){
 async function sbDeleteTrip(id){
   await sbFetch(`ss_trips?device_id=eq.${getDeviceId()}&trip_id=eq.${id}`,'PATCH',[{deleted:true}]);
 }
-// Push one camera (upsert)
+// Push one camera to global shared table (upsert by cam_id — no device filter)
 async function sbPushCam(c){
-  await sbFetch('ss_cameras?on_conflict=device_id,cam_id','POST',[{device_id:getDeviceId(),cam_id:String(c.id),data:c,deleted:false}]);
+  await sbFetch('ss_shared_cameras?on_conflict=cam_id','POST',[{cam_id:String(c.id),data:c,added_by:getDeviceId(),deleted:false}]);
 }
-// Mark camera deleted
+// Soft-delete a camera globally (marks deleted for everyone — only if you added it)
 async function sbDeleteCam(id){
-  await sbFetch(`ss_cameras?device_id=eq.${getDeviceId()}&cam_id=eq.${id}`,'PATCH',[{deleted:true}]);
+  await sbFetch(`ss_shared_cameras?cam_id=eq.${id}&added_by=eq.${getDeviceId()}`,'PATCH',[{deleted:true}]);
 }
 
 // Full sync: pull from Supabase and merge into local, then push any local-only records
@@ -685,18 +686,21 @@ async function sbSync(){
       }
       if(added)updateBadge();
     }
-    // ── Pull cameras ──
-    const remoteCams=await sbFetch(`ss_cameras?device_id=eq.${did}&deleted=eq.false&select=cam_id,data`);
+    // ── Pull ALL shared cameras (global — no device filter) ──
+    const remoteCams=await sbFetch(`ss_shared_cameras?deleted=eq.false&select=cam_id,data`);
     if(remoteCams&&remoteCams.length){
       const localCams=await loadUCams();
       const localCamIds=new Set(localCams.map(c=>String(c.id)));
+      let camAdded=0;
       for(const row of remoteCams){
         if(!row.data||localCamIds.has(String(row.data.id)))continue;
         const tooClose=localCams.some(ec=>hav(ec.lat,ec.lng,row.data.lat,row.data.lng)*1000<30);
         if(tooClose)continue;
         await idbPut('ucams',row.data).catch(()=>{});
         localCams.push(row.data);localCamIds.add(String(row.data.id));
+        camAdded++;
       }
+      if(camAdded&&typeof S!=='undefined')S.userCams=await loadUCams();
     }
     // ── Push local trips not yet in Supabase ──
     const remoteIds=new Set((remoteTrips||[]).map(r=>r.trip_id));
@@ -704,7 +708,7 @@ async function sbSync(){
     for(const t of allLocal){
       if(!remoteIds.has(t.id))await sbPushTrip(t).catch(()=>{});
     }
-    // ── Push local cameras not yet in Supabase ──
+    // ── Push local cameras not yet in shared table ──
     const remoteCamIds=new Set((remoteCams||[]).map(r=>r.cam_id));
     const allLocalCams=await loadUCams();
     for(const c of allLocalCams){
@@ -741,29 +745,49 @@ function importAllData(evt){
       // ── Trips: merge by id, never re-add duplicates ──
       const exTrips=await loadTrips();
       const exIds=new Set(exTrips.map(t=>t.id));
-      // Also load deleted-trip IDs so we don't resurface deleted entries
       let deletedIds=new Set();
       try{deletedIds=new Set(JSON.parse(localStorage.getItem('ss_deleted_ids')||'[]'));}catch(x){}
       const addedTrips=newTrips.filter(t=>t&&t.id&&!exIds.has(t.id)&&!deletedIds.has(t.id));
+      // ALL trips from the file (new + already local) get upserted to Supabase
+      const allImportTrips=newTrips.filter(t=>t&&t.id&&!deletedIds.has(t.id));
       const merged=[...exTrips,...addedTrips].sort((a,b)=>a.id-b.id);
       await saveTrips(merged);
 
       // ── Cameras: merge by id + lat/lng proximity (30m) to avoid near-dupes ──
       const exCams=await loadUCams();
       const exCamIds=new Set(exCams.map(c=>c.id));
+      const allImportCams=[];
       let addedCams=0;
       for(const c of newCams){
         if(!c||!c.id)continue;
-        if(exCamIds.has(c.id))continue; // exact id duplicate
-        // Check proximity — skip if another cam within 30m already exists
+        allImportCams.push(c); // collect all for Supabase upsert
+        if(exCamIds.has(c.id))continue;
         const tooClose=exCams.some(ec=>hav(ec.lat,ec.lng,c.lat,c.lng)*1000<30);
         if(tooClose)continue;
-        await addUCam(c);
+        await idbPut('ucams',c).catch(()=>{}); // save locally without triggering sbPushCam (batch below)
         exCams.push(c);exCamIds.add(c.id);
         addedCams++;
       }
       await updateBadge();
-      alert(`✓ Imported ${addedTrips.length} new trip(s) and ${addedCams} new camera(s).\n(Skipped ${newTrips.length-addedTrips.length} duplicate/deleted trip(s) and ${newCams.length-addedCams} duplicate camera(s).)`);
+
+      // ── Push everything to Supabase (upsert — safe to re-run) ──
+      showSyncBadge('syncing');
+      let sbOk=true;
+      try{
+        // Batch upsert trips in chunks of 50
+        for(let i=0;i<allImportTrips.length;i+=50){
+          const chunk=allImportTrips.slice(i,i+50).map(t=>({device_id:getDeviceId(),trip_id:t.id,data:t,deleted:false}));
+          await sbFetch('ss_trips?on_conflict=device_id,trip_id','POST',chunk);
+        }
+        // Batch upsert cameras to global shared table
+        for(let i=0;i<allImportCams.length;i+=50){
+          const chunk=allImportCams.slice(i,i+50).map(c=>({cam_id:String(c.id),data:c,added_by:getDeviceId(),deleted:false}));
+          await sbFetch('ss_shared_cameras?on_conflict=cam_id','POST',chunk);
+        }
+        showSyncBadge('ok');setTimeout(()=>showSyncBadge(''),3000);
+      }catch(sbErr){sbOk=false;showSyncBadge('err');setTimeout(()=>showSyncBadge(''),5000);}
+
+      alert(`✓ Imported ${addedTrips.length} new trip(s) and ${addedCams} new camera(s).\n${allImportTrips.length} trip(s) and ${allImportCams.length} camera(s) pushed to cloud${sbOk?'':' (offline — will sync later)'}.\n(Skipped ${newTrips.length-addedTrips.length} local duplicates.)`);
       if(document.getElementById('histScreen').classList.contains('active'))renderHistList();
     }catch(e2){alert('Import failed: '+e2.message);}
   };
