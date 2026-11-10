@@ -351,13 +351,14 @@ canvas{display:block}
     </div>
     <div class="R">
       <div class="ts"><b id="tCountry" style="color:var(--accent);font-size:10px"></b></div>
-      <button class="tbtn end" onclick="confirmEnd()">END</button>
+      <button class="tbtn" id="pauseBtn" onclick="togglePause()" style="background:#ffd70015;border-color:#ffd700;color:#ffd700;font-weight:700;letter-spacing:1px">⏸ PAUSE</button>
+      <button class="tbtn end" onclick="confirmEnd()" style="background:#ff2d2d22;border-color:#ff2d2d;color:#ff2d2d;font-weight:700">■ END</button>
     </div>
   </div>
   <div id="alertIcons"></div>
   <div id="mainView">
     <canvas id="speedCanvas"></canvas>
-    <div id="stopPill">Stopped: <span id="stopVal">0:00</span> / 10:00</div>
+    <div id="stopPill">Stopped: <span id="stopVal">0:00</span> / 5:00</div>
     <!-- Small always-visible add camera button (top-right) for manual adds -->
     <button onclick="reportUserCamera()" style="position:absolute;bottom:90px;right:14px;background:#ffd70022;border:1.5px solid #ffd700;color:#ffd700;font-size:15px;font-family:'Rajdhani',sans-serif;font-weight:700;padding:13px 20px;border-radius:24px;cursor:pointer;z-index:6;white-space:nowrap;box-shadow:0 4px 18px #ffd70030">📷 Add Camera</button>
     <!-- Camera action sheet — slides up on camera alert -->
@@ -387,8 +388,8 @@ canvas{display:block}
     <div class="sc"><div class="lb">Max</div><div class="vl" id="dMax">0</div></div>
     <div class="sc"><div class="lb">Viol</div><div class="vl d" id="dViol">0</div></div>
     <div class="sc"><div class="lb">Cams</div><div class="vl c" id="dCams">0</div></div>
-    <div class="sc tap" onclick="confirmEnd()" style="border-color:var(--danger);border-width:1.5px;background:#ff2d2d12">
-      <div class="lb" style="color:var(--danger)">END</div><div class="vl d" style="font-size:clamp(16px,4vw,22px)">●</div>
+    <div class="sc tap" onclick="confirmEnd()" style="border-color:#ff2d2d;border-width:2px;background:#ff2d2d28;box-shadow:0 0 10px #ff2d2d44">
+      <div class="lb" style="color:#ff4444">END</div><div class="vl d" style="font-size:clamp(16px,4vw,22px);color:#ff4444">■</div>
     </div>
   </div>
 </div>
@@ -426,7 +427,7 @@ canvas{display:block}
       <h3><span>🚀</span>GETTING STARTED</h3>
       <div class="how-item"><div class="how-icon ac">📍</div><div class="how-t"><b>Mount your phone</b><p>Use a windshield or dashboard mount. Grant location permission when prompted.</p></div></div>
       <div class="how-item"><div class="how-icon ac">▶</div><div class="how-t"><b>Press START RIDE</b><p>GPS activates, speedometer appears, speed limit detection begins immediately.</p></div></div>
-      <div class="how-item"><div class="how-icon ac">🛑</div><div class="how-t"><b>End your ride</b><p>Tap END. Trip saved automatically. Auto-ends after 10 min stationary.</p></div></div>
+      <div class="how-item"><div class="how-icon ac">🛑</div><div class="how-t"><b>End your ride</b><p>Tap END. Trip saved automatically. Auto-ends after 5 min stationary.</p></div></div>
     </div>
     <div class="how-sec">
       <h3><span>🔔</span>SOUNDS</h3>
@@ -969,7 +970,9 @@ function mkAlertTone(ctx,type){
   for(let i=0;i<n;i++){
     const t=i/sr;
     const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1;
-    d[i]=(Math.sin(2*Math.PI*1100*t)*0.8+Math.sin(2*Math.PI*2200*t)*0.2)*env;
+    // Boosted: 1100Hz fundamental + 2200Hz harmonic, clipped slightly for extra punch
+    const raw=(Math.sin(2*Math.PI*1100*t)*0.85+Math.sin(2*Math.PI*2200*t)*0.25+Math.sin(2*Math.PI*3300*t)*0.1)*env;
+    d[i]=Math.max(-1,Math.min(1,raw*1.3));
   }
   return b;
 }
@@ -1303,7 +1306,7 @@ function clearAllIcons(){Object.keys(_icons).forEach(clearIcon);}
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
-let rideActive=false,pendingAct=null,watchId=null,rafId=null,tripTmr=null;
+let rideActive=false,ridePaused=false,pendingAct=null,watchId=null,rafId=null,tripTmr=null;
 let _currentTripId=null;
 
 const S={
@@ -1411,7 +1414,7 @@ function kalmanSpeed(rawKmh, nowMs){
 }
 
 function onGPS(pos){
-  if(!rideActive||demoActive)return;
+  if(!rideActive||demoActive||ridePaused)return;
   document.getElementById('gpsDot').className='gps-dot fix';
   const{latitude:la,longitude:lo,speed:spd,accuracy:acc}=pos.coords;
   S.pLat=S.lat;S.pLng=S.lng;S.lat=la;S.lng=lo;S.acc=Math.round(acc);
@@ -1569,7 +1572,7 @@ function handleStop(){
     S.stopDur=(Date.now()-S.stopT)/1000;el.style.display='block';
     const m=Math.floor(S.stopDur/60),s=Math.floor(S.stopDur%60);
     document.getElementById('stopVal').textContent=`${m}:${s.toString().padStart(2,'0')}`;
-    if(S.stopDur>=600)endRide();
+    if(S.stopDur>=300)endRide();
   } else {S.stopT=null;S.stopDur=0;el.style.display='none';}
 }
 function handleViol(la,lo){
@@ -1808,8 +1811,25 @@ async function delUCamAndRefresh(id){await delUCam(id);await renderUCamList();}
 /* ══════════════════════════════════════════════════════
    END RIDE
 ══════════════════════════════════════════════════════ */
+function togglePause(){
+  if(!rideActive||demoActive)return;
+  ridePaused=!ridePaused;
+  const btn=document.getElementById('pauseBtn');
+  if(ridePaused){
+    setSpdBeep(false);setCamBeep(false);
+    if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+    if(btn){btn.textContent='▶ RESUME';btn.style.background='#00e67622';btn.style.borderColor='#00e676';btn.style.color='#00e676';}
+    showIcon('pause','info','⏸','Ride paused — GPS stopped',3000);
+  } else {
+    ridePaused=false;
+    startGPS();
+    if(btn){btn.textContent='⏸ PAUSE';btn.style.background='#ffd70015';btn.style.borderColor='#ffd700';btn.style.color='#ffd700';}
+    showIcon('resume','info','▶','Ride resumed',2000);
+  }
+}
 function endRide(){
   if(!rideActive&&!demoActive)return;
+  ridePaused=false;
   rideActive=false;demoActive=false;clearTimeout(demoTmr);
   cancelAnimationFrame(rafId);clearInterval(tripTmr);
   setSpdBeep(false);_spiMode='';setCamBeep(false);hideCamSheet();
