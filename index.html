@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0c10;--surface:#111318;--card:#1a1d24;--border:#2a2e3a;
-  --text:#e8eaf0;--muted:#6b7280;--accent:#00d4ff;--warn:#ff6b00;
+  --text:#e8eaf0;--muted:#b0b8c8;--accent:#00d4ff;--warn:#ff6b00;
   --danger:#ff2d2d;--success:#00e676;--cam:#ffd700;--police:#a855f7;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
@@ -351,14 +351,13 @@ canvas{display:block}
     </div>
     <div class="R">
       <div class="ts"><b id="tCountry" style="color:var(--accent);font-size:10px"></b></div>
-      <button class="tbtn" id="pauseBtn" onclick="togglePause()" style="background:#ffd70015;border-color:#ffd700;color:#ffd700;font-weight:700;letter-spacing:1px">⏸ PAUSE</button>
-      <button class="tbtn end" onclick="confirmEnd()" style="background:#ff2d2d22;border-color:#ff2d2d;color:#ff2d2d;font-weight:700">■ END</button>
+      <button class="tbtn end" onclick="confirmEnd()">END</button>
     </div>
   </div>
   <div id="alertIcons"></div>
   <div id="mainView">
     <canvas id="speedCanvas"></canvas>
-    <div id="stopPill">Stopped: <span id="stopVal">0:00</span> / 5:00</div>
+    <div id="stopPill">Stopped: <span id="stopVal">0:00</span> / 10:00</div>
     <!-- Small always-visible add camera button (top-right) for manual adds -->
     <button onclick="reportUserCamera()" style="position:absolute;bottom:90px;right:14px;background:#ffd70022;border:1.5px solid #ffd700;color:#ffd700;font-size:15px;font-family:'Rajdhani',sans-serif;font-weight:700;padding:13px 20px;border-radius:24px;cursor:pointer;z-index:6;white-space:nowrap;box-shadow:0 4px 18px #ffd70030">📷 Add Camera</button>
     <!-- Camera action sheet — slides up on camera alert -->
@@ -388,8 +387,8 @@ canvas{display:block}
     <div class="sc"><div class="lb">Max</div><div class="vl" id="dMax">0</div></div>
     <div class="sc"><div class="lb">Viol</div><div class="vl d" id="dViol">0</div></div>
     <div class="sc"><div class="lb">Cams</div><div class="vl c" id="dCams">0</div></div>
-    <div class="sc tap" onclick="confirmEnd()" style="border-color:#ff2d2d;border-width:2px;background:#ff2d2d28;box-shadow:0 0 10px #ff2d2d44">
-      <div class="lb" style="color:#ff4444">END</div><div class="vl d" style="font-size:clamp(16px,4vw,22px);color:#ff4444">■</div>
+    <div class="sc tap" onclick="confirmEnd()" style="border-color:var(--danger);border-width:1.5px;background:#ff2d2d12">
+      <div class="lb" style="color:var(--danger)">END</div><div class="vl d" style="font-size:clamp(16px,4vw,22px)">●</div>
     </div>
   </div>
 </div>
@@ -427,7 +426,7 @@ canvas{display:block}
       <h3><span>🚀</span>GETTING STARTED</h3>
       <div class="how-item"><div class="how-icon ac">📍</div><div class="how-t"><b>Mount your phone</b><p>Use a windshield or dashboard mount. Grant location permission when prompted.</p></div></div>
       <div class="how-item"><div class="how-icon ac">▶</div><div class="how-t"><b>Press START RIDE</b><p>GPS activates, speedometer appears, speed limit detection begins immediately.</p></div></div>
-      <div class="how-item"><div class="how-icon ac">🛑</div><div class="how-t"><b>End your ride</b><p>Tap END. Trip saved automatically. Auto-ends after 5 min stationary.</p></div></div>
+      <div class="how-item"><div class="how-icon ac">🛑</div><div class="how-t"><b>End your ride</b><p>Tap END. Trip saved automatically. Auto-ends after 10 min stationary.</p></div></div>
     </div>
     <div class="how-sec">
       <h3><span>🔔</span>SOUNDS</h3>
@@ -650,24 +649,17 @@ function showSyncBadge(state){
     el.style.background='#00d4ff12';
     el.style.border='1px solid #00d4ff44';
   } else if(state==='ok'){
-    el.textContent='✅ Sync completed — database connected';
+    el.textContent='✅ Sync complete';
     el.style.color='#00e676';
     el.style.background='#00e67612';
     el.style.border='1px solid #00e67644';
-    setTimeout(()=>{
-      el.textContent='☁ Cloud sync active';
-      el.style.color='#6b7280';
-      el.style.background='transparent';
-      el.style.border='none';
-    },4000);
+    setTimeout(()=>{el.style.display='none';},4000);
   } else if(state==='err'){
-    el.textContent='⚠️ Offline — data saved locally';
+    el.textContent='⚠️ Offline — saved locally';
     el.style.color='#ff6b00';
     el.style.background='#ff6b0012';
     el.style.border='1px solid #ff6b0044';
-    setTimeout(()=>{
-      el.style.display='none';
-    },6000);
+    setTimeout(()=>{el.style.display='none';},5000);
   } else {
     el.style.display='none';
   }
@@ -970,9 +962,8 @@ function mkAlertTone(ctx,type){
   for(let i=0;i<n;i++){
     const t=i/sr;
     const env=i<atk?i/atk:i>(n-rel)?(n-i)/rel:1;
-    // Boosted: 1100Hz fundamental + 2200Hz harmonic, clipped slightly for extra punch
-    const raw=(Math.sin(2*Math.PI*1100*t)*0.85+Math.sin(2*Math.PI*2200*t)*0.25+Math.sin(2*Math.PI*3300*t)*0.1)*env;
-    d[i]=Math.max(-1,Math.min(1,raw*1.3));
+    const raw=(Math.sin(2*Math.PI*1100*t)*0.9+Math.sin(2*Math.PI*2200*t)*0.3+Math.sin(2*Math.PI*3300*t)*0.15)*env;
+    d[i]=Math.max(-0.98,Math.min(0.98,raw*1.6));
   }
   return b;
 }
@@ -1306,7 +1297,7 @@ function clearAllIcons(){Object.keys(_icons).forEach(clearIcon);}
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
-let rideActive=false,ridePaused=false,pendingAct=null,watchId=null,rafId=null,tripTmr=null;
+let rideActive=false,pendingAct=null,watchId=null,rafId=null,tripTmr=null;
 let _currentTripId=null;
 
 const S={
@@ -1381,30 +1372,35 @@ function startGPS(){
 }
 
 /* ── Adaptive Kalman speed filter ──────────────────────
-   Goals:
-   • Track real speed closely (needle ≈ car speedo ±2–3 km/h)
-   • Smooth out GPS jitter without introducing visible lag
-   • Decay smoothly to zero after stopping (no snap)
-   • Don't over-smooth sudden legit speed changes
+   Calibration notes (measured vs real speedo):
+   • Climbing: GPS lags by 5-10 km/h → trust GPS fully on big deltas
+   • Cruising: GPS reads ~5 km/h low → apply +4 km/h offset at speed
+   • Stopping: snap to 0 fast (1-2 ticks) — no slow decay
    ─────────────────────────────────────────────────────*/
 let _kV=0,_kP=1,_kLastT=0,_kZeroCount=0;
 
+// GPS speed calibration offset: GPS tends to under-read at speed
+// +4 km/h added above 15 km/h, tapering to 0 below 10 km/h
+function calibrate(kmh){
+  if(kmh<=0)return 0;
+  if(kmh>=15)return kmh+4;
+  return kmh+(kmh/15)*4; // linear ramp 0→4 between 0-15 km/h
+}
+
 function kalmanSpeed(rawKmh, nowMs){
-  const dt=_kLastT>0?Math.min((nowMs-_kLastT)/1000,2):1; // seconds since last update, cap 2s
+  const dt=_kLastT>0?Math.min((nowMs-_kLastT)/1000,2):1;
   _kLastT=nowMs;
 
-  // Process noise Q scales with time gap — longer gap = more uncertainty
-  const Q=0.8*dt;
+  const Q=1.2*dt; // higher process noise = tracks changes faster
 
-  // Measurement noise R:
-  // • Large delta → trust GPS more (real acceleration/brake)
-  // • Small delta near current estimate → smooth (GPS jitter)
+  // Trust GPS fully on large changes (acceleration/braking)
+  // Only smooth small jitter at stable speed
   const delta=Math.abs(rawKmh-_kV);
-  const R = delta>15 ? 0.08   // big change → trust GPS fully
-           : delta>8  ? 0.25
-           : delta>4  ? 0.8
-           : delta>1  ? 2.0
-           :             4.0;  // tiny wobble → heavy smooth
+  const R = delta>12 ? 0.02  // big change → track GPS immediately
+           : delta>7  ? 0.08
+           : delta>3  ? 0.4
+           : delta>1  ? 1.2
+           :             2.5; // tiny jitter → smooth
 
   _kP=_kP+Q;
   const K=_kP/(_kP+R);
@@ -1414,32 +1410,29 @@ function kalmanSpeed(rawKmh, nowMs){
 }
 
 function onGPS(pos){
-  if(!rideActive||demoActive||ridePaused)return;
+  if(!rideActive||demoActive)return;
   document.getElementById('gpsDot').className='gps-dot fix';
   const{latitude:la,longitude:lo,speed:spd,accuracy:acc}=pos.coords;
   S.pLat=S.lat;S.pLng=S.lng;S.lat=la;S.lng=lo;S.acc=Math.round(acc);
   const now=Date.now();
 
   // Raw speed: pos.coords.speed can be null or 0 on iOS even when moving
-  // Strategy: if truly 0 (confirmed by 3+ consecutive zero readings), decay to 0;
-  // otherwise treat a single 0 as a GPS hiccup and use Kalman smoothing
   let rawKmh=(spd!=null&&spd>=0)?spd*3.6:0;
 
   if(rawKmh===0){
     _kZeroCount++;
-    if(_kZeroCount>=3){
-      // Confirmed stopped — decay smoothly rather than snap
-      _kV=_kV*0.55; // each tick: 55% of previous (smooth decay)
-      _kP=1;
-      if(_kV<0.5){_kV=0;_kP=1;} // fully settled
+    if(_kZeroCount>=2){
+      // Confirmed stopped after 2 consecutive zeros — snap to 0 immediately
+      _kV=0;_kP=1;
     } else {
-      // Single/double zero — could be GPS hiccup, keep Kalman running
-      rawKmh=_kV*0.8; // nudge toward zero but don't snap
+      // Single zero — could be GPS hiccup, nudge toward zero
+      rawKmh=_kV*0.5;
       _kV=kalmanSpeed(rawKmh,now);
     }
   } else {
     _kZeroCount=0;
-    _kV=kalmanSpeed(rawKmh,now);
+    // Apply calibration offset before Kalman, so filter tracks calibrated speed
+    _kV=kalmanSpeed(calibrate(rawKmh),now);
   }
   S.speed=Math.max(0,_kV);
 
@@ -1572,7 +1565,7 @@ function handleStop(){
     S.stopDur=(Date.now()-S.stopT)/1000;el.style.display='block';
     const m=Math.floor(S.stopDur/60),s=Math.floor(S.stopDur%60);
     document.getElementById('stopVal').textContent=`${m}:${s.toString().padStart(2,'0')}`;
-    if(S.stopDur>=300)endRide();
+    if(S.stopDur>=600)endRide();
   } else {S.stopT=null;S.stopDur=0;el.style.display='none';}
 }
 function handleViol(la,lo){
@@ -1811,25 +1804,8 @@ async function delUCamAndRefresh(id){await delUCam(id);await renderUCamList();}
 /* ══════════════════════════════════════════════════════
    END RIDE
 ══════════════════════════════════════════════════════ */
-function togglePause(){
-  if(!rideActive||demoActive)return;
-  ridePaused=!ridePaused;
-  const btn=document.getElementById('pauseBtn');
-  if(ridePaused){
-    setSpdBeep(false);setCamBeep(false);
-    if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
-    if(btn){btn.textContent='▶ RESUME';btn.style.background='#00e67622';btn.style.borderColor='#00e676';btn.style.color='#00e676';}
-    showIcon('pause','info','⏸','Ride paused — GPS stopped',3000);
-  } else {
-    ridePaused=false;
-    startGPS();
-    if(btn){btn.textContent='⏸ PAUSE';btn.style.background='#ffd70015';btn.style.borderColor='#ffd700';btn.style.color='#ffd700';}
-    showIcon('resume','info','▶','Ride resumed',2000);
-  }
-}
 function endRide(){
   if(!rideActive&&!demoActive)return;
-  ridePaused=false;
   rideActive=false;demoActive=false;clearTimeout(demoTmr);
   cancelAnimationFrame(rafId);clearInterval(tripTmr);
   setSpdBeep(false);_spiMode='';setCamBeep(false);hideCamSheet();
