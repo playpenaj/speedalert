@@ -351,7 +351,8 @@ canvas{display:block}
     </div>
     <div class="R">
       <div class="ts"><b id="tCountry" style="color:var(--accent);font-size:10px"></b></div>
-      <button class="tbtn end" onclick="confirmEnd()">END</button>
+      <button class="tbtn" id="pauseBtn" onclick="togglePause()" style="background:#ffd70015;border-color:#ffd700;color:#ffd700;font-weight:700;letter-spacing:1px">⏸ PAUSE</button>
+      <button class="tbtn end" onclick="confirmEnd()" style="background:#ff2d2d22;border-color:#ff2d2d;color:#ff2d2d;font-weight:700">■ END</button>
     </div>
   </div>
   <div id="alertIcons"></div>
@@ -1297,7 +1298,7 @@ function clearAllIcons(){Object.keys(_icons).forEach(clearIcon);}
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
-let rideActive=false,pendingAct=null,watchId=null,rafId=null,tripTmr=null;
+let rideActive=false,ridePaused=false,pendingAct=null,watchId=null,rafId=null,tripTmr=null;
 let _currentTripId=null;
 
 const S={
@@ -1409,8 +1410,24 @@ function kalmanSpeed(rawKmh, nowMs){
   return Math.max(0,_kV);
 }
 
-function onGPS(pos){
+function togglePause(){
   if(!rideActive||demoActive)return;
+  ridePaused=!ridePaused;
+  const btn=document.getElementById('pauseBtn');
+  if(ridePaused){
+    setSpdBeep(false);setCamBeep(false);
+    if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+    if(btn){btn.textContent='▶ RESUME';btn.style.background='#00e67622';btn.style.borderColor='#00e676';btn.style.color='#00e676';}
+    showIcon('pause','info','⏸','Ride paused — GPS stopped',3000);
+  }else{
+    ridePaused=false;
+    startGPS();
+    if(btn){btn.textContent='⏸ PAUSE';btn.style.background='#ffd70015';btn.style.borderColor='#ffd700';btn.style.color='#ffd700';}
+    showIcon('resume','info','▶','Ride resumed',2000);
+  }
+}
+function onGPS(pos){
+  if(!rideActive||demoActive||ridePaused)return;
   document.getElementById('gpsDot').className='gps-dot fix';
   const{latitude:la,longitude:lo,speed:spd,accuracy:acc}=pos.coords;
   S.pLat=S.lat;S.pLng=S.lng;S.lat=la;S.lng=lo;S.acc=Math.round(acc);
@@ -1806,6 +1823,7 @@ async function delUCamAndRefresh(id){await delUCam(id);await renderUCamList();}
 ══════════════════════════════════════════════════════ */
 function endRide(){
   if(!rideActive&&!demoActive)return;
+  ridePaused=false;
   rideActive=false;demoActive=false;clearTimeout(demoTmr);
   cancelAnimationFrame(rafId);clearInterval(tripTmr);
   setSpdBeep(false);_spiMode='';setCamBeep(false);hideCamSheet();
