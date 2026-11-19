@@ -113,6 +113,44 @@ canvas{display:block}
 /* ══ END ══ */
 #endScreen{background:var(--bg);align-items:center;justify-content:center;
   gap:14px;padding:20px;overflow-y:auto}
+/* Ride analysis */
+.ride-analysis{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.ra-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ra-title{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);letter-spacing:1.5px;font-weight:700}
+.ra-score{font-family:'Orbitron',monospace;font-size:26px;font-weight:900}
+.ra-score.A{color:#00e676}.ra-score.B{color:#69f0ae}.ra-score.C{color:#ffd700}.ra-score.D{color:#ff6b00}.ra-score.F{color:#ff2d2d}
+.ra-bar{height:6px;background:#ffffff12;border-radius:3px;margin-bottom:12px;overflow:hidden}
+.ra-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.ra-items{display:flex;flex-direction:column;gap:6px}
+.ra-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.45}
+.ra-item .ico{font-size:14px;flex-shrink:0;margin-top:1px}
+/* Compare */
+.ride-compare{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.rc-title{font-family:'Orbitron',monospace;font-size:11px;color:var(--accent);letter-spacing:1.5px;font-weight:700;margin-bottom:10px}
+.rc-row{display:flex;align-items:center;gap:6px;margin-bottom:7px;font-size:12px}
+.rc-label{color:var(--muted);width:70px;flex-shrink:0;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.rc-val{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;width:58px;text-align:right;flex-shrink:0}
+.rc-val.cur{color:var(--accent)}
+.rc-delta{font-size:11px;padding:1px 6px;border-radius:9px;flex-shrink:0}
+.rc-delta.up{background:#00e67618;color:#00e676}
+.rc-delta.dn{background:#ff2d2d18;color:#ff2d2d}
+.rc-delta.eq{background:#ffffff0a;color:var(--muted)}
+/* Petrol modal */
+#petrolModal{position:fixed;inset:0;background:#000000cc;display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+#petrolModal.on{display:flex}
+.petrol-box{background:var(--surface);border:1.5px solid #00e67655;border-radius:18px;padding:22px;width:100%;max-width:320px}
+.petrol-box h3{font-family:'Orbitron',monospace;font-size:13px;color:#00e676;letter-spacing:1.5px;margin-bottom:16px;text-align:center}
+.petrol-field{margin-bottom:14px}
+.petrol-field label{display:block;font-size:11px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px}
+.petrol-field input{width:100%;background:#0a0c10;border:1px solid var(--border);color:var(--text);font-family:'Orbitron',monospace;font-size:16px;padding:9px 12px;border-radius:8px;outline:none;-webkit-appearance:none}
+.petrol-field input:focus{border-color:#00e676}
+.petrol-actions{display:flex;gap:8px;margin-top:4px}
+/* Fuel stats card on home */
+.fuel-card{width:100%;max-width:340px;background:#0a1a10;border:1px solid #00e67630;border-radius:14px;padding:12px 16px}
+.fuel-card-row{display:flex;justify-content:space-between;align-items:center}
+.fuel-stat{text-align:center}
+.fuel-stat .fv{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:#00e676}
+.fuel-stat .fl{font-size:10px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
 #endGrid{background:var(--card);border:1px solid var(--border);border-radius:14px;
   padding:16px;width:100%;max-width:360px;display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .es{text-align:center}
@@ -319,6 +357,16 @@ canvas{display:block}
     <input id="importFile" type="file" accept=".json" style="position:fixed;top:-9999px;left:-9999px" onchange="importAllData(event)">
     <button class="s-btn dc" onclick="clearHistory()">🗑 Clear Trips</button>
   </div>
+  <!-- Total km + fuel card -->
+  <div class="fuel-card" id="homeStatsCard">
+    <div class="fuel-card-row">
+      <div class="fuel-stat"><div class="fv" id="homeTotalKm">0.0</div><div class="fl">Total km</div></div>
+      <div class="fuel-stat"><div class="fv" id="homeTotalRides">0</div><div class="fl">Rides</div></div>
+      <div class="fuel-stat"><div class="fv" id="homeEfficiency">—</div><div class="fl">km/L</div></div>
+      <div class="fuel-stat"><div class="fv" id="homeLastFill">—</div><div class="fl">km since fill</div></div>
+    </div>
+    <button class="s-btn" onclick="openPetrolModal()" style="width:100%;justify-content:center;margin-top:10px;border-color:#00e676;color:#00e676;font-size:13px">⛽ LOG PETROL FILL-UP</button>
+  </div>
   <!-- Volume control -->
   <div style="width:100%;max-width:340px;background:#1a1d24;border:1px solid #2a2e3a;border-radius:14px;padding:14px 18px;margin-top:4px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -409,6 +457,10 @@ canvas{display:block}
     <div class="rl">Route</div>
     <div class="rv" id="eRoute">—</div>
   </div>
+  <!-- Ride Analysis -->
+  <div class="ride-analysis" id="rideAnalysis"></div>
+  <!-- Compare with previous -->
+  <div class="ride-compare" id="rideCompare" style="display:none"></div>
   <div class="start-row">
     <button class="start-btn" onclick="resetApp()">NEW RIDE</button>
     <button class="s-btn ac" onclick="shareLastTrip()">📤 SHARE TRIP</button>
@@ -493,6 +545,20 @@ canvas{display:block}
     <div class="ovbtns">
       <button class="bc by" id="ovY" onclick="unlockAudio();doConfirm()">CONFIRM</button>
       <button class="bc bn"          onclick="closeOverlay()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PETROL MODAL ══ -->
+<div id="petrolModal">
+  <div class="petrol-box">
+    <h3>⛽ PETROL FILL-UP</h3>
+    <div class="petrol-field"><label>Litres filled</label><input type="number" id="petrolLitres" placeholder="e.g. 12.5" step="0.1" min="0"></div>
+    <div class="petrol-field"><label>Cost (optional)</label><input type="number" id="petrolCost" placeholder="e.g. 24.80" step="0.01" min="0"></div>
+    <div class="petrol-field"><label>Odometer km (optional)</label><input type="number" id="petrolOdo" placeholder="e.g. 15420" step="1" min="0"></div>
+    <div class="petrol-actions">
+      <button class="s-btn" style="flex:1;justify-content:center" onclick="closePetrolModal()">CANCEL</button>
+      <button class="s-btn" style="flex:1;justify-content:center;border-color:#00e676;color:#00e676" onclick="savePetrolFill()">SAVE ⛽</button>
     </div>
   </div>
 </div>
@@ -608,7 +674,7 @@ async function deleteTripById(id){
   updateBadge();
   sbDeleteTrip(id).catch(()=>{});
 }
-async function updateBadge(){const trips=await loadTrips();const el=document.getElementById('tripBadge');if(el)el.textContent=trips.length+' trip'+(trips.length===1?'':'s');}
+async function updateBadge(){const trips=await loadTrips();const el=document.getElementById('tripBadge');if(el)el.textContent=trips.length+' trip'+(trips.length===1?'':'s');updateHomeStats();}
 async function loadUCams(){try{return await idbGetAll('ucams');}catch(e){return[];}}
 async function addUCam(cam){await idbPut('ucams',cam).catch(()=>{});sbPushCam(cam).catch(()=>{});}
 async function delUCam(id){await idbDelete('ucams',id).catch(()=>{});sbDeleteCam(id).catch(()=>{});}
@@ -681,6 +747,10 @@ async function sbPushCam(c){
 // Soft-delete a camera globally (marks deleted for everyone — only if you added it)
 async function sbDeleteCam(id){
   await sbFetch(`ss_shared_cameras?cam_id=eq.${id}&added_by=eq.${getDeviceId()}`,'PATCH',[{deleted:true}]);
+}
+// Push petrol fill to Supabase (ss_fuel table — private per device)
+async function sbPushFuel(f){
+  await sbFetch('ss_fuel?on_conflict=device_id,fill_id','POST',[{device_id:getDeviceId(),fill_id:f.id,data:f}]);
 }
 
 // Full sync: pull from Supabase and merge into local, then push any local-only records
@@ -1220,7 +1290,7 @@ function runDemoStep(){
   document.getElementById('tAcc').textContent=`±${S.acc}m`;
   document.getElementById('tRoad').textContent=S.road;
   const mg=S.speed-S.spdLimit;
-  document.getElementById('dSpeed').className='vl'+(mg>=10?' d':mg>0?' w':' g');
+  document.getElementById('dSpeed').className='vl'+(mg>=20?' d':mg>=10?' w':' g');
   const overLimit=S.speed>(S.spdLimit||50);
   // Camera alert
   if(sc.cam){
@@ -1242,13 +1312,13 @@ function runDemoStep(){
       hideCamSheet();
     }
   }
-  // Speed violation
-  if(mg>=10){
-    if(!S.exceeded){S.exceeded=true;S.viol++;S.violLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,spd:Math.round(S.speed),lim:S.spdLimit,road:S.road,pc:S.endPC});document.getElementById('dViol').textContent=S.viol;}
-    showIcon('spd','speed','⚠',`${Math.round(S.speed)}/${S.spdLimit} (+${Math.round(mg)})`,sc.dur);
+  // Speed: +10 warning, +20 violation
+  if(mg>=20){
+    if(!S.exceeded){S.exceeded=true;S.viol++;S.violLog.push({time:fmtT(Date.now()),lat:stepLat,lng:stepLng,spd:Math.round(S.speed),lim:S.spdLimit,road:S.road,pc:S.endPC,severity:'violation'});document.getElementById('dViol').textContent=S.viol;}
+    showIcon('spd','speed','🚨',`VIOLATION ${Math.round(S.speed)}/${S.spdLimit} (+${Math.round(mg)})`,sc.dur);
     setSpdBeep('severe');
-  } else if(mg>0){
-    if(!S.exceeded){S.exceeded=true;showIcon('spd','warn','⚡',`${Math.round(S.speed)}/${S.spdLimit} (+${Math.round(mg)})`,sc.dur);}
+  } else if(mg>=10){
+    if(!S.exceeded){S.exceeded=true;showIcon('spd','warn','⚠️',`WARNING ${Math.round(S.speed)}/${S.spdLimit} (+${Math.round(mg)})`,sc.dur);}
     setSpdBeep('mild');
   } else {
     S.exceeded=false;setSpdBeep(false);clearIcon('spd');
@@ -1470,7 +1540,7 @@ function onGPS(pos){
   document.getElementById('dViol').textContent=S.viol;
   document.getElementById('dCams').textContent=S.camCnt;
   const mg=S.speed-S.spdLimit;
-  document.getElementById('dSpeed').className='vl'+(mg>10?' d':mg>0?' w':' g');
+  document.getElementById('dSpeed').className='vl'+(mg>=20?' d':mg>=10?' w':' g');
 }
 function onGPSErr(e){
   if(isIOS&&(e.code===1||e.code===3)&&rideActive){
@@ -1587,18 +1657,27 @@ function handleStop(){
 }
 function handleViol(la,lo){
   const lim=S.spdLimit||50,exc=S.speed>lim,mg=S.speed-lim;
+  // Thresholds: +10 = WARNING (orange beep), +20 = VIOLATION (red double-beep)
   if(exc){
     if(!S.excStart)S.excStart=Date.now();
     if(Date.now()-S.excStart>1500){
       if(!S.exceeded){
-        S.exceeded=true;S.viol++;
-        if(S.log.length)S.log[S.log.length-1].exc=(S.log[S.log.length-1].exc||0)+1;
-        S.violLog.push({time:fmtT(Date.now()),lat:la,lng:lo,spd:Math.round(S.speed),lim,road:S.road,pc:S.endPC});
-        showIcon('spd',mg>=10?'speed':'warn',mg>=10?'⚠':'⚡',`${Math.round(S.speed)}/${lim} km/h (+${Math.round(mg)})`,8000);
-        if(mg>=10&&_notifGranted)sendSWAlert('SPEED_ALERT',`${Math.round(S.speed)}km/h in ${lim} zone on ${S.road}`);
+        S.exceeded=true;
+        if(mg>=20){
+          // Violation — log it
+          S.viol++;
+          if(S.log.length)S.log[S.log.length-1].exc=(S.log[S.log.length-1].exc||0)+1;
+          S.violLog.push({time:fmtT(Date.now()),lat:la,lng:lo,spd:Math.round(S.speed),lim,road:S.road,pc:S.endPC,severity:'violation'});
+          showIcon('spd','speed','🚨',`VIOLATION ${Math.round(S.speed)}/${lim} (+${Math.round(mg)})`,8000);
+          if(_notifGranted)sendSWAlert('SPEED_ALERT',`${Math.round(S.speed)}km/h in ${lim} zone on ${S.road}`);
+          document.getElementById('dViol').textContent=S.viol;
+        } else {
+          // Warning — show but don't count as violation
+          showIcon('spd','warn','⚠️',`WARNING ${Math.round(S.speed)}/${lim} (+${Math.round(mg)})`,8000);
+        }
       }
-      // 1–9 over: beep every 5s; 10+ over: beep every 3s
-      setSpdBeep(mg>=10?'severe':'mild');
+      // +10–19 = mild beep every 5s; +20 = severe double-beep every 3s
+      setSpdBeep(mg>=20?'severe':'mild');
     }
   } else {
     S.excStart=null;S.exceeded=false;
@@ -1849,6 +1928,8 @@ function endRide(){
     spdLog:S.spdLog.slice(-600),violLog:violLogDedup,camLog:camLogDedup,log:S.log
   };
   appendTrip(trip);_currentTripId=trip.id;
+  renderRideAnalysis(trip);
+  renderRideComparison(trip);
   document.getElementById('eDist').textContent=S.dist.toFixed(2)+' km';
   document.getElementById('eTime').textContent=`${mm}:${ss}`;
   document.getElementById('eMax').textContent=Math.round(S.maxSpd)+' km/h';
@@ -1859,7 +1940,233 @@ function endRide(){
   clearAllIcons();showScreen('endScreen');
 }
 function shareLastTrip(){if(_currentTripId)shareTrip(_currentTripId);}
-function resetApp(){updateBadge();showScreen('startScreen');}
+function resetApp(){updateBadge();updateHomeStats();showScreen('startScreen');}
+
+/* ══════════════════════════════════════════════════════
+   PETROL / FUEL LOG
+══════════════════════════════════════════════════════ */
+function loadFuelLog(){try{return JSON.parse(localStorage.getItem('ss_fuel')||'[]');}catch(e){return[];}}
+function saveFuelLog(log){try{localStorage.setItem('ss_fuel',JSON.stringify(log));}catch(e){}}
+
+function openPetrolModal(){
+  document.getElementById('petrolLitres').value='';
+  document.getElementById('petrolCost').value='';
+  document.getElementById('petrolOdo').value='';
+  document.getElementById('petrolModal').classList.add('on');
+  setTimeout(()=>document.getElementById('petrolLitres').focus(),200);
+}
+function closePetrolModal(){document.getElementById('petrolModal').classList.remove('on');}
+function savePetrolFill(){
+  const litres=parseFloat(document.getElementById('petrolLitres').value);
+  if(!litres||litres<=0){alert('Please enter litres filled.');return;}
+  const cost=parseFloat(document.getElementById('petrolCost').value)||null;
+  const odo=parseFloat(document.getElementById('petrolOdo').value)||null;
+  const log=loadFuelLog();
+  log.push({id:Date.now(),date:new Date().toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}),
+    time:new Date().toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}),
+    litres,cost,odo});
+  saveFuelLog(log);
+  const entry=log[log.length-1];
+  sbPushFuel(entry).catch(()=>{});
+  closePetrolModal();
+  updateHomeStats();
+  showIcon('fuel','info','⛽',`Fill-up saved: ${litres}L${cost?' · $'+cost.toFixed(2):''}`,3000);
+}
+
+/* ══════════════════════════════════════════════════════
+   HOME SCREEN STATS
+══════════════════════════════════════════════════════ */
+async function updateHomeStats(){
+  const trips=await loadTrips();
+  const totalKm=trips.reduce((s,t)=>s+(t.dist||0),0);
+  const el=document.getElementById('homeTotalKm');
+  if(el)el.textContent=totalKm>=1000?(totalKm/1000).toFixed(1)+'k':totalKm.toFixed(1);
+  const re=document.getElementById('homeTotalRides');
+  if(re)re.textContent=trips.length;
+  // Fuel efficiency: km since last fill / litres of that fill
+  const fuel=loadFuelLog();
+  const efEl=document.getElementById('homeEfficiency');
+  const lfEl=document.getElementById('homeLastFill');
+  if(fuel.length>=2){
+    // km between last two fills = sum of trips between them
+    const lastFill=fuel[fuel.length-1];
+    const prevFill=fuel[fuel.length-2];
+    const kmBetween=trips.filter(t=>t.id>prevFill.id&&t.id<=lastFill.id).reduce((s,t)=>s+(t.dist||0),0);
+    if(kmBetween>0&&lastFill.litres>0){
+      if(efEl)efEl.textContent=(kmBetween/lastFill.litres).toFixed(1);
+    }
+  } else { if(efEl)efEl.textContent='—'; }
+  // km since last fill
+  if(fuel.length>0){
+    const lastFill=fuel[fuel.length-1];
+    const kmSince=trips.filter(t=>t.id>lastFill.id).reduce((s,t)=>s+(t.dist||0),0);
+    if(lfEl)lfEl.textContent=kmSince.toFixed(0);
+  } else { if(lfEl)lfEl.textContent='—'; }
+}
+
+/* ══════════════════════════════════════════════════════
+   RIDE ANALYSIS ALGORITHM
+══════════════════════════════════════════════════════ */
+function analyseRide(trip){
+  // ── Safety Officer Ride Analysis ──────────────────────
+  // Judges: acceleration control, braking control, speed
+  // compliance, riding smoothness, hazard awareness
+  // Max 5 findings, plain-language officer tone
+  // ─────────────────────────────────────────────────────
+  const avg=trip.avgSpd||0;
+  const max=trip.maxSpd||0;
+  const viols=trip.viol||0;        // +20 km/h over = violation
+  const warnings=(trip.violLog||[]).filter(v=>v.severity!=='violation').length;
+  const cams=trip.cams||0;
+  const spdLog=trip.spdLog||[];
+  let score=100;
+  const items=[];
+
+  // ── 1. SPEED COMPLIANCE (violations at +20) ──
+  if(viols===0&&warnings===0){
+    items.push({ico:'✅',txt:'Full speed compliance — zero warnings or violations recorded. Excellent discipline on the road.',pos:true});
+  } else if(viols===0){
+    score-=warnings*6;
+    items.push({ico:'⚠️',txt:`${warnings} speed warning${warnings>1?'s':''} recorded (+10 km/h over limit). Close to the threshold — tighten speed discipline.`,pos:false});
+  } else {
+    score-=Math.min(40,viols*12+warnings*4);
+    items.push({ico:'🚨',txt:`${viols} violation${viols>1?'s':''} recorded (+20 km/h over limit). This represents serious risk to self and others. Mandatory improvement required.`,pos:false});
+  }
+
+  // ── 2. ACCELERATION CONTROL ──
+  // Detect hard acceleration: speed increase >15 km/h in 2 consecutive readings
+  let hardAccel=0;
+  for(let i=2;i<spdLog.length;i++){
+    if(spdLog[i].s-spdLog[i-2].s>15)hardAccel++;
+  }
+  if(hardAccel===0){
+    items.push({ico:'🟢',txt:'Smooth throttle control throughout. Progressive acceleration observed — no aggressive bursts detected.',pos:true});
+  } else if(hardAccel<=3){
+    score-=8;
+    items.push({ico:'🟡',txt:`${hardAccel} instance${hardAccel>1?'s':''} of hard acceleration detected. Apply throttle progressively — sudden bursts reduce tyre grip and reaction time.`,pos:false});
+  } else {
+    score-=18;
+    items.push({ico:'🔴',txt:`Repeated hard acceleration (${hardAccel} instances). Aggressive throttle control significantly increases crash risk. Ride with discipline.`,pos:false});
+  }
+
+  // ── 3. BRAKING / DECELERATION ──
+  let hardBrake=0;
+  for(let i=2;i<spdLog.length;i++){
+    if(spdLog[i-2].s-spdLog[i].s>15&&spdLog[i-2].s>20)hardBrake++;
+  }
+  if(hardBrake===0){
+    items.push({ico:'🟢',txt:'Controlled braking observed. Smooth deceleration maintained — good anticipation of traffic ahead.',pos:true});
+  } else if(hardBrake<=3){
+    score-=8;
+    items.push({ico:'🟡',txt:`${hardBrake} hard braking event${hardBrake>1?'s':''} noted. Increase following distance and read the road further ahead to avoid late braking.`,pos:false});
+  } else {
+    score-=16;
+    items.push({ico:'🔴',txt:`Frequent hard braking (${hardBrake} events). This indicates poor hazard anticipation. Maintain safe following distance and scan further ahead.`,pos:false});
+  }
+
+  // ── 4. RIDING SMOOTHNESS ──
+  if(max>5){
+    const ratio=avg/max;
+    if(ratio>=0.72){
+      items.push({ico:'🟢',txt:`Consistent riding pace (avg ${avg} / max ${max} km/h). Speed maintained well — reflects good road awareness and throttle discipline.`,pos:true});
+    } else if(ratio>=0.5){
+      score-=6;
+      items.push({ico:'🟡',txt:`Moderate speed variance (avg ${avg} / max ${max} km/h). Frequent fluctuations suggest stop-start patterns. Smoother throttle will improve safety and fuel efficiency.`,pos:false});
+    } else {
+      score-=12;
+      items.push({ico:'🔴',txt:`High speed variance (avg ${avg} / max ${max} km/h). Erratic pace detected — plan overtakes and lane changes earlier to avoid sudden speed changes.`,pos:false});
+    }
+  }
+
+  // ── 5. HAZARD AWARENESS (cameras / warnings) ──
+  if(cams>0||viols>0||warnings>0){
+    if(cams===0&&viols===0){
+      items.push({ico:'👁️',txt:'Good hazard awareness — speed managed correctly around all monitored zones.',pos:true});
+    } else if(cams>0&&viols===0){
+      score-=4;
+      items.push({ico:'📷',txt:`${cams} speed camera alert${cams>1?'s':''} triggered. Speed was managed, but earlier reduction before camera zones is best practice.`,pos:false});
+    } else {
+      items.push({ico:'📷',txt:`Speed violations near monitored zones detected. Camera awareness must improve — reduce speed well before camera zones, not at them.`,pos:false});
+    }
+  }
+
+  // Keep max 5 items
+  const finalItems=items.slice(0,5);
+  score=Math.max(0,Math.min(100,score));
+  const grade=score>=90?'A':score>=75?'B':score>=60?'C':score>=45?'D':'F';
+  const gradeColor={'A':'#00e676','B':'#69f0ae','C':'#ffd700','D':'#ff6b00','F':'#ff2d2d'}[grade];
+  const summary={
+    'A':'Outstanding ride. All safety parameters met — keep this standard.',
+    'B':'Good ride overall. Minor areas to refine — you are on the right track.',
+    'C':'Acceptable ride with notable risk points. Address the flagged items before next ride.',
+    'D':'Below standard. Multiple safety concerns observed. Significant improvement needed.',
+    'F':'Unsafe riding detected. This ride presents serious risk. Review all findings immediately.'
+  }[grade];
+
+  return{score,grade,gradeColor,summary,items:finalItems};
+}
+
+function renderRideAnalysis(trip){
+  const a=analyseRide(trip);
+  const el=document.getElementById('rideAnalysis');
+  if(!el)return;
+  el.innerHTML=`
+    <div class="ra-header">
+      <div>
+        <div class="ra-title">RIDE ANALYSIS</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${a.summary}</div>
+      </div>
+      <div>
+        <div class="ra-score ${a.grade}" style="color:${a.gradeColor}">${a.grade}</div>
+        <div style="font-size:10px;color:var(--muted);text-align:center">${a.score}/100</div>
+      </div>
+    </div>
+    <div class="ra-bar"><div class="ra-bar-fill" style="width:${a.score}%;background:${a.gradeColor}"></div></div>
+    <div class="ra-items">${a.items.map(i=>`<div class="ra-item"><span class="ico">${i.ico}</span><span style="color:${i.pos?'var(--text)':'#ffb347'}">${i.txt}</span></div>`).join('')}</div>`;
+}
+
+/* ══════════════════════════════════════════════════════
+   RIDE COMPARISON
+══════════════════════════════════════════════════════ */
+async function renderRideComparison(currentTrip){
+  const el=document.getElementById('rideCompare');
+  if(!el)return;
+  const trips=await loadTrips();
+  // Get previous trips (exclude current)
+  const prev=trips.filter(t=>t.id!==currentTrip.id).slice(-5);
+  if(prev.length===0){el.style.display='none';return;}
+  el.style.display='';
+  // Calculate averages of previous trips
+  const avgPrevDist=(prev.reduce((s,t)=>s+(t.dist||0),0)/prev.length);
+  const avgPrevMax=(prev.reduce((s,t)=>s+(t.maxSpd||0),0)/prev.length);
+  const avgPrevAvg=(prev.reduce((s,t)=>s+(t.avgSpd||0),0)/prev.length);
+  const avgPrevViol=(prev.reduce((s,t)=>s+(t.viol||0),0)/prev.length);
+  const prevAnalyses=prev.map(t=>analyseRide(t));
+  const avgPrevScore=(prevAnalyses.reduce((s,a)=>s+a.score,0)/prevAnalyses.length);
+  const curAnalysis=analyseRide(currentTrip);
+
+  function delta(cur,avg,lowerBetter=false){
+    const diff=cur-avg;
+    if(Math.abs(diff)<0.5)return{cls:'eq',txt:'='};
+    const good=(lowerBetter?diff<0:diff>0);
+    return{cls:good?'up':'dn',txt:(diff>0?'+':'')+diff.toFixed(1)};
+  }
+
+  const rows=[
+    {label:'Distance',cur:currentTrip.dist.toFixed(1)+'km',avg:avgPrevDist.toFixed(1)+'km',d:delta(currentTrip.dist,avgPrevDist)},
+    {label:'Max Spd',cur:currentTrip.maxSpd+'km/h',avg:Math.round(avgPrevMax)+'km/h',d:delta(currentTrip.maxSpd,avgPrevMax,true)},
+    {label:'Avg Spd',cur:currentTrip.avgSpd+'km/h',avg:Math.round(avgPrevAvg)+'km/h',d:delta(currentTrip.avgSpd,avgPrevAvg)},
+    {label:'Viols',cur:currentTrip.viol,avg:avgPrevViol.toFixed(1),d:delta(currentTrip.viol,avgPrevViol,true)},
+    {label:'Score',cur:curAnalysis.score,avg:Math.round(avgPrevScore),d:delta(curAnalysis.score,avgPrevScore)},
+  ];
+  el.innerHTML=`<div class="rc-title">VS LAST ${prev.length} RIDE${prev.length>1?'S':''}</div>`+
+    rows.map(r=>`<div class="rc-row">
+      <span class="rc-label">${r.label}</span>
+      <span class="rc-val cur">${r.cur}</span>
+      <span style="font-size:10px;color:var(--muted);flex:1;text-align:center">avg ${r.avg}</span>
+      <span class="rc-delta ${r.d.cls}">${r.d.txt}</span>
+    </div>`).join('');
+}
 
 /* ══════════════════════════════════════════════════════
    HISTORY
